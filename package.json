@@ -1,0 +1,38 @@
+{
+	"name": "fast-calender-manager",
+	"version": "1.0.0",
+	"description": "This is a web app based tool for modifying my GCal faster, for blazingly fast week planning xD",
+	"type": "module",
+	"scripts": {
+		"build": "rsbuild build",
+		"dev": "rsbuild dev --open",
+		"preview": "rsbuild preview"
+	},
+	"dependencies": {
+		"@fullcalendar/core": "^6.1.18",
+		"@fullcalendar/interaction": "^6.1.18",
+		"@fullcalendar/react": "^6.1.18",
+		"@fullcalendar/timegrid": "^6.1.18",
+		"@types/react": "^19.1.9",
+		"@types/react-dom": "^19.1.7",
+		"luxon": "^3.7.1",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"typescript": "^5.8.3"
+	},
+	"devDependencies": {
+		"@rsbuild/core": "^1.4.3",
+		"@rsbuild/plugin-react": "^1.3.3",
+		"@types/luxon": "^3.7.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/KyleKlus/fast-calender-manager.git"
+	},
+	"author": "Kyle Klus",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/KyleKlus/fast-calender-manager/issues"
+	},
+	"homepage": "https://github.com/KyleKlus/fast-calender-manager#readme"
+}
