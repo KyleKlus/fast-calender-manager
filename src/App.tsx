@@ -1,45 +1,28 @@
-import './App.css';
-import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
 import { DateTime } from 'luxon';
+import { useContext } from 'react';
+import { GCalContext } from './GCalContext';
+import CalendarPage from './CalendarPage';
+function App() {
+  const { isLoggedIn, gcal, isTryingToAutoLogin, setIsLoggedIn } = useContext(GCalContext);
 
-const App = () => {
   return (
-    <FullCalendar
-      plugins={[timeGridPlugin, interactionPlugin]}
-      initialView="timeGridWeek"
-      customButtons={{
-        addEventButton: {
-          text: 'Add Event',
-          click: () => alert('Custom button clicked!'),
-
-        },
-        selectRangeButton: {
-          text: 'Select Range',
-          click: () => alert('Custom button clicked!'),
-
-        },
-      }}
-      headerToolbar={{
-        right: 'addEventButton selectRangeButton',
-        center: 'title',
-        left: 'prev,today,next',
-      }}
-      initialDate={DateTime.now().toFormat('yyyy-MM-dd')}
-      editable={true}
-      selectable={true}
-      selectMirror={true}
-      selectOverlap={true}
-      eventOverlap={true}
-      events={[]}
-      locale={'de'}
-      nowIndicator={true}
-      droppable={true}
-      dragScroll={true}
-      snapDuration={'00:15:00'}
-      slotDuration={'00:15:00'}
-    />
+    <>{isLoggedIn
+      ?
+      <CalendarPage />
+      :
+      <div>
+        {isTryingToAutoLogin &&
+          <button onClick={() => {
+            gcal.handleAuthClick().then((res) => {
+              setIsLoggedIn(true);
+              localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
+            });
+          }}>
+            Log in
+          </button>
+        }
+      </div>
+    }</>
   );
 };
 
