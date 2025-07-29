@@ -3,13 +3,11 @@ This is a web app based tool for modifying my GCal faster, for blazingly fast we
 
 
 ## Description
----
 Diese Webapp macht es einfacher Termine zu planen/modifizieren, was wiederum Zeitspart, wenn ich wieder meine Woche planen muss
 
 
 
 ## Requirements
----
 - Die Ladezeiten sollen so gering wie möglich sein
 - Modifications UI ist per Rechtsclick sichtbar
 - Modifications UI ist sehr übersichtlich und mit nur wenigen clicks veränderbar
@@ -31,7 +29,6 @@ Diese Webapp macht es einfacher Termine zu planen/modifizieren, was wiederum Zei
 
 
 ## Limitations
----
 - Ich brauche nur eine Wochenansicht
 - Das Tool ist hauptsächlich nur zum verändern von GCal
 - Das Tool ist nicht als Ansicht gedacht
@@ -41,7 +38,6 @@ Diese Webapp macht es einfacher Termine zu planen/modifizieren, was wiederum Zei
 
 
 ## Tasks
----
 - [ ] Init project
 	- [ ] Get Typescript & React running
 	- [ ] Get a FullCalendar instance up and running
