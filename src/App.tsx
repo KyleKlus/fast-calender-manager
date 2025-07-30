@@ -1,27 +1,16 @@
-import { DateTime } from 'luxon';
+import './App.css';
 import { useContext } from 'react';
-import { GCalContext } from './GCalContext';
-import CalendarPage from './CalendarPage';
+import CalendarPage from './pages/CalendarPage';
+import { GCalContext } from './contexts/GCalContext';
+import LoginPage from './pages/LoginPage';
+
 function App() {
-  const { isLoggedIn, gcal, isTryingToAutoLogin, setIsLoggedIn } = useContext(GCalContext);
+  const { isLoggedIn } = useContext(GCalContext);
 
   return (
     <>{isLoggedIn
-      ?
-      <CalendarPage />
-      :
-      <div>
-        {isTryingToAutoLogin &&
-          <button onClick={() => {
-            gcal.handleAuthClick().then((res) => {
-              setIsLoggedIn(true);
-              localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
-            });
-          }}>
-            Log in
-          </button>
-        }
-      </div>
+      ? <CalendarPage />
+      : <LoginPage />
     }</>
   );
 };

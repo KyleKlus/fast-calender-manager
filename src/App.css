@@ -2,26 +2,3 @@ body {
   margin: 0;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
 }
-
-.fc {
-  min-height: 100vh;
-  --fc-button-bg-color: #c54141;
-  --fc-button-text-color: #fff;
-  --fc-button-border-color: #c54141;
-  --fc-button-hover-bg-color: #a03c3c;
-  --fc-button-hover-border-color: #a03c3c;
-  --fc-button-active-bg-color: #8c3333;
-  --fc-button-active-border-color: #8c3333;
-  --fc-today-bg-color: rgba(255, 40, 40, 0.063);
-}
-
-.fc-header-toolbar {
-  margin: 0.5rem !important;
-}
-
-.fc .fc-button-primary:focus,
-.fc .fc-button-primary:active,
-.fc .fc-button-primary:not(:disabled).fc-button-active:focus,
-.fc .fc-button-primary:not(:disabled):active:focus {
-  box-shadow: none;
-}

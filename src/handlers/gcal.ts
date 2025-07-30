@@ -23,21 +23,23 @@ class GCal {
     tokenClient: ExtendedTokenClient | null = null;
     onLoadCallback: any = null;
     calendar: string = "primary";
+    tasklist: string = "@default";
 
     constructor(public config: ConfigGCal) {
+        this.initGapiClient = this.initGapiClient.bind(this);
+        this.handleSignoutClick = this.handleSignoutClick.bind(this);
+        this.handleAuthClick = this.handleAuthClick.bind(this);
+        this.createEvent = this.createEvent.bind(this);
+        this.listUpcomingEvents = this.listUpcomingEvents.bind(this);
+        this.listEvents = this.listEvents.bind(this);
+        this.createEventFromNow = this.createEventFromNow.bind(this);
+        this.onLoad = this.onLoad.bind(this);
+        this.setCalendar = this.setCalendar.bind(this);
+        this.updateEvent = this.updateEvent.bind(this);
+        this.deleteEvent = this.deleteEvent.bind(this);
+        this.getEvent = this.getEvent.bind(this);
+
         try {
-            this.initGapiClient = this.initGapiClient.bind(this);
-            this.handleSignoutClick = this.handleSignoutClick.bind(this);
-            this.handleAuthClick = this.handleAuthClick.bind(this);
-            this.createEvent = this.createEvent.bind(this);
-            this.listUpcomingEvents = this.listUpcomingEvents.bind(this);
-            this.listEvents = this.listEvents.bind(this);
-            this.createEventFromNow = this.createEventFromNow.bind(this);
-            this.onLoad = this.onLoad.bind(this);
-            this.setCalendar = this.setCalendar.bind(this);
-            this.updateEvent = this.updateEvent.bind(this);
-            this.deleteEvent = this.deleteEvent.bind(this);
-            this.getEvent = this.getEvent.bind(this);
             this.handleClientLoad();
         } catch (e) {
             console.log(e);
@@ -118,7 +120,6 @@ class GCal {
                 if (token) {
                     tokenObject = JSON.parse(token);
                 }
-                console.log(tokenObject, gapi.client.getToken(), gapi.auth.getToken());
                 if (gapi.client.getToken() === null && token === null) {
                     this.tokenClient!.requestAccessToken({ prompt: "consent" });
                 } else {
@@ -206,6 +207,21 @@ class GCal {
         if (gapi) {
             return gapi.client.calendar.events.list({
                 calendarId,
+                ...queryOptions,
+            });
+        } else {
+            console.error("Error: gapi not loaded");
+            return false;
+        }
+    }
+
+    public listTasks(
+        queryOptions: object,
+        tasklistId: string = this.tasklist
+    ): any {
+        if (gapi) {
+            return gapi.client.tasks.tasks.list({
+                tasklist: tasklistId,
                 ...queryOptions,
             });
         } else {

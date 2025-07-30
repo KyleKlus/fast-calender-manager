@@ -1,0 +1,52 @@
+.fcPage {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.fcPage .fc {
+    min-height: 100vh;
+    --fc-button-bg-color: #c54141;
+    --fc-button-text-color: #fff;
+    --fc-button-border-color: #c54141;
+    --fc-button-hover-bg-color: #a03c3c;
+    --fc-button-hover-border-color: #a03c3c;
+    --fc-button-active-bg-color: #8c3333;
+    --fc-button-active-border-color: #8c3333;
+    --fc-today-bg-color: rgba(255, 40, 40, 0.063);
+    --fc-event-bg-color: #b74f4f;
+    --fc-event-border-color: #b74f4f;
+}
+
+.fcPage .fc-event {
+    border-radius: 6px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+    outline: #e8e8e8 solid 1px;
+
+    &:hover:not(.fc-event-past) {
+        filter: brightness(1.1);
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+        outline: #fff solid 1.5px;
+    }
+}
+
+.fcPage .fc-event-past {
+    filter: saturate(0.4) brightness(1.4);
+    box-shadow: none;
+
+    &:hover {
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+        outline: #fff solid 1.5px;
+    }
+}
+
+.fcPage .fc-header-toolbar {
+    margin: 0.5rem !important;
+}
+
+.fcPage .fc .fc-button-primary:focus,
+.fcPage .fc .fc-button-primary:active,
+.fcPage .fc .fc-button-primary:not(:disabled).fc-button-active:focus,
+.fcPage .fc .fc-button-primary:not(:disabled):active:focus {
+    box-shadow: none;
+}

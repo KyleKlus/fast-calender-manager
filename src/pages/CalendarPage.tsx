@@ -1,26 +1,23 @@
-import './App.css';
+import './CalendarPage.css';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import googleCalendarPlugin from '@fullcalendar/google-calendar';
 import { DateTime } from 'luxon';
 import { useContext, useEffect, useState } from 'react';
-import { GCalContext } from './GCalContext';
+import { GCalContext } from '../contexts/GCalContext';
 
 interface ICalendarPageProps { }
 
 function CalendarPage(props: ICalendarPageProps) {
-    const { isLoggedIn, events, loadEvents } = useContext(GCalContext);
-    const [areEventsLoaded, setAreEventsLoaded] = useState(false);
+    const { isLoggedIn, areEventsLoaded, events, loadEvents, } = useContext(GCalContext);
 
     useEffect(() => {
         if (areEventsLoaded && isLoggedIn) return;
         loadEvents();
-        setAreEventsLoaded(true);
     }, []);
 
     return (
-        <>
+        <div className={'fcPage'}>
             {
                 areEventsLoaded
                     ? <FullCalendar
@@ -45,12 +42,14 @@ function CalendarPage(props: ICalendarPageProps) {
                             left: 'prev,today,next',
                         }
                         }
+                        eventColor='#b74f4f'
                         initialDate={DateTime.now().toFormat('yyyy-MM-dd')}
                         editable={true}
                         selectable={true}
                         selectMirror={true}
                         selectOverlap={true}
                         eventOverlap={true}
+                        firstDay={1}
                         events={events}
                         locale={'de'}
                         nowIndicator={true}
@@ -61,7 +60,7 @@ function CalendarPage(props: ICalendarPageProps) {
                     />
                     : <div>Loading...</div>
             }
-        </>
+        </div>
     );
 };
 

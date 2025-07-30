@@ -27,9 +27,10 @@
 		"@rsbuild/core": "^1.4.3",
 		"@rsbuild/plugin-react": "^1.3.3",
 		"@types/gapi": "^0.0.47",
-		"@types/luxon": "^3.7.0",
 		"@types/gapi.calendar": "^3.0.6",
+		"@types/gapi.client.tasks-v1": "^0.0.5",
 		"@types/google.accounts": "^0.0.6",
+		"@types/luxon": "^3.7.0",
 		"@types/node": "^18.13.0",
 		"typescript": "^4.7.2"
 	},
