@@ -11,39 +11,100 @@ import { EventContext } from '../contexts/EventContext';
 import { DateTime } from 'luxon';
 import EventTemplateDrawer from '../components/EventTemplateDrawer';
 
-interface ICalendarPageProps { }
+export interface ICalendarPageProps { }
+
+export type PopoverMode = 'add' | 'add-template' | 'edit' | 'none';
 
 function CalendarPage(props: ICalendarPageProps) {
-    const { isLoggedIn, areEventsLoaded, events, loadEvents, } = useContext(GCalContext);
-    const { currentEvent, setCurrentEvent } = useContext(EventContext);
+    const { isLoggedIn, areEventsLoaded, events, isCurrentlyLoading, loadEvents, } = useContext(GCalContext);
+    const { currentEvents, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
     const [popoverOpen, setPopoverOpen] = useState(false);
+    const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
     const [date, setDate] = useState(DateTime.now());
 
     useEffect(() => {
         if (areEventsLoaded && isLoggedIn) return;
-        loadEvents();
+        loadEvents(date);
     }, []);
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
-        setCurrentEvent(info.event);
-        setPopoverOpen(true);
+
+        switch (toolbarMode) {
+            case 'none':
+                if (popoverMode === 'none') {
+                    setAddCurrentEvent(info.event);
+                    setPopoverMode('edit');
+                    setPopoverOpen(true);
+                    break;
+                }
+                break;
+            case 'select':
+                if (currentEvents.filter((e) => e.id === info.event.id).length > 0) {
+                    setRemoveCurrentEvent(info.event);
+                    break;
+                }
+                setAddCurrentEvent(info.event);
+                break;
+            case 'duplicate':
+                setAddCurrentEvent(info.event);
+                // TODO: duplicate event
+                setRemoveCurrentEvent(info.event);
+                break;
+            case 'delete':
+                setAddCurrentEvent(info.event);
+                // TODO: delete event
+                setRemoveCurrentEvent(info.event);
+                break;
+            case 'color':
+                setAddCurrentEvent(info.event);
+                // TODO: delete event
+                setRemoveCurrentEvent(info.event);
+                break;
+        }
+    }
+
+    function getCorrectPopoverDisplay(popoverMode: PopoverMode) {
+        switch (popoverMode) {
+            case 'add':
+                return <div style={{ backgroundColor: '#dddd' }}>add</div>
+            case 'add-template':
+                return <div style={{ backgroundColor: '#dddd' }}>add-template</div>
+            case 'edit':
+                return <div style={{ backgroundColor: '#dddd' }}>edit</div>
+            case 'none':
+                return <div style={{ backgroundColor: '#dddd' }}>none</div>
+        }
     }
 
     return (
         <div className={'fcPage'}>
             <ToolBarDrawer
                 selectedMode={toolbarMode}
-                onModeChange={(mode) => setToolbarMode(mode)}
+                onAddClick={() => {
+                    setPopoverMode('add');
+                    setPopoverOpen(true);
+                }}
+                onModeChange={(mode) => {
+                    setToolbarMode(toolbarMode === mode ? 'none' : mode);
+                }}
                 onTodayClick={() => {
-                    setDate(DateTime.now());
+                    if (isCurrentlyLoading) return;
+
+                    const currentWeek = DateTime.now();
+                    setDate(currentWeek);
+                    loadEvents(currentWeek);
                     (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
                 }}
             />
             <div className='calendar-container'>
                 <div className='calendar-left-button calendar-nav-button' onClick={() => {
-                    setDate(date.minus({ weeks: 1 }));
+                    if (isCurrentlyLoading) return;
+
+                    const prevWeek = date.minus({ weeks: 1 });
+                    setDate(prevWeek);
+                    loadEvents(prevWeek);
                     (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
                 }}>
                     <i className='bi-chevron-double-left'></i>
@@ -59,7 +120,10 @@ function CalendarPage(props: ICalendarPageProps) {
                         : <div>Loading...</div>
                 }
                 <div className='calendar-right-button calendar-nav-button' onClick={() => {
-                    setDate(date.plus({ weeks: 1 }));
+                    if (isCurrentlyLoading) return;
+                    const nextWeek = date.plus({ weeks: 1 });
+                    setDate(nextWeek);
+                    loadEvents(nextWeek);
                     (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
                 }}>
                     <i className='bi-chevron-double-right'></i>
@@ -73,18 +137,11 @@ function CalendarPage(props: ICalendarPageProps) {
                     open={popoverOpen}
                     modal
                 >
-                    <div style={{ backgroundColor: '#dddd' }}>
-                        <div>
-                            <div>{currentEvent?.title}</div>
-                            <button onClick={() => setPopoverOpen(false)}>close</button>
-                        </div>
-                        <div>{currentEvent?.title}</div>
-                        <div>{currentEvent?.extendedProps?.description}</div>
-
-                    </div>
+                    {getCorrectPopoverDisplay(popoverMode)}
                 </Popup>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 

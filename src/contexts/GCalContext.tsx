@@ -45,20 +45,22 @@ interface IGCalContext {
     isLoggedIn: boolean;
     areEventsLoaded: boolean;
     isTryingToAutoLogin: boolean;
+    isCurrentlyLoading: boolean;
     gcal: GCal;
     events: EventSourceInput;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
-    loadEvents: () => Promise<void>;
+    loadEvents: (date?: DateTime) => Promise<void>;
 }
 
 const GCalContext = createContext<IGCalContext>({
     isLoggedIn: false,
     areEventsLoaded: false,
     isTryingToAutoLogin: true,
+    isCurrentlyLoading: false,
     gcal,
     events: [],
     setIsLoggedIn: (isLoggedIn: boolean) => { },
-    loadEvents: async () => { },
+    loadEvents: async (date: DateTime = DateTime.now()) => { },
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
@@ -66,6 +68,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
     const [events, setEvents] = useState<EventSourceInput>([]);
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
+    const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
+
+
 
     useEffect(() => {
         if (isTryingToAutoLogin) {
@@ -79,17 +84,19 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         }
     });
 
-    async function loadEvents(): Promise<void> {
-        if (!isLoggedIn) { return }
+    async function loadEvents(date: DateTime = DateTime.now()): Promise<void> {
+        if (!isLoggedIn || isCurrentlyLoading) { return }
+        setIsCurrentlyLoading(true);
 
         let events = (await gcal.listEvents({
             calendarId: 'primary',
-            timeMin: DateTime.now().startOf('week').toISO(),
-            timeMax: DateTime.now().endOf('week').toISO(),
+            timeMin: date.startOf('week').minus({ weeks: 1 }).toISO(),
+            timeMax: date.endOf('week').plus({ weeks: 1 }).toISO(),
             showDeleted: false,
             singleEvents: true,
             orderBy: 'startTime',
         })).result.items.map((e: any) => {
+            setIsCurrentlyLoading(false);
             return {
                 id: e.id,
                 title: e.summary,
@@ -136,7 +143,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, gcal, events, loadEvents, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );

@@ -1,6 +1,6 @@
-import { CalendarOptions, EventClickArg, EventContentArg, EventSourceInput } from "@fullcalendar/core";
+import { CalendarOptions, EventAddArg, EventClickArg, EventContentArg, EventDropArg, EventSourceInput } from "@fullcalendar/core";
 import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import interactionPlugin, { EventDragStopArg, EventResizeStopArg } from '@fullcalendar/interaction';
 import { DateTime } from 'luxon';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 
@@ -12,6 +12,10 @@ export interface IFCConfigProps {
     eventClick?: (info: EventClickArg) => void;
     eventContent?: (info: EventContentArg) => void;
     addEvent?: (info: EventContentArg) => void;
+    eventDrop?: (info: EventDropArg) => void;
+    eventResizeStop?: (info: EventResizeStopArg) => void;
+    eventDragStop?: (info: EventDragStopArg) => void;
+    eventAdd?: (info: EventAddArg) => void;
 }
 
 export function generateFCConfig(props: IFCConfigProps): CalendarOptions {
@@ -40,5 +44,9 @@ export function generateFCConfig(props: IFCConfigProps): CalendarOptions {
         slotDuration: '00:15:00',
         themeSystem: 'bootstrap5',
         eventClick: props.eventClick,
+        eventAdd: props.eventAdd,
+        eventDrop: props.eventDrop,
+        eventResizeStop: props.eventResizeStop,
+        eventDragStop: props.eventDragStop,
     };
 }

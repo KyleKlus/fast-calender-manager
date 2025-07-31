@@ -3,7 +3,7 @@ import './ToolBarDrawer.css';
 import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
 import { colorMap } from '../contexts/GCalContext';
 
-export type ToolbarMode = 'color' | 'delete' | 'select' | 'none';
+export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 
 export interface IToolBarDrawerProps {
     selectedColor?: number;
@@ -20,7 +20,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
         <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
             <div className='toolbar'>
                 <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
-                    <i className={`bi-plus-circle${'-fill'}`}></i>
+                    <i className={`bi-plus-circle`}></i>
                 </Button>
                 <DropdownButton
                     id={`dropdown-variants-${'Primary'}`}
@@ -44,16 +44,42 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                         variant='primary'
                         active={props.selectedMode === 'color'}
                         className={"color-event-button"}
-                        onClick={() => { props.onModeChange && props.onModeChange('color') }}
+                        onClick={() => {
+                            if (props.selectedMode === 'select') {
+                                // TODO: implement
+                                return;
+                            }
+                            props.onModeChange && props.onModeChange('color')
+                        }}
                     >
-                        <i className={`bi-palette${'-fill'}`}></i>
+                        <i className={`bi-palette${props.selectedMode === 'color' ? '-fill' : ''}`}></i>
                     </Button>
                     <Button
                         variant="primary" active={props.selectedMode === 'delete'}
                         className='delete-event-button'
-                        onClick={() => { props.onModeChange && props.onModeChange('delete') }}
+                        onClick={() => {
+                            if (props.selectedMode === 'select') {
+                                // TODO: implement
+                                return;
+                            }
+                            props.onModeChange && props.onModeChange('delete')
+                        }}
                     >
-                        <i className={`bi-trash${'-fill'}`}></i>
+                        <i className={`bi-trash${props.selectedMode === 'delete' ? '-fill' : ''}`}></i>
+                    </Button>
+                    <Button
+                        variant="primary"
+                        active={props.selectedMode === 'duplicate'}
+                        className='duplicate-event-button'
+                        onClick={() => {
+                            if (props.selectedMode === 'select') {
+                                // TODO: implement
+                                return;
+                            }
+                            props.onModeChange && props.onModeChange('duplicate')
+                        }}
+                    >
+                        <i className={`bi-copy`}></i>
                     </Button>
                     <Button
                         variant="primary"
@@ -61,10 +87,9 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                         className='select-event-button'
                         onClick={() => { props.onModeChange && props.onModeChange('select') }}
                     >
-                        <i className={`bi-check-square${'-fill'}`}></i>
+                        <i className={`bi-check-square${props.selectedMode === 'select' ? '-fill' : ''}`}></i>
                     </Button>
                 </ButtonGroup>
-
                 <Button variant="primary" className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
                     Today
                 </Button>
@@ -74,7 +99,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
             >
                 <i className="bi-chevron-down"></i>
             </div>
-        </div>
+        </div >
     );
 };
 
