@@ -4,8 +4,17 @@
     height: 100vh;
 }
 
+.fcPage .calendar-container {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    min-height: 1vh;
+}
+
 .fcPage .fc {
-    min-height: 100vh;
+    min-height: 1vh;
+    flex-grow: 1;
     --fc-button-bg-color: #c54141;
     --fc-button-text-color: #fff;
     --fc-button-border-color: #c54141;
@@ -18,15 +27,26 @@
     --fc-event-border-color: #b74f4f;
 }
 
+.fcPage .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
+    margin-bottom: 0.5rem;
+}
+
+.fcPage .fc-theme-bootstrap5 .fc-list,
+.fcPage .fc-theme-bootstrap5 .fc-scrollgrid,
+.fcPage .fc-theme-bootstrap5 td,
+.fcPage .fc-theme-bootstrap5 th {
+    border-color: var(--bs-border-color);
+}
+
 .fcPage .fc-event {
     border-radius: 6px;
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
-    outline: #e8e8e8 solid 1px;
+    outline: var(--bs-border-color) solid 1px;
 
     &:hover:not(.fc-event-past) {
         filter: brightness(1.1);
         box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
-        outline: #fff solid 1.5px;
+        outline: var(--bs-border-color) solid 1.5px;
     }
 }
 
@@ -36,17 +56,6 @@
 
     &:hover {
         box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
-        outline: #fff solid 1.5px;
+        outline: var(--bs-border-color) solid 1.5px;
     }
-}
-
-.fcPage .fc-header-toolbar {
-    margin: 0.5rem !important;
-}
-
-.fcPage .fc .fc-button-primary:focus,
-.fcPage .fc .fc-button-primary:active,
-.fcPage .fc .fc-button-primary:not(:disabled).fc-button-active:focus,
-.fcPage .fc .fc-button-primary:not(:disabled):active:focus {
-    box-shadow: none;
 }

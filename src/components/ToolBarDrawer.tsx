@@ -1,0 +1,76 @@
+import { useState } from 'react';
+import './ToolBarDrawer.css';
+import { DropdownButton, ButtonGroup, Dropdown, Button } from 'react-bootstrap';
+import { colorMap } from '../contexts/GCalContext';
+
+export type ToolbarMode = 'color' | 'delete' | 'select' | 'none';
+
+export interface IToolBarDrawerProps {
+    selectedColor?: number;
+    selectedMode?: ToolbarMode;
+    onAddClick?: () => void;
+    onModeChange?: (mode: ToolbarMode) => void;
+}
+
+const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
+    const [isToolbarOpen, setToolbarOpen] = useState(false);
+    const [selectedColor, setSelectedColor] = useState<number>(props.selectedColor || 0);
+    return (
+        <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
+            <div className='toolbar'>
+                <Button variant="primary" className='add-event-button'>
+                    <i className={`bi-plus-circle${'-fill'}`}></i>
+                </Button>
+                <DropdownButton
+                    id={`dropdown-variants-${'Primary'}`}
+                    variant={'Primary'.toLowerCase()}
+                    className='color-event-button'
+                    title={
+                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: colorMap[selectedColor] }}></div>
+                    }
+                >
+                    {colorMap.map((color, index) => (
+                        <div
+                            className={['color-swatch',].join(' ')}
+                            style={{ backgroundColor: color, borderWidth: selectedColor === index ? '2px' : '1px' }}
+                            key={index}
+                            onClick={() => { setSelectedColor(index) }}
+                        ></div>
+                    ))}
+                </DropdownButton>
+                <ButtonGroup>
+                    <Button
+                        variant='primary'
+                        active={props.selectedMode === 'color'}
+                        className={"color-event-button"}
+                        onClick={() => { props.onModeChange && props.onModeChange('color') }}
+                    >
+                        <i className={`bi-palette${'-fill'}`}></i>
+                    </Button>
+                    <Button
+                        variant="primary" active={props.selectedMode === 'delete'}
+                        className='delete-event-button'
+                        onClick={() => { props.onModeChange && props.onModeChange('delete') }}
+                    >
+                        <i className={`bi-trash${'-fill'}`}></i>
+                    </Button>
+                    <Button
+                        variant="primary"
+                        active={props.selectedMode === 'select'}
+                        className='select-event-button'
+                        onClick={() => { props.onModeChange && props.onModeChange('select') }}
+                    >
+                        <i className={`bi-check-square${'-fill'}`}></i>
+                    </Button>
+                </ButtonGroup>
+            </div>
+            <div className='toolbar-handle'
+                onClick={() => { setToolbarOpen(!isToolbarOpen) }}
+            >
+                <i className="bi-chevron-down"></i>
+            </div>
+        </div>
+    );
+};
+
+export default ToolBarDrawer;

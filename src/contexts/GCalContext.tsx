@@ -3,6 +3,7 @@ import GCal from '../handlers/gcal';
 import env from '../env.json';
 import { DateTime } from 'luxon';
 import React from 'react';
+import { EventSourceInput } from '@fullcalendar/core';
 
 const config = {
     clientId: env.CLIENT_ID,
@@ -14,22 +15,56 @@ const config = {
     ],
 };
 
+export const colorMap = [
+    '#525279ff', '#DC3912', '#33b679',
+    '#109618', '#990099', '#7595a0ff',
+    '#DD4477', '#039be5', '#616161',
+    '#3f51b5',
+    '#0b8043',
+    '#92a075ff',
+    '#a07575ff',
+    '#a09e75ff',
+    '#dbababff',
+    '#3af025ff',
+    '#992222ff',
+    '#2e0881ff',
+    '#64e59eff',
+    '#134d60ff',
+    '#c17615ff',
+    '#63105fff',
+    '#a4e10cff',
+    '#9690edff',
+    '#236a0eff',
+    '#b15492ff',
+    '#5b1142ff',
+];
+
 const gcal = new GCal(config);
 
-const GCalContext = createContext({
+interface IGCalContext {
+    isLoggedIn: boolean;
+    areEventsLoaded: boolean;
+    isTryingToAutoLogin: boolean;
+    gcal: GCal;
+    events: EventSourceInput;
+    setIsLoggedIn: (isLoggedIn: boolean) => void;
+    loadEvents: () => Promise<void>;
+}
+
+const GCalContext = createContext<IGCalContext>({
     isLoggedIn: false,
     areEventsLoaded: false,
     isTryingToAutoLogin: true,
     gcal,
     events: [],
     setIsLoggedIn: (isLoggedIn: boolean) => { },
-    loadEvents: () => { },
+    loadEvents: async () => { },
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
-    const [events, setEvents] = useState([]);
+    const [events, setEvents] = useState<EventSourceInput>([]);
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
 
     useEffect(() => {
@@ -44,31 +79,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         }
     });
 
-    async function loadEvents() {
+    async function loadEvents(): Promise<void> {
         if (!isLoggedIn) { return }
-
-        const colorMap = [
-            '#525279ff', '#DC3912', '#33b679',
-            '#109618', '#990099', '#7595a0ff',
-            '#DD4477', '#039be5', '#616161',
-            '#3f51b5',
-            '#0b8043',
-            '#92a075ff',
-            '#a07575ff',
-            '#a09e75ff',
-            '#dbababff',
-            '#3af025ff',
-            '#992222ff',
-            '#2e0881ff',
-            '#64e59eff',
-            '#134d60ff',
-            '#c17615ff',
-            '#63105fff',
-            '#a4e10cff',
-            '#9690edff',
-            '#236a0eff',
-            '#5b1142ff',
-        ];
 
         let events = (await gcal.listEvents({
             calendarId: 'primary',
@@ -83,11 +95,13 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 title: e.summary,
                 start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
                 end: e.end.dateTime || e.end.date, // same
-                url: e.htmlLink,
+                // url: e.htmlLink,
                 location: e.location,
                 description: e.description,
                 attachments: e.attachments || [],
-                extendedProps: (e.extendedProperties || {}).shared || {},
+                extendedProps: {
+                    description: e.description,
+                },
                 backgroundColor: colorMap[e.colorId as number] as string,
                 borderColor: colorMap[e.colorId as number] as string,
             }
