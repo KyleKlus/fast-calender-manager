@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './ToolBarDrawer.css';
-import { DropdownButton, ButtonGroup, Dropdown, Button } from 'react-bootstrap';
+import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
 import { colorMap } from '../contexts/GCalContext';
 
 export type ToolbarMode = 'color' | 'delete' | 'select' | 'none';
@@ -30,7 +30,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                         <div className={['color-swatch',].join(' ')} style={{ backgroundColor: colorMap[selectedColor] }}></div>
                     }
                 >
-                    {colorMap.map((color, index) => (
+                    {colorMap.filter((color, index) => color !== '').map((color, index) => (
                         <div
                             className={['color-swatch',].join(' ')}
                             style={{ backgroundColor: color, borderWidth: selectedColor === index ? '2px' : '1px' }}

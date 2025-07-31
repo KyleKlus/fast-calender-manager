@@ -47,7 +47,7 @@
 }
 
 .color-event-button.show .dropdown-menu {
-    --swatch-amount: 9;
+    --swatch-amount: 4;
     --gap: 0.5rem;
     padding: var(--gap);
     display: flex;

@@ -4,6 +4,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { DateTime } from 'luxon';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 
+export const defaultEventColor = '#b74f4f';
+
 export interface IFCConfigProps {
     events: EventSourceInput;
     date: DateTime;
