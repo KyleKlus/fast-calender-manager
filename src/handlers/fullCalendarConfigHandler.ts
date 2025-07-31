@@ -6,6 +6,7 @@ import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 
 export interface IFCConfigProps {
     events: EventSourceInput;
+    date: DateTime;
     eventClick?: (info: EventClickArg) => void;
     eventContent?: (info: EventContentArg) => void;
     addEvent?: (info: EventContentArg) => void;
@@ -15,9 +16,11 @@ export function generateFCConfig(props: IFCConfigProps): CalendarOptions {
     return {
         plugins: [timeGridPlugin, interactionPlugin, bootstrap5Plugin],
         initialView: "timeGridWeek",
-        headerToolbar: false,
+        headerToolbar: {
+            left: 'prev,next today',
+        },
         eventColor: '#b74f4f',
-        initialDate: DateTime.now().toFormat('yyyy-MM-dd'),
+        initialDate: props.date.toFormat('yyyy-MM-dd'),
         editable: true,
         selectable: true,
         selectMirror: true,

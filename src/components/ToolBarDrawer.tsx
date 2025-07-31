@@ -10,6 +10,7 @@ export interface IToolBarDrawerProps {
     selectedMode?: ToolbarMode;
     onAddClick?: () => void;
     onModeChange?: (mode: ToolbarMode) => void;
+    onTodayClick?: () => void;
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
@@ -63,6 +64,10 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                         <i className={`bi-check-square${'-fill'}`}></i>
                     </Button>
                 </ButtonGroup>
+
+                <Button variant="primary" className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
+                    Today
+                </Button>
             </div>
             <div className='toolbar-handle'
                 onClick={() => { setToolbarOpen(!isToolbarOpen) }}
