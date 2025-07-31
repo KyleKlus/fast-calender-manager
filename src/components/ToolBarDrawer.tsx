@@ -19,7 +19,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
     return (
         <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
             <div className='toolbar'>
-                <Button variant="primary" className='add-event-button'>
+                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                     <i className={`bi-plus-circle${'-fill'}`}></i>
                 </Button>
                 <DropdownButton

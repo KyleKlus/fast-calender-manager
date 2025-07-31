@@ -9,6 +9,7 @@ import Popup from 'reactjs-popup';
 import ToolBarDrawer, { ToolbarMode } from '../components/ToolBarDrawer';
 import { EventContext } from '../contexts/EventContext';
 import { DateTime } from 'luxon';
+import EventTemplateDrawer from '../components/EventTemplateDrawer';
 
 interface ICalendarPageProps { }
 
@@ -65,6 +66,7 @@ function CalendarPage(props: ICalendarPageProps) {
                 </div>
 
             </div>
+            <EventTemplateDrawer />
             {popoverOpen && (
                 <Popup
                     onClose={() => setPopoverOpen(false)}
