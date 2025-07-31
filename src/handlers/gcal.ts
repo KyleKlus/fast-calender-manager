@@ -269,7 +269,7 @@ class GCal {
      * @returns {any}
      */
     public createEvent(
-        event: { end: TimeCalendarType; start: TimeCalendarType },
+        event: { summary?: string; description?: string; end: TimeCalendarType; start: TimeCalendarType, colorId?: string },
         calendarId: string = this.calendar,
         sendUpdates: "all" | "externalOnly" | "none" = "none"
     ): any {

@@ -3,6 +3,7 @@ import './EventTemplateDrawer.css';
 import { Button } from 'react-bootstrap';
 
 export interface IEventTemplateDrawerProps {
+    onAddClick?: () => void;
 }
 
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
@@ -15,8 +16,8 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                 <i className="bi-chevron-up"></i>
             </div>
             <div className='event-template-drawer'>
-                <Button variant="primary" className='add-event-button' onClick={() => { }}>
-                    <i className={`bi-plus-circle${'-fill'}`}></i>
+                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                    <i className={`bi-plus-circle`}></i>
                 </Button>
             </div>
 

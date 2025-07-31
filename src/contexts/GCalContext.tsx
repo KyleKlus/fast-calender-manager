@@ -3,7 +3,7 @@ import GCal from '../handlers/gcal';
 import env from '../env.json';
 import { DateTime } from 'luxon';
 import React from 'react';
-import { EventSourceInput } from '@fullcalendar/core';
+import { EventInput, EventSourceInput } from '@fullcalendar/core';
 
 const config = {
     clientId: env.CLIENT_ID,
@@ -50,6 +50,7 @@ interface IGCalContext {
     events: EventSourceInput;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
+    addEvent: (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => Promise<void>;
 }
 
 const GCalContext = createContext<IGCalContext>({
@@ -61,16 +62,15 @@ const GCalContext = createContext<IGCalContext>({
     events: [],
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
+    addEvent: async (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => { },
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
-    const [events, setEvents] = useState<EventSourceInput>([]);
+    const [events, setEvents] = useState<EventInput[]>([]);
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
-
-
 
     useEffect(() => {
         if (isTryingToAutoLogin) {
@@ -88,7 +88,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         if (!isLoggedIn || isCurrentlyLoading) { return }
         setIsCurrentlyLoading(true);
 
-        let events = (await gcal.listEvents({
+        let events: EventInput[] = (await gcal.listEvents({
             calendarId: 'primary',
             timeMin: date.startOf('week').minus({ weeks: 1 }).toISO(),
             timeMax: date.endOf('week').plus({ weeks: 1 }).toISO(),
@@ -142,8 +142,50 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         setAreEventsLoaded(true);
     }
 
+    async function addEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) {
+        if (!isLoggedIn || isCurrentlyLoading) { return }
+        setIsCurrentlyLoading(true);
+
+        const start = event.start.toISO();
+        const startZone = event.start.zoneName;
+        const end = event.end.toISO();
+        const endZone = event.end.zoneName;
+
+        await gcal.createEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: {
+                dateTime: start === null ? undefined : start,
+                timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+            },
+            end: {
+                dateTime: end === null ? undefined : end,
+                timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+            },
+            colorId: event.colorId.toString(),
+        }).then((res: any) => {
+            const e = res.result;
+            setEvents([...events, {
+                id: e.id,
+                title: e.summary,
+                start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                end: e.end.dateTime || e.end.date, // same
+                // url: e.htmlLink,
+                location: e.location,
+                description: e.description,
+                attachments: e.attachments || [],
+                extendedProps: {
+                    description: e.description,
+                },
+                backgroundColor: colorMap[e.colorId as number] as string,
+                borderColor: colorMap[e.colorId as number] as string,
+            }]);
+            setIsCurrentlyLoading(false);
+        });
+    }
+
     return (
-        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );

@@ -10,6 +10,8 @@ import ToolBarDrawer, { ToolbarMode } from '../components/ToolBarDrawer';
 import { EventContext } from '../contexts/EventContext';
 import { DateTime } from 'luxon';
 import EventTemplateDrawer from '../components/EventTemplateDrawer';
+import { Button, Card, Form, FormText } from 'react-bootstrap';
+import AddEventPopover from '../components/AddEventPopover';
 
 export interface ICalendarPageProps { }
 
@@ -68,13 +70,24 @@ function CalendarPage(props: ICalendarPageProps) {
     function getCorrectPopoverDisplay(popoverMode: PopoverMode) {
         switch (popoverMode) {
             case 'add':
-                return <div style={{ backgroundColor: '#dddd' }}>add</div>
             case 'add-template':
-                return <div style={{ backgroundColor: '#dddd' }}>add-template</div>
+                return (
+                    <AddEventPopover
+                        popoverMode={popoverMode}
+                        closePopover={() => {
+                            setPopoverMode('none');
+                            setPopoverOpen(false);
+                        }}
+                    />
+                );
             case 'edit':
-                return <div style={{ backgroundColor: '#dddd' }}>edit</div>
+                return <Card className={['popover', 'edit-event-popover'].join(' ')}>
+                    Edit
+                </Card>
             case 'none':
-                return <div style={{ backgroundColor: '#dddd' }}>none</div>
+                return <Card className={['popover', 'none-popover'].join(' ')}>
+                    Why is this open?
+                </Card>
         }
     }
 
@@ -130,7 +143,10 @@ function CalendarPage(props: ICalendarPageProps) {
                 </div>
 
             </div>
-            <EventTemplateDrawer />
+            <EventTemplateDrawer onAddClick={() => {
+                setPopoverMode('add-template');
+                setPopoverOpen(true);
+            }} />
             {popoverOpen && (
                 <Popup
                     onClose={() => setPopoverOpen(false)}
