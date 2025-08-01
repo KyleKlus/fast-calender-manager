@@ -51,6 +51,16 @@ interface IGCalContext {
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
     addEvent: (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => Promise<void>;
+    editEvent: (
+        event: {
+            title?: string;
+            start?: DateTime;
+            end?: DateTime;
+            colorId?: number;
+            extendedProps?: { description?: string }
+        },
+        eventId: string
+    ) => Promise<void>;
 }
 
 const GCalContext = createContext<IGCalContext>({
@@ -63,6 +73,16 @@ const GCalContext = createContext<IGCalContext>({
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
     addEvent: async (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => { },
+    editEvent: async (
+        event: {
+            title?: string;
+            start?: DateTime;
+            end?: DateTime;
+            colorId?: number;
+            extendedProps?: { description?: string }
+        },
+        eventId: string
+    ) => { }
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
@@ -184,8 +204,24 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         });
     }
 
+    async function editEvent(
+        event: {
+            title?: string;
+            start?: DateTime;
+            end?: DateTime;
+            colorId?: number;
+            extendedProps?: { description?: string }
+        },
+        eventId: string
+    ) {
+        if (!isLoggedIn || isCurrentlyLoading) { return }
+        setIsCurrentlyLoading(true);
+
+
+    }
+
     return (
-        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );

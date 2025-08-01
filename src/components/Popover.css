@@ -1,0 +1,11 @@
+.popover {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border: 1px solid #000;
+    border-radius: 6px;
+    gap: 0.5rem;
+}

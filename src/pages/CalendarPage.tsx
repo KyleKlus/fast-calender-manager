@@ -12,6 +12,7 @@ import { DateTime } from 'luxon';
 import EventTemplateDrawer from '../components/EventTemplateDrawer';
 import { Button, Card, Form, FormText } from 'react-bootstrap';
 import AddEventPopover from '../components/AddEventPopover';
+import EditEventPopover from '../components/EditEventPopover';
 
 export interface ICalendarPageProps { }
 
@@ -36,7 +37,7 @@ function CalendarPage(props: ICalendarPageProps) {
         switch (toolbarMode) {
             case 'none':
                 if (popoverMode === 'none') {
-                    setAddCurrentEvent(info.event);
+                    setCurrentEvents([info.event]);
                     setPopoverMode('edit');
                     setPopoverOpen(true);
                     break;
@@ -81,9 +82,15 @@ function CalendarPage(props: ICalendarPageProps) {
                     />
                 );
             case 'edit':
-                return <Card className={['popover', 'edit-event-popover'].join(' ')}>
-                    Edit
-                </Card>
+                return (
+                    <EditEventPopover
+                        closePopover={() => {
+                            setPopoverMode('none');
+                            setPopoverOpen(false);
+                        }}
+                    />
+                );
+
             case 'none':
                 return <Card className={['popover', 'none-popover'].join(' ')}>
                     Why is this open?
@@ -149,7 +156,10 @@ function CalendarPage(props: ICalendarPageProps) {
             }} />
             {popoverOpen && (
                 <Popup
-                    onClose={() => setPopoverOpen(false)}
+                    onClose={() => {
+                        setPopoverMode('none');
+                        setPopoverOpen(false)
+                    }}
                     open={popoverOpen}
                     modal
                 >

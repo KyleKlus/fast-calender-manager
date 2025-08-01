@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import './Popover.css';
 import './AddEventPopover.css';
 import { Card, Form, Button } from "react-bootstrap";
 import { colorMap, GCalContext } from '../contexts/GCalContext';
@@ -79,6 +80,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
             <Form.Label htmlFor="">Event Description:</Form.Label>
             <Form.Control
                 type="text"
+                as={'textarea'}
                 id="eventDescriptionInput"
                 placeholder="Event Description"
                 value={eventDescription}

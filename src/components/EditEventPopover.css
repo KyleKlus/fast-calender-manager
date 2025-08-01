@@ -1,19 +1,29 @@
-.add-popover,
-.add-template-popover {
-    min-width: 500px;
+.edit-popover,
+.edit-template {
+    min-width: 600px;
 }
 
-.add-popover.isAllday,
-.add-template-popover.isAllday {
+.edit-popover.isAllday {
     min-width: 358px;
 }
 
-.add-popover-date-input {
+.edit-popover-date-input {
     display: flex;
     gap: 0.5rem;
 }
 
-.add-popover-buttons {
+.edit-popover-quick-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.edit-popover-quick-actions .btn {
+    max-height: 2.5rem;
+}
+
+.edit-popover-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
@@ -27,14 +37,23 @@
 }
 
 .color-menu {
-    --swatch-amount: 4;
+    --swatch-amount: 11;
     --gap: 0.5rem;
     padding: var(--gap);
     display: flex;
     flex-direction: row;
     gap: var(--gap);
     min-width: calc(var(--swatch-amount) * 1.5rem + calc(var(--swatch-amount) + 1.2) * var(--gap));
+    max-width: calc(var(--swatch-amount) * 1.5rem + calc(var(--swatch-amount) + 1.2) * var(--gap));
     flex-wrap: wrap;
+}
+
+.edit-popover-date-input {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
 }
 
 .react-datepicker-wrapper input {
