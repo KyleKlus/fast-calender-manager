@@ -84,6 +84,7 @@
 
 .fcPage .fc-event-past {
     filter: saturate(0.4) brightness(1.4);
+    --fc-event-text-color: #3b3a3a;
     box-shadow: none;
 
     &:hover {
