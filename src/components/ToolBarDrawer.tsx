@@ -6,16 +6,16 @@ import { colorMap } from '../contexts/GCalContext';
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 
 export interface IToolBarDrawerProps {
-    selectedColor?: number;
-    selectedMode?: ToolbarMode;
-    onAddClick?: () => void;
-    onModeChange?: (mode: ToolbarMode) => void;
-    onTodayClick?: () => void;
+    selectedColor: number;
+    selectedMode: ToolbarMode;
+    selectColor: (colorId: number) => void;
+    onAddClick: () => void;
+    onModeChange: (mode: ToolbarMode) => void;
+    onTodayClick: () => void;
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
     const [isToolbarOpen, setToolbarOpen] = useState(false);
-    const [selectedColor, setSelectedColor] = useState<number>(props.selectedColor || 0);
     return (
         <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
             <div className='toolbar'>
@@ -27,15 +27,15 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     variant={'Primary'.toLowerCase()}
                     className='color-event-button'
                     title={
-                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: colorMap[selectedColor] }}></div>
+                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: colorMap[props.selectedColor] }}></div>
                     }
                 >
                     {colorMap.filter((color, index) => color !== '').map((color, index) => (
                         <div
                             className={['color-swatch',].join(' ')}
-                            style={{ backgroundColor: color, borderWidth: selectedColor === index ? '2px' : '1px' }}
+                            style={{ backgroundColor: color, borderWidth: props.selectedColor === index ? '2px' : '1px' }}
                             key={index}
-                            onClick={() => { setSelectedColor(index) }}
+                            onClick={() => { props.selectColor(index) }}
                         ></div>
                     ))}
                 </DropdownButton>

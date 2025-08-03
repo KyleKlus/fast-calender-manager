@@ -8,7 +8,7 @@ export interface ConfigGCal {
     hosted_domain?: string;
 }
 
-export interface TimeCalendarType {
+export type TimeCalendarType = { date: string } | {
     dateTime?: string;
     timeZone: string;
 }

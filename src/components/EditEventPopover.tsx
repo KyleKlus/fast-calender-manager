@@ -15,7 +15,7 @@ export interface IEditEventPopoverProps {
 const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPopoverProps) => {
     const { editEvent, addEvent, deleteEvent } = useContext(GCalContext);
     const { currentEvents } = useContext(EventContext);
-    const [isAllDay, setIsAllDay] = useState(currentEvents[0].allDay);
+    const [isAllDay, setIsAllDay] = useState(currentEvents[0].allDay || false);
     const [eventName, setEventName] = useState(currentEvents[0].title);
     const [startDate, setStartDate] = useState(currentEvents[0].start ? currentEvents[0].start : DateTime.now().toJSDate());
     const [endDate, setEndDate] = useState(currentEvents[0].end ? currentEvents[0].end : DateTime.now().plus({ hour: 1 }).toJSDate());
@@ -42,7 +42,8 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                                     colorId: index,
                                     extendedProps: currentEvents[0].extendedProps,
                                 },
-                                    currentEvents[0].id
+                                    currentEvents[0].id,
+                                    isAllDay
                                 ).then(_ => {
                                     setEventColor(index)
                                 });
@@ -60,16 +61,19 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 <Button
                     onClick={() => {
                         if (eventName === '') { return }
-                        addEvent({
-                            title: eventName,
-                            start: DateTime.fromJSDate(startDate),
-                            end: DateTime.fromJSDate(endDate),
-                            colorId: eventColor,
-                            extendedProps: {
-                                ...currentEvents[0].extendedProps,
-                                description: eventDescription,
+                        addEvent(
+                            {
+                                title: eventName,
+                                start: DateTime.fromJSDate(startDate),
+                                end: DateTime.fromJSDate(endDate),
+                                colorId: eventColor,
+                                extendedProps: {
+                                    ...currentEvents[0].extendedProps,
+                                    description: eventDescription,
+                                },
                             },
-                        }).then(_ => {
+                            isAllDay
+                        ).then(_ => {
                             props.closePopover();
                         });
                     }}
@@ -104,8 +108,8 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                             if (date === null) { return }
                             setStartDate(date)
                         }}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
+                        showTimeSelect={!isAllDay}
+                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
                         locale="de" // Or any other locale you support
                     />
                 </div>
@@ -117,8 +121,8 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                             if (date === null) { return }
                             setEndDate(date)
                         }}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
+                        showTimeSelect={!isAllDay}
+                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
                         locale="de" // Or any other locale you support
                     />
                 </div>
@@ -139,16 +143,20 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 <Button
                     onClick={() => {
                         if (eventName === '') { return }
-                        editEvent({
-                            title: eventName,
-                            start: DateTime.fromJSDate(startDate),
-                            end: DateTime.fromJSDate(endDate),
-                            colorId: eventColor,
-                            extendedProps: {
-                                ...currentEvents[0].extendedProps,
-                                description: eventDescription,
+                        editEvent(
+                            {
+                                title: eventName,
+                                start: DateTime.fromJSDate(startDate),
+                                end: DateTime.fromJSDate(endDate),
+                                colorId: eventColor,
+                                extendedProps: {
+                                    ...currentEvents[0].extendedProps,
+                                    description: eventDescription,
+                                },
                             },
-                        }, currentEvents[0].id).then(_ => {
+                            currentEvents[0].id,
+                            isAllDay
+                        ).then(_ => {
                             props.closePopover();
                         });
                     }}

@@ -9,15 +9,18 @@ import "react-datepicker/dist/react-datepicker.css";
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+    isAllDay: boolean | undefined;
     closePopover: () => void;
 }
 
 const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopoverProps) => {
     const { addEvent } = useContext(GCalContext);
-    const [isAllDay, setIsAllDay] = useState(false);
+    const [isAllDay, setIsAllDay] = useState(props.isAllDay || false);
     const [eventName, setEventName] = useState('');
-    const [startDate, setStartDate] = useState(DateTime.now().toJSDate());
-    const [endDate, setEndDate] = useState(DateTime.now().plus({ hour: 1 }).toJSDate());
+    const [startDate, setStartDate] = useState(props.startDate || DateTime.now().toJSDate());
+    const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate());
     const [eventDescription, setEventDescription] = useState('');
     const [eventColor, setEventColor] = useState(0);
 
@@ -40,8 +43,8 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                             if (date === null) { return }
                             setStartDate(date)
                         }}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
+                        showTimeSelect={!isAllDay}
+                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
                         locale="de" // Or any other locale you support
                     />
                 </div>
@@ -53,8 +56,8 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                             if (date === null) { return }
                             setEndDate(date)
                         }}
-                        showTimeSelect
-                        dateFormat="yyyy-MM-dd HH:mm"
+                        showTimeSelect={!isAllDay}
+                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
                         locale="de" // Or any other locale you support
                     />
                 </div>
@@ -94,21 +97,23 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                     onClick={() => {
                         if (props.popoverMode !== 'add') { return }
                         if (eventName === '') { return }
-                        addEvent({
-                            title: eventName,
-                            start: DateTime.fromJSDate(startDate),
-                            end: DateTime.fromJSDate(endDate),
-                            colorId: eventColor,
-                            extendedProps: {
-                                description: eventDescription,
+                        addEvent(
+                            {
+                                title: eventName,
+                                start: DateTime.fromJSDate(startDate),
+                                end: DateTime.fromJSDate(endDate),
+                                colorId: eventColor,
+                                extendedProps: {
+                                    description: eventDescription,
+                                },
                             },
-                        }).then(_ => {
+                            isAllDay
+                        ).then(_ => {
                             props.closePopover();
                         });
-                    }}
-                >Confirm</Button>
+                    }}>Confirm</Button>
             </div>
-        </Card>
+        </Card >
     );
 };
 

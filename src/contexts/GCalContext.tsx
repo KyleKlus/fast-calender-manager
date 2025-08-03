@@ -56,7 +56,9 @@ interface IGCalContext {
     events: EventSourceInput;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
-    addEvent: (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => Promise<void>;
+    addEvent: (
+        event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } },
+        isAllDay?: boolean) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
     editEvent: (
         event: {
@@ -66,7 +68,8 @@ interface IGCalContext {
             colorId: number;
             extendedProps: { description?: string }
         },
-        eventId: string
+        eventId: string,
+        isAllDay?: boolean
     ) => Promise<void>;
 }
 
@@ -79,7 +82,9 @@ const GCalContext = createContext<IGCalContext>({
     events: [],
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
-    addEvent: async (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => { },
+    addEvent: async (
+        event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } },
+        isAllDay?: boolean) => { },
     deleteEvent: async (eventId: string) => { },
     editEvent: async (
         event: {
@@ -89,7 +94,8 @@ const GCalContext = createContext<IGCalContext>({
             colorId: number;
             extendedProps: { description?: string }
         },
-        eventId: string
+        eventId: string,
+        isAllDay?: boolean
     ) => { }
 });
 
@@ -125,11 +131,13 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             orderBy: 'startTime',
         })).result.items.map((e: any) => {
             setIsCurrentlyLoading(false);
+            console.log(e.start.date);
             return {
                 id: e.id,
                 title: e.summary,
                 start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
                 end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
                 // url: e.htmlLink,
                 location: e.location,
                 description: e.description,
@@ -170,26 +178,34 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         setAreEventsLoaded(true);
     }
 
-    async function addEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) {
+    async function addEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }, isAllDay?: boolean) {
         if (!isLoggedIn || isCurrentlyLoading) { return }
         setIsCurrentlyLoading(true);
 
         const start = event.start.toISO();
+        const startDate = event.start.toFormat('yyyy-MM-dd');
         const startZone = event.start.zoneName;
         const end = event.end.toISO();
+        const endDate = event.end.toFormat('yyyy-MM-dd');
         const endZone = event.end.zoneName;
 
         await gcal.createEvent({
             summary: event.title,
             description: event.extendedProps?.description,
-            start: {
-                dateTime: start === null ? undefined : start,
-                timeZone: startZone === null ? DateTime.now().zoneName : startZone,
-            },
-            end: {
-                dateTime: end === null ? undefined : end,
-                timeZone: endZone === null ? DateTime.now().zoneName : endZone,
-            },
+            start: isAllDay
+                ? {
+                    date: startDate,
+                }
+                : {
+                    dateTime: start === null ? undefined : start,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: endDate }
+                : {
+                    dateTime: end === null ? undefined : end,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
             colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
         }).then((res: any) => {
             const e = res.result;
@@ -198,6 +214,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 title: e.summary,
                 start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
                 end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
                 // url: e.htmlLink,
                 location: e.location,
                 description: e.description,
@@ -230,27 +247,36 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             colorId: number;
             extendedProps: { description?: string }
         },
-        eventId: string
+        eventId: string,
+        isAllDay?: boolean
     ) {
         if (!isLoggedIn || isCurrentlyLoading) { return }
         setIsCurrentlyLoading(true);
 
         const start = event.start.toISO();
+        const startDate = event.start.toFormat('yyyy-MM-dd');
         const startZone = event.start.zoneName;
         const end = event.end.toISO();
+        const endDate = event.end.toFormat('yyyy-MM-dd');
         const endZone = event.end.zoneName;
 
         gcal.updateEvent({
             summary: event.title,
             description: event.extendedProps?.description,
-            start: {
-                dateTime: start === null ? undefined : start,
-                timeZone: startZone === null ? DateTime.now().zoneName : startZone,
-            },
-            end: {
-                dateTime: end === null ? undefined : end,
-                timeZone: endZone === null ? DateTime.now().zoneName : endZone,
-            },
+            start: isAllDay
+                ? {
+                    date: startDate,
+                }
+                : {
+                    dateTime: start === null ? undefined : start,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: endDate }
+                : {
+                    dateTime: end === null ? undefined : end,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
             colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
         }, eventId).then((res: any) => {
             setEvents([...events.map((e: any) => {
@@ -263,8 +289,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                         },
                         backgroundColor: colorMap[event.colorId as number] || colorMap[0] as string,
                         borderColor: colorMap[event.colorId as number] || colorMap[0] as string,
-                        start: event.start.toJSDate(),
-                        end: event.end.toJSDate(),
+                        start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                        end: e.end.dateTime || e.end.date, // same
+                        allDay: e.start.date !== undefined,
                     };
                 }
                 return e;
