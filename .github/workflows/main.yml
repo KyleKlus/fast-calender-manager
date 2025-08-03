@@ -18,7 +18,7 @@ jobs:
 
       - name: Build site
         run: |
-          rsbuild build
+          npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
