@@ -10,5 +10,6 @@ export default defineConfig({
 		cssModules: {
 			auto: true,
 		},
+		assetPrefix: "/fast-calender-manager/",
 	},
 });
