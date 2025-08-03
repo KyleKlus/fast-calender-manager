@@ -6,7 +6,9 @@
 	"scripts": {
 		"build": "rsbuild build",
 		"dev": "rsbuild dev --open",
-		"preview": "rsbuild preview"
+		"preview": "rsbuild preview",
+		"start": "rsbuild start",
+		"deploy": "rsbuild deploy --mode github"
 	},
 	"dependencies": {
 		"@fullcalendar/bootstrap5": "^6.1.18",
