@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './ToolBarDrawer.css';
 import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
 import { colorMap } from '../contexts/GCalContext';
+import { useKeyPress } from '../hooks/useKeyPress';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 
@@ -16,6 +17,57 @@ export interface IToolBarDrawerProps {
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
     const [isToolbarOpen, setToolbarOpen] = useState(false);
+    const isSpaceKeyPressed = useKeyPress(' ');
+    const isTKeyPressed = useKeyPress('t');
+    const isXKeyPressed = useKeyPress('x');
+    const isCKeyPressed = useKeyPress('c');
+    const isDKeyPressed = useKeyPress('d');
+    const isSKeyPressed = useKeyPress('s');
+    const isAKeyPressed = useKeyPress('a');
+
+    useEffect(() => {
+        if (isSpaceKeyPressed) {
+            setToolbarOpen(!isToolbarOpen);
+        }
+    }, [isSpaceKeyPressed]);
+
+    useEffect(() => {
+        if (isTKeyPressed) {
+            props.onTodayClick();
+        }
+    }, [isTKeyPressed]);
+
+
+    useEffect(() => {
+        if (isXKeyPressed && isToolbarOpen) {
+            props.onModeChange && props.onModeChange('delete');
+        }
+    }, [isXKeyPressed]);
+
+    useEffect(() => {
+        if (isCKeyPressed && isToolbarOpen) {
+            props.onModeChange && props.onModeChange('color');
+        }
+    }, [isCKeyPressed]);
+
+    useEffect(() => {
+        if (isDKeyPressed && isToolbarOpen) {
+            props.onModeChange && props.onModeChange('duplicate');
+        }
+    }, [isDKeyPressed]);
+
+    useEffect(() => {
+        if (isSKeyPressed && isToolbarOpen) {
+            props.onModeChange && props.onModeChange('select');
+        }
+    }, [isSKeyPressed]);
+
+    useEffect(() => {
+        if (isAKeyPressed) {
+            props.onAddClick();
+        }
+    }, [isAKeyPressed]);
+
     return (
         <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
             <div className='toolbar'>

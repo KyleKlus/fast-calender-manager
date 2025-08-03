@@ -3,6 +3,9 @@ import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
 	plugins: [pluginReact()],
+	html: {
+		title: "Calendar Manager",
+	},
 	output: {
 		cssModules: {
 			auto: true,

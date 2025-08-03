@@ -14,6 +14,7 @@ import { Card, } from 'react-bootstrap';
 import AddEventPopover from '../components/AddEventPopover';
 import EditEventPopover from '../components/EditEventPopover';
 import { EventDragStopArg, EventResizeStopArg } from '@fullcalendar/interaction';
+import { useKeyPress } from '../hooks/useKeyPress';
 
 export interface ICalendarPageProps { }
 
@@ -29,6 +30,32 @@ function CalendarPage(props: ICalendarPageProps) {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
     const [date, setDate] = useState(DateTime.now());
+
+    const isRightArrowKeyPressed = useKeyPress('ArrowRight');
+    const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
+    const isTKeyPressed = useKeyPress('t');
+
+    useEffect(() => {
+        if (isLeftArrowKeyPressed) {
+            if (isCurrentlyLoading) return;
+
+            const prevWeek = date.minus({ weeks: 1 });
+            setDate(prevWeek);
+            loadEvents(prevWeek);
+            (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+        }
+    }, [isLeftArrowKeyPressed]);
+
+    useEffect(() => {
+        if (isRightArrowKeyPressed) {
+            if (isCurrentlyLoading) return;
+
+            const nextWeek = date.plus({ weeks: 1 });
+            setDate(nextWeek);
+            loadEvents(nextWeek);
+            (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement)?.click();
+        }
+    }, [isRightArrowKeyPressed]);
 
     useEffect(() => {
         if (areEventsLoaded && isLoggedIn) return;
@@ -178,7 +205,7 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     return (
-        <div className={'fcPage'}>
+        <div className={'fcPage'} >
             <ToolBarDrawer
                 selectedMode={toolbarMode}
                 selectedColor={selectedColor}
