@@ -16,9 +16,15 @@ const config = {
 };
 
 export const colorMap = [
-    '#b74f4f', '#7986cbff', '#33b679',
-    '#8e24aaff', '#e67c73ff', '#f6bf26ff',
-    '#f4511eff', '#039be5', '#616161',
+    '#b74f4f',
+    '#7986cbff',
+    '#33b679',
+    '#8e24aaff',
+    '#e67c73ff',
+    '#f6bf26ff',
+    '#f4511eff',
+    '#039be5',
+    '#616161',
     '#3f51b5',
     '#0b8043',
     '',
@@ -51,13 +57,14 @@ interface IGCalContext {
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
     addEvent: (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => Promise<void>;
+    deleteEvent: (eventId: string) => Promise<void>;
     editEvent: (
         event: {
-            title?: string;
-            start?: DateTime;
-            end?: DateTime;
-            colorId?: number;
-            extendedProps?: { description?: string }
+            title: string;
+            start: DateTime;
+            end: DateTime;
+            colorId: number;
+            extendedProps: { description?: string }
         },
         eventId: string
     ) => Promise<void>;
@@ -73,13 +80,14 @@ const GCalContext = createContext<IGCalContext>({
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
     addEvent: async (event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }) => { },
+    deleteEvent: async (eventId: string) => { },
     editEvent: async (
         event: {
-            title?: string;
-            start?: DateTime;
-            end?: DateTime;
-            colorId?: number;
-            extendedProps?: { description?: string }
+            title: string;
+            start: DateTime;
+            end: DateTime;
+            colorId: number;
+            extendedProps: { description?: string }
         },
         eventId: string
     ) => { }
@@ -129,8 +137,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 extendedProps: {
                     description: e.description,
                 },
-                backgroundColor: colorMap[e.colorId as number] as string,
-                borderColor: colorMap[e.colorId as number] as string,
+                backgroundColor: colorMap[e.colorId as number] || colorMap[0] as string,
+                borderColor: colorMap[e.colorId as number] || colorMap[0] as string,
             }
         });
 
@@ -182,7 +190,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 dateTime: end === null ? undefined : end,
                 timeZone: endZone === null ? DateTime.now().zoneName : endZone,
             },
-            colorId: event.colorId.toString(),
+            colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
         }).then((res: any) => {
             const e = res.result;
             setEvents([...events, {
@@ -197,31 +205,76 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 extendedProps: {
                     description: e.description,
                 },
-                backgroundColor: colorMap[e.colorId as number] as string,
-                borderColor: colorMap[e.colorId as number] as string,
+                backgroundColor: colorMap[e.colorId as number] || colorMap[0] as string,
+                borderColor: colorMap[e.colorId as number] || colorMap[0] as string,
             }]);
+            setIsCurrentlyLoading(false);
+        });
+    }
+
+    async function deleteEvent(eventId: string) {
+        if (!isLoggedIn || isCurrentlyLoading) { return }
+        setIsCurrentlyLoading(true);
+
+        gcal.deleteEvent(eventId).then((res: any) => {
+            setEvents([...events.filter((e) => e.id !== eventId)]);
             setIsCurrentlyLoading(false);
         });
     }
 
     async function editEvent(
         event: {
-            title?: string;
-            start?: DateTime;
-            end?: DateTime;
-            colorId?: number;
-            extendedProps?: { description?: string }
+            title: string;
+            start: DateTime;
+            end: DateTime;
+            colorId: number;
+            extendedProps: { description?: string }
         },
         eventId: string
     ) {
         if (!isLoggedIn || isCurrentlyLoading) { return }
         setIsCurrentlyLoading(true);
 
+        const start = event.start.toISO();
+        const startZone = event.start.zoneName;
+        const end = event.end.toISO();
+        const endZone = event.end.zoneName;
 
+        gcal.updateEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: {
+                dateTime: start === null ? undefined : start,
+                timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+            },
+            end: {
+                dateTime: end === null ? undefined : end,
+                timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+            },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
+        }, eventId).then((res: any) => {
+            setEvents([...events.map((e: any) => {
+                if (e.id === eventId) {
+                    return {
+                        ...e,
+                        title: event.title,
+                        extendedProps: {
+                            description: event.extendedProps?.description,
+                        },
+                        backgroundColor: colorMap[event.colorId as number] || colorMap[0] as string,
+                        borderColor: colorMap[event.colorId as number] || colorMap[0] as string,
+                        start: event.start.toJSDate(),
+                        end: event.end.toJSDate(),
+                    };
+                }
+                return e;
+            })]);
+            setIsCurrentlyLoading(false);
+        });
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );

@@ -1,3 +1,5 @@
+import { EventInput } from "@fullcalendar/core";
+
 export interface ConfigGCal {
     clientId: string;
     apiKey: string;
@@ -343,18 +345,16 @@ class GCal {
      * @returns {any}
      */
     updateEvent(
-        event: object,
+        event: { summary?: string; description?: string; end: TimeCalendarType; start: TimeCalendarType, colorId?: string },
         eventId: string,
         calendarId: string = this.calendar,
-        sendUpdates: string = "none"
     ): any {
         if (gapi) {
             //@ts-ignore the @types/gapi.calendar package is not up to date(https://developers.google.com/calendar/api/v3/reference/events/patch)
-            return gapi.client.calendar.events.patch({
+            return gapi.client.calendar.events.update({
                 calendarId: calendarId,
                 eventId: eventId,
                 resource: event,
-                sendUpdates: sendUpdates,
             });
         } else {
             console.error("Error: gapi is not loaded use onLoad before please.");

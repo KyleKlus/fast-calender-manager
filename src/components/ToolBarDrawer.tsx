@@ -95,7 +95,13 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 </Button>
             </div>
             <div className='toolbar-handle'
-                onClick={() => { setToolbarOpen(!isToolbarOpen) }}
+                onClick={() => {
+                    if (isToolbarOpen) {
+                        props.onModeChange && props.onModeChange('none')
+                    }
+                    setToolbarOpen(!isToolbarOpen)
+                }
+                }
             >
                 <i className="bi-chevron-down"></i>
             </div>
