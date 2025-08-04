@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
+    selectedColor?: number;
     startDate: Date | undefined;
     endDate: Date | undefined;
     isAllDay: boolean | undefined;
@@ -22,7 +23,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
     const [startDate, setStartDate] = useState(props.startDate || DateTime.now().toJSDate());
     const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate());
     const [eventDescription, setEventDescription] = useState('');
-    const [eventColor, setEventColor] = useState(0);
+    const [eventColor, setEventColor] = useState(props.selectedColor || 0);
 
     return (
         <Card className={['popover', props.popoverMode === 'add' ? 'add-popover' : 'add-template-popover', isAllDay ? 'allday' : ''].join(' ')}>

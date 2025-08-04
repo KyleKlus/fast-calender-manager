@@ -135,6 +135,7 @@ function CalendarPage(props: ICalendarPageProps) {
                 return (
                     <AddEventPopover
                         popoverMode={popoverMode}
+                        selectedColor={selectedColor}
                         startDate={selectedStartDate}
                         endDate={selectedEndDate}
                         isAllDay={isAllDay}
