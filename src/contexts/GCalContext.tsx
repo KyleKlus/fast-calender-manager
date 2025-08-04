@@ -289,9 +289,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                         },
                         backgroundColor: colorMap[event.colorId as number] || colorMap[0] as string,
                         borderColor: colorMap[event.colorId as number] || colorMap[0] as string,
-                        start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
-                        end: e.end.dateTime || e.end.date, // same
-                        allDay: e.start.date !== undefined,
+                        start: isAllDay ? startDate : start, // try timed. will fall back to all-day
+                        end: isAllDay ? endDate : end, // same
+                        allDay: isAllDay,
                     };
                 }
                 return e;

@@ -33,7 +33,6 @@ function CalendarPage(props: ICalendarPageProps) {
 
     const isRightArrowKeyPressed = useKeyPress('ArrowRight');
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
-    const isTKeyPressed = useKeyPress('t');
 
     useEffect(() => {
         if (isLeftArrowKeyPressed) {
