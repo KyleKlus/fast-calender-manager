@@ -179,6 +179,8 @@ function CalendarPage(props: ICalendarPageProps) {
 
     function eventChange(info: EventChangeArg) {
         setAddCurrentEvent(info.event);
+        const isAllDay = info.event.allDay;
+
         editEvent({
             title: info.event.title,
             start: DateTime.fromJSDate(info.event.start ? info.event.start : DateTime.now().toJSDate()),
@@ -188,7 +190,7 @@ function CalendarPage(props: ICalendarPageProps) {
                 ...info.event.extendedProps,
                 description: info.event.extendedProps?.description,
             },
-        }, info.event.id).then(_ => {
+        }, info.event.id, isAllDay).then(_ => {
             setRemoveCurrentEvent(info.event);
         });
     }
