@@ -4,21 +4,21 @@ import { useContext, useEffect, useState } from 'react';
 import { colorMap, GCalContext } from '../contexts/GCalContext';
 
 import { generateFCConfig } from '../handlers/fullCalendarConfigHandler';
-import { DateSelectArg, EventAddArg, EventChangeArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
+import { DateSelectArg, EventChangeArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import Popup from 'reactjs-popup';
 import ToolBarDrawer, { ToolbarMode } from '../components/ToolBarDrawer';
-import { EventContext } from '../contexts/EventContext';
+import { convertEventImplToEventInput, EventContext, SimplifiedEvent } from '../contexts/EventContext';
 import { DateTime } from 'luxon';
 import EventTemplateDrawer from '../components/EventTemplateDrawer';
 import { Card, } from 'react-bootstrap';
 import AddEventPopover from '../components/AddEventPopover';
 import EditEventPopover from '../components/EditEventPopover';
-import { EventDragStartArg, EventDragStopArg, EventResizeStopArg } from '@fullcalendar/interaction';
+import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
 import { useKeyPress } from '../hooks/useKeyPress';
 
 export interface ICalendarPageProps { }
 
-export type PopoverMode = 'add' | 'add-template' | 'edit' | 'none';
+export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'none';
 
 function CalendarPage(props: ICalendarPageProps) {
     const { isLoggedIn, areEventsLoaded, events, isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
@@ -26,10 +26,12 @@ function CalendarPage(props: ICalendarPageProps) {
     const [selectedColor, setSelectedColor] = useState<number>(0);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
+    const [selectedEventTemplate, setSelectedEventTemplate] = useState<SimplifiedEvent | undefined>(undefined);
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
     const [lockShortcuts, setLockShortcuts] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [shouldReloadTemplates, setShouldReloadTemplates] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
     const [date, setDate] = useState(DateTime.now());
 
@@ -69,7 +71,7 @@ function CalendarPage(props: ICalendarPageProps) {
         switch (toolbarMode) {
             case 'none':
                 if (popoverMode === 'none') {
-                    setCurrentEvents([info.event]);
+                    setCurrentEvents([convertEventImplToEventInput(info.event)]);
                     setLockShortcuts(true);
                     setPopoverMode('edit');
                     setPopoverOpen(true);
@@ -78,13 +80,12 @@ function CalendarPage(props: ICalendarPageProps) {
                 break;
             case 'select':
                 if (currentEvents.filter((e) => e.id === info.event.id).length > 0) {
-                    setRemoveCurrentEvent(info.event);
+                    setRemoveCurrentEvent(convertEventImplToEventInput(info.event));
                     break;
                 }
-                setAddCurrentEvent(info.event);
+                setAddCurrentEvent(convertEventImplToEventInput(info.event));
                 break;
             case 'duplicate':
-                setAddCurrentEvent(info.event);
                 addEvent({
                     title: info.event.title,
                     start: DateTime.fromJSDate(info.event.start ? info.event.start : DateTime.now().toJSDate()),
@@ -94,18 +95,12 @@ function CalendarPage(props: ICalendarPageProps) {
                         ...info.event.extendedProps,
                         description: info.event.extendedProps?.description,
                     },
-                }, info.event.allDay).then(_ => {
-                    setRemoveCurrentEvent(info.event);
-                });
+                }, info.event.allDay)
                 break;
             case 'delete':
-                setAddCurrentEvent(info.event);
-                deleteEvent(info.event.id).then(_ => {
-                    setRemoveCurrentEvent(info.event);
-                });
+                deleteEvent(info.event.id)
                 break;
             case 'color':
-                setAddCurrentEvent(info.event);
                 editEvent({
                     title: info.event.title,
                     start: DateTime.fromJSDate(info.event.start ? info.event.start : DateTime.now().toJSDate()),
@@ -116,9 +111,7 @@ function CalendarPage(props: ICalendarPageProps) {
                         description: info.event.extendedProps?.description,
                     },
 
-                }, info.event.id, info.event.allDay).then(_ => {
-                    setRemoveCurrentEvent(info.event);
-                });
+                }, info.event.id, info.event.allDay)
                 break;
         }
     }
@@ -143,6 +136,9 @@ function CalendarPage(props: ICalendarPageProps) {
                         endDate={selectedEndDate}
                         isAllDay={isAllDay}
                         closePopover={() => {
+                            if (popoverMode === 'add-template') {
+                                setShouldReloadTemplates(true);
+                            }
                             setSelectedStartDate(undefined);
                             setSelectedEndDate(undefined);
                             setPopoverMode('none');
@@ -151,13 +147,18 @@ function CalendarPage(props: ICalendarPageProps) {
                         }}
                     />
                 );
+            case 'edit-template':
             case 'edit':
                 return (
                     <EditEventPopover
+                        selectedEventTemplate={selectedEventTemplate}
+                        popoverMode={popoverMode}
+                        reloadTemplates={() => { setShouldReloadTemplates(true) }}
                         closePopover={() => {
                             setPopoverMode('none');
                             setPopoverOpen(false);
                             setLockShortcuts(false);
+                            setSelectedEventTemplate(undefined);
                         }}
                     />
                 );
@@ -170,7 +171,6 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function eventChange(info: EventChangeArg) {
-        setAddCurrentEvent(info.event);
         const isAllDay = info.event.allDay;
 
         editEvent({
@@ -182,9 +182,7 @@ function CalendarPage(props: ICalendarPageProps) {
                 ...info.event.extendedProps,
                 description: info.event.extendedProps?.description,
             },
-        }, info.event.id, isAllDay).then(_ => {
-            setRemoveCurrentEvent(info.event);
-        });
+        }, info.event.id, isAllDay)
     }
 
     function select(info: DateSelectArg) {
@@ -203,114 +201,144 @@ function CalendarPage(props: ICalendarPageProps) {
         setIsDragging(false);
     }
 
+    const handleEventReceive = (info: EventReceiveArg) => {
+        const droppedEvent = info.event;
+        addEvent({
+            title: droppedEvent.title,
+            start: DateTime.fromJSDate(droppedEvent.start ? droppedEvent.start : DateTime.now().toJSDate()),
+            end: DateTime.fromJSDate(droppedEvent.end ? droppedEvent.end : DateTime.now().plus({ hour: 1 }).toJSDate()),
+            colorId: colorMap.indexOf(droppedEvent.backgroundColor) === -1 ? 0 : colorMap.indexOf(droppedEvent.backgroundColor),
+            extendedProps: {
+                ...droppedEvent.extendedProps,
+                description: droppedEvent.extendedProps?.description,
+            },
+        }, droppedEvent.allDay);
+    };
+
     return (
-        <div className={'fcPage'} >
-            <ToolBarDrawer
-                selectedMode={toolbarMode}
-                selectedColor={selectedColor}
-                lockShortcuts={lockShortcuts}
-                selectColor={(colorId: number) => {
-                    setSelectedColor(colorId);
-                }}
-                onAddClick={() => {
-                    setPopoverMode('add');
-                    setLockShortcuts(true);
-                    setPopoverOpen(true);
-                }}
-                onModeChange={(mode) => {
-                    setToolbarMode(toolbarMode === mode ? 'none' : mode);
-                }}
-                onTodayClick={() => {
-                    if (isCurrentlyLoading) return;
-
-                    const currentWeek = DateTime.now();
-                    setDate(currentWeek);
-                    loadEvents(currentWeek);
-                    (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
-                }}
-            />
-            <div className='calendar-container'>
-                <div
-                    className='calendar-left-button calendar-nav-button'
-                    onMouseEnter={() => {
-                        if (isDragging && !isCurrentlyLoading) {
-
-                            const prevWeek = date.minus({ weeks: 1 });
-                            setDate(prevWeek);
-                            loadEvents(prevWeek);
-                            (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+        <>
+            {areEventsLoaded
+                ? <div className={'fcPage'}>
+                    < ToolBarDrawer
+                        selectedMode={toolbarMode}
+                        selectedColor={selectedColor}
+                        lockShortcuts={lockShortcuts}
+                        selectColor={(colorId: number) => {
+                            setSelectedColor(colorId);
                         }
-                    }}
-                    onClick={() => {
-                        if (isCurrentlyLoading) return;
+                        }
+                        onAddClick={() => {
+                            setPopoverMode('add');
+                            setLockShortcuts(true);
+                            setPopoverOpen(true);
+                        }}
+                        onModeChange={(mode) => {
+                            setToolbarMode(toolbarMode === mode ? 'none' : mode);
+                        }}
+                        onTodayClick={() => {
+                            if (isCurrentlyLoading) return;
 
-                        const prevWeek = date.minus({ weeks: 1 });
-                        setDate(prevWeek);
-                        loadEvents(prevWeek);
-                        (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
-                    }}
-                >
-                    <i className='bi-chevron-double-left'></i>
-                </div>
-                {
-                    areEventsLoaded
-                        ? <FullCalendar {...generateFCConfig({
+                            const currentWeek = DateTime.now();
+                            setDate(currentWeek);
+                            loadEvents(currentWeek);
+                            (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
+                        }}
+                    />
+                    < div className='calendar-container' >
+                        <div
+                            className='calendar-left-button calendar-nav-button'
+                            onMouseEnter={() => {
+                                if (isDragging && !isCurrentlyLoading) {
+
+                                    const prevWeek = date.minus({ weeks: 1 });
+                                    setDate(prevWeek);
+                                    loadEvents(prevWeek);
+                                    (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                                }
+                            }}
+                            onClick={() => {
+                                if (isCurrentlyLoading) return;
+
+                                const prevWeek = date.minus({ weeks: 1 });
+                                setDate(prevWeek);
+                                loadEvents(prevWeek);
+                                (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                            }}
+                        >
+                            <i className='bi-chevron-double-left'></i>
+                        </div>
+
+                        <FullCalendar {...generateFCConfig({
                             events,
                             eventClick,
                             eventChange,
                             eventDragStart,
                             eventDragStop,
+                            eventReceive: handleEventReceive,
                             select,
                             date
                         })}
                         />
-                        : <div>Loading...</div>
-                }
-                <div
-                    className='calendar-right-button calendar-nav-button'
-                    onMouseEnter={() => {
 
-                        if (isDragging && !isCurrentlyLoading) {
-                            const nextWeek = date.plus({ weeks: 1 });
-                            setDate(nextWeek);
-                            loadEvents(nextWeek);
-                            (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
-                        }
-                    }}
-                    onClick={() => {
-                        if (isCurrentlyLoading) return;
-                        const nextWeek = date.plus({ weeks: 1 });
-                        setDate(nextWeek);
-                        loadEvents(nextWeek);
-                        (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
-                    }}
-                >
-                    <i className='bi-chevron-double-right'></i>
-                </div>
+                        <div
+                            className='calendar-right-button calendar-nav-button'
+                            onMouseEnter={() => {
 
-            </div>
-            <EventTemplateDrawer onAddClick={() => {
-                setPopoverMode('add-template');
-                setLockShortcuts(true);
+                                if (isDragging && !isCurrentlyLoading) {
+                                    const nextWeek = date.plus({ weeks: 1 });
+                                    setDate(nextWeek);
+                                    loadEvents(nextWeek);
+                                    (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                                }
+                            }}
+                            onClick={() => {
+                                if (isCurrentlyLoading) return;
+                                const nextWeek = date.plus({ weeks: 1 });
+                                setDate(nextWeek);
+                                loadEvents(nextWeek);
+                                (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                            }}
+                        >
+                            <i className='bi-chevron-double-right'></i>
+                        </div>
 
-                setPopoverOpen(true);
-            }} />
-            {popoverOpen && (
-                <Popup
-                    onClose={() => {
-                        setCurrentEvents([]);
-                        setPopoverMode('none');
-                        setPopoverOpen(false)
-                        setLockShortcuts(false);
-                    }}
-                    open={popoverOpen}
-                    modal
-                >
-                    {getCorrectPopoverDisplay(popoverMode)}
-                </Popup>
-            )
+                    </div >
+                    <EventTemplateDrawer
+                        shouldReload={shouldReloadTemplates}
+                        confirmReload={() => { setShouldReloadTemplates(false) }}
+                        onAddClick={() => {
+                            setPopoverMode('add-template');
+                            setLockShortcuts(true);
+                            setPopoverOpen(true);
+                        }}
+                        onEditClick={(eventTemplate: SimplifiedEvent) => {
+                            console.log(eventTemplate);
+                            setPopoverMode('edit-template');
+                            setSelectedEventTemplate(eventTemplate);
+                            setLockShortcuts(true);
+                            setPopoverOpen(true);
+                        }}
+                    />
+                    {
+                        popoverOpen && (
+                            <Popup
+                                onClose={() => {
+                                    setCurrentEvents([]);
+                                    setPopoverMode('none');
+                                    setPopoverOpen(false)
+                                    setLockShortcuts(false);
+                                }}
+                                open={popoverOpen}
+                                modal
+                            >
+                                {getCorrectPopoverDisplay(popoverMode)}
+                            </Popup>
+                        )
+                    }
+                </div >
+                : <div>Loading...</div>
             }
-        </div >
+        </>
     );
 };
 

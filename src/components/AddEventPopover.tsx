@@ -6,6 +6,7 @@ import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { SimplifiedEvent } from '../contexts/EventContext';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
@@ -106,8 +107,28 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                 }}>Cancel</Button>
                 <Button
                     onClick={() => {
-                        if (props.popoverMode !== 'add') { return }
                         if (eventName === '') { return }
+
+                        if (props.popoverMode !== 'add') {
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            eventTemplates.push({
+                                title: eventName,
+                                start: startDate.toISOString(),
+                                end: endDate.toISOString(),
+                                allDay: isAllDay,
+                                description: eventDescription,
+                                colorId: eventColor,
+                            });
+
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.closePopover();
+                            return;
+                        }
+
                         addEvent(
                             {
                                 title: eventName,

@@ -45,6 +45,8 @@ export const colorMap = [
     '',
 ];
 
+export const defaultColor: string = colorMap[0];
+
 const gcal = new GCal(config);
 
 interface IGCalContext {
@@ -182,6 +184,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         if (!isLoggedIn || isCurrentlyLoading) { return }
         setIsCurrentlyLoading(true);
 
+        console.log('Add event', event);
+
+
         const start = event.start.toISO();
         const startDate = event.start.toFormat('yyyy-MM-dd');
         const startZone = event.start.zoneName;
@@ -259,6 +264,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         const end = event.end.toISO();
         const endDate = event.end.toFormat('yyyy-MM-dd');
         const endZone = event.end.zoneName;
+
+        console.log('update event', event);
 
         gcal.updateEvent({
             summary: event.title,
