@@ -27,6 +27,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
+    const [lockShortcuts, setLockShortcuts] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
     const [date, setDate] = useState(DateTime.now());
@@ -35,7 +36,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
 
     useEffect(() => {
-        if (isLeftArrowKeyPressed) {
+        if (isLeftArrowKeyPressed && !lockShortcuts) {
             if (isCurrentlyLoading) return;
 
             const prevWeek = date.minus({ weeks: 1 });
@@ -46,7 +47,7 @@ function CalendarPage(props: ICalendarPageProps) {
     }, [isLeftArrowKeyPressed]);
 
     useEffect(() => {
-        if (isRightArrowKeyPressed) {
+        if (isRightArrowKeyPressed && !lockShortcuts) {
             if (isCurrentlyLoading) return;
 
             const nextWeek = date.plus({ weeks: 1 });
@@ -68,6 +69,7 @@ function CalendarPage(props: ICalendarPageProps) {
             case 'none':
                 if (popoverMode === 'none') {
                     setCurrentEvents([info.event]);
+                    setLockShortcuts(true);
                     setPopoverMode('edit');
                     setPopoverOpen(true);
                     break;
@@ -144,6 +146,7 @@ function CalendarPage(props: ICalendarPageProps) {
                             setSelectedEndDate(undefined);
                             setPopoverMode('none');
                             setPopoverOpen(false);
+                            setLockShortcuts(false);
                         }}
                     />
                 );
@@ -153,6 +156,7 @@ function CalendarPage(props: ICalendarPageProps) {
                         closePopover={() => {
                             setPopoverMode('none');
                             setPopoverOpen(false);
+                            setLockShortcuts(false);
                         }}
                     />
                 );
@@ -201,6 +205,7 @@ function CalendarPage(props: ICalendarPageProps) {
         setSelectedStartDate(info.start);
         setSelectedEndDate(info.end);
         setPopoverMode('add');
+        setLockShortcuts(true);
         setPopoverOpen(true);
     }
 
@@ -209,11 +214,13 @@ function CalendarPage(props: ICalendarPageProps) {
             <ToolBarDrawer
                 selectedMode={toolbarMode}
                 selectedColor={selectedColor}
+                lockShortcuts={lockShortcuts}
                 selectColor={(colorId: number) => {
                     setSelectedColor(colorId);
                 }}
                 onAddClick={() => {
                     setPopoverMode('add');
+                    setLockShortcuts(true);
                     setPopoverOpen(true);
                 }}
                 onModeChange={(mode) => {
@@ -268,6 +275,8 @@ function CalendarPage(props: ICalendarPageProps) {
             </div>
             <EventTemplateDrawer onAddClick={() => {
                 setPopoverMode('add-template');
+                setLockShortcuts(true);
+
                 setPopoverOpen(true);
             }} />
             {popoverOpen && (
@@ -276,6 +285,7 @@ function CalendarPage(props: ICalendarPageProps) {
                         setCurrentEvents([]);
                         setPopoverMode('none');
                         setPopoverOpen(false)
+                        setLockShortcuts(false);
                     }}
                     open={popoverOpen}
                     modal
