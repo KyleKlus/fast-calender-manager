@@ -312,7 +312,6 @@ function CalendarPage(props: ICalendarPageProps) {
                             setPopoverOpen(true);
                         }}
                         onEditClick={(eventTemplate: SimplifiedEvent) => {
-                            console.log(eventTemplate);
                             setPopoverMode('edit-template');
                             setSelectedEventTemplate(eventTemplate);
                             setLockShortcuts(true);

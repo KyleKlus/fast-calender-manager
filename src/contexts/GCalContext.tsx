@@ -56,7 +56,9 @@ interface IGCalContext {
     isCurrentlyLoading: boolean;
     gcal: GCal;
     events: EventSourceInput;
+    isSyncOn: boolean;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
+    setIsSyncOn: (isSyncOn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
     addEvent: (
         event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } },
@@ -80,8 +82,10 @@ const GCalContext = createContext<IGCalContext>({
     areEventsLoaded: false,
     isTryingToAutoLogin: true,
     isCurrentlyLoading: false,
+    isSyncOn: false,
     gcal,
     events: [],
+    setIsSyncOn: (isSyncOn: boolean) => { },
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
     addEvent: async (
@@ -107,6 +111,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [events, setEvents] = useState<EventInput[]>([]);
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
+    const [isSyncOn, setIsSyncOn] = useState(false);
 
     useEffect(() => {
         if (isTryingToAutoLogin) {
@@ -117,6 +122,18 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                     setIsTryingToAutoLogin(false);
                 });
             }, 1000);
+        }
+    });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
+                clearInterval(interval);
+                loadEvents(DateTime.now());
+            }
+        }, 20000);
+        return () => {
+            clearInterval(interval);
         }
     });
 
@@ -133,7 +150,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             orderBy: 'startTime',
         })).result.items.map((e: any) => {
             setIsCurrentlyLoading(false);
-            console.log(e.start.date);
             return {
                 id: e.id,
                 title: e.summary,
@@ -183,9 +199,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     async function addEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }, isAllDay?: boolean) {
         if (!isLoggedIn || isCurrentlyLoading) { return }
         setIsCurrentlyLoading(true);
-
-        console.log('Add event', event);
-
 
         const start = event.start.toISO();
         const startDate = event.start.toFormat('yyyy-MM-dd');
@@ -265,8 +278,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         const endDate = event.end.toFormat('yyyy-MM-dd');
         const endZone = event.end.zoneName;
 
-        console.log('update event', event);
-
         gcal.updateEvent({
             summary: event.title,
             description: event.extendedProps?.description,
@@ -308,7 +319,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );

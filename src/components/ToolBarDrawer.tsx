@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './ToolBarDrawer.css';
 import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
-import { colorMap } from '../contexts/GCalContext';
+import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { useKeyPress } from '../hooks/useKeyPress';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
@@ -17,6 +17,7 @@ export interface IToolBarDrawerProps {
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
+    const { isSyncOn, setIsSyncOn } = useContext(GCalContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
     const isTKeyPressed = useKeyPress('t');
@@ -74,6 +75,9 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
             <div className='toolbar'>
                 <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                     <i className={`bi-plus-circle`}></i>
+                </Button>
+                <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
+                    <i className={`bi-arrow-repeat`}></i>
                 </Button>
                 <DropdownButton
                     id={`dropdown-variants-${'Primary'}`}
