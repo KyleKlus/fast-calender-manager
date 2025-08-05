@@ -168,15 +168,6 @@ function CalendarPage(props: ICalendarPageProps) {
         }
     }
 
-    function eventAdd(info: EventAddArg) {
-        setAddCurrentEvent(info.event);
-        console.log('ADD:', info.event);
-    }
-
-    function eventResizeStop(info: EventResizeStopArg) {
-        console.log('RESIZE:', info.event);
-    }
-
     function eventChange(info: EventChangeArg) {
         setAddCurrentEvent(info.event);
         const isAllDay = info.event.allDay;
@@ -193,14 +184,6 @@ function CalendarPage(props: ICalendarPageProps) {
         }, info.event.id, isAllDay).then(_ => {
             setRemoveCurrentEvent(info.event);
         });
-    }
-
-    function eventDragStop(info: EventDragStopArg) {
-        console.log('DRAG:', info.event);
-    }
-
-    function eventDrop(info: EventDropArg) {
-        console.log('DROP:', info.event);
     }
 
     function select(info: DateSelectArg) {
@@ -253,11 +236,7 @@ function CalendarPage(props: ICalendarPageProps) {
                         ? <FullCalendar {...generateFCConfig({
                             events,
                             eventClick,
-                            eventAdd,
-                            eventResizeStop,
                             eventChange,
-                            eventDrop,
-                            eventDragStop,
                             select,
                             date
                         })}
