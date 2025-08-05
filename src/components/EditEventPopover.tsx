@@ -91,22 +91,17 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
             />
             <div className='edit-popover-date-input'>
                 <div>
-                    <Form.Label htmlFor="">Is allday:</Form.Label>
-                    <Form.Check
-                        type="checkbox"
-                        id="isAllDayCheckbox"
-                        label="Is allday"
-                        defaultChecked={isAllDay}
-                        onChange={() => { setIsAllDay(!isAllDay) }}
-                    />
-                </div>
-                <div>
                     <Form.Label htmlFor="">Event Start:</Form.Label>
                     <DatePicker
                         selected={startDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
-                            setStartDate(date)
+                            const newStartDate = DateTime.fromJSDate(date);
+                            const prevStartDate = DateTime.fromJSDate(startDate);
+                            const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
+                            const currentEndDate = DateTime.fromJSDate(endDate);
+                            setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
+                            setStartDate(date);
                         }}
                         showTimeSelect={!isAllDay}
                         dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
@@ -119,6 +114,11 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                         selected={endDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
+                            const newEndDate = DateTime.fromJSDate(date);
+                            const currentStartDate = DateTime.fromJSDate(startDate);
+                            if (newEndDate <= currentStartDate) {
+                                return
+                            }
                             setEndDate(date)
                         }}
                         showTimeSelect={!isAllDay}
@@ -126,6 +126,16 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                         locale="de" // Or any other locale you support
                     />
                 </div>
+            </div>
+            <div>
+                <Form.Label htmlFor="">Is allday:</Form.Label>
+                <Form.Check
+                    type="checkbox"
+                    id="isAllDayCheckbox"
+                    label="Is allday"
+                    defaultChecked={isAllDay}
+                    onChange={() => { setIsAllDay(!isAllDay) }}
+                />
             </div>
             <Form.Label htmlFor="">Description:</Form.Label>
             <Form.Control

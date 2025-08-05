@@ -42,7 +42,12 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                         selected={startDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
-                            setStartDate(date)
+                            const newStartDate = DateTime.fromJSDate(date);
+                            const prevStartDate = DateTime.fromJSDate(startDate);
+                            const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
+                            const currentEndDate = DateTime.fromJSDate(endDate);
+                            setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
+                            setStartDate(date);
                         }}
                         showTimeSelect={!isAllDay}
                         dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
@@ -55,6 +60,11 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                         selected={endDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
+                            const newEndDate = DateTime.fromJSDate(date);
+                            const currentStartDate = DateTime.fromJSDate(startDate);
+                            if (newEndDate <= currentStartDate) {
+                                return
+                            }
                             setEndDate(date)
                         }}
                         showTimeSelect={!isAllDay}
