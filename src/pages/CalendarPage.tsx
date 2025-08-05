@@ -13,7 +13,7 @@ import EventTemplateDrawer from '../components/EventTemplateDrawer';
 import { Card, } from 'react-bootstrap';
 import AddEventPopover from '../components/AddEventPopover';
 import EditEventPopover from '../components/EditEventPopover';
-import { EventDragStopArg, EventResizeStopArg } from '@fullcalendar/interaction';
+import { EventDragStartArg, EventDragStopArg, EventResizeStopArg } from '@fullcalendar/interaction';
 import { useKeyPress } from '../hooks/useKeyPress';
 
 export interface ICalendarPageProps { }
@@ -29,6 +29,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
     const [lockShortcuts, setLockShortcuts] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
     const [date, setDate] = useState(DateTime.now());
 
@@ -194,6 +195,14 @@ function CalendarPage(props: ICalendarPageProps) {
         setPopoverOpen(true);
     }
 
+    function eventDragStart(info: EventDragStartArg) {
+        setIsDragging(true);
+    }
+
+    function eventDragStop(info: EventDragStopArg) {
+        setIsDragging(false);
+    }
+
     return (
         <div className={'fcPage'} >
             <ToolBarDrawer
@@ -221,14 +230,26 @@ function CalendarPage(props: ICalendarPageProps) {
                 }}
             />
             <div className='calendar-container'>
-                <div className='calendar-left-button calendar-nav-button' onClick={() => {
-                    if (isCurrentlyLoading) return;
+                <div
+                    className='calendar-left-button calendar-nav-button'
+                    onMouseEnter={() => {
+                        if (isDragging && !isCurrentlyLoading) {
 
-                    const prevWeek = date.minus({ weeks: 1 });
-                    setDate(prevWeek);
-                    loadEvents(prevWeek);
-                    (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
-                }}>
+                            const prevWeek = date.minus({ weeks: 1 });
+                            setDate(prevWeek);
+                            loadEvents(prevWeek);
+                            (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                        }
+                    }}
+                    onClick={() => {
+                        if (isCurrentlyLoading) return;
+
+                        const prevWeek = date.minus({ weeks: 1 });
+                        setDate(prevWeek);
+                        loadEvents(prevWeek);
+                        (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                    }}
+                >
                     <i className='bi-chevron-double-left'></i>
                 </div>
                 {
@@ -237,19 +258,33 @@ function CalendarPage(props: ICalendarPageProps) {
                             events,
                             eventClick,
                             eventChange,
+                            eventDragStart,
+                            eventDragStop,
                             select,
                             date
                         })}
                         />
                         : <div>Loading...</div>
                 }
-                <div className='calendar-right-button calendar-nav-button' onClick={() => {
-                    if (isCurrentlyLoading) return;
-                    const nextWeek = date.plus({ weeks: 1 });
-                    setDate(nextWeek);
-                    loadEvents(nextWeek);
-                    (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
-                }}>
+                <div
+                    className='calendar-right-button calendar-nav-button'
+                    onMouseEnter={() => {
+
+                        if (isDragging && !isCurrentlyLoading) {
+                            const nextWeek = date.plus({ weeks: 1 });
+                            setDate(nextWeek);
+                            loadEvents(nextWeek);
+                            (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                        }
+                    }}
+                    onClick={() => {
+                        if (isCurrentlyLoading) return;
+                        const nextWeek = date.plus({ weeks: 1 });
+                        setDate(nextWeek);
+                        loadEvents(nextWeek);
+                        (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                    }}
+                >
                     <i className='bi-chevron-double-right'></i>
                 </div>
 
