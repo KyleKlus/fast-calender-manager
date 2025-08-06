@@ -45,7 +45,7 @@ export function generateFCConfig(props: IFCConfigProps): CalendarOptions {
         dragScroll: true,
         scrollTime: '07:30:00',
         snapDuration: '00:15:00',
-        slotDuration: '00:15:00',
+        slotDuration: '00:30:00',
         themeSystem: 'bootstrap5',
         eventReceive: props.eventReceive,
         select: props.select,

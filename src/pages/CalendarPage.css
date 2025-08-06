@@ -82,6 +82,10 @@
     }
 }
 
+.fcPage .fc-event.fc-timegrid-event-short {
+    font-size: xx-small;
+}
+
 .fcPage .fc-event-past {
     filter: saturate(0.4) brightness(1.4);
     --fc-event-text-color: #3b3a3a;

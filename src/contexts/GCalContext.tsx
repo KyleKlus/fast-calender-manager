@@ -117,7 +117,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         if (isTryingToAutoLogin) {
             setTimeout(() => {
                 gcal.handleAuthClick().then((res) => {
-
                     setIsLoggedIn(true);
                     setIsTryingToAutoLogin(false);
                 });
