@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './ToolBarDrawer.css';
 import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
-import { colorMap } from '../contexts/GCalContext';
+import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { useKeyPress } from '../hooks/useKeyPress';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
@@ -9,6 +9,7 @@ export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 export interface IToolBarDrawerProps {
     selectedColor: number;
     selectedMode: ToolbarMode;
+    lockShortcuts: boolean;
     selectColor: (colorId: number) => void;
     onAddClick: () => void;
     onModeChange: (mode: ToolbarMode) => void;
@@ -16,6 +17,7 @@ export interface IToolBarDrawerProps {
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
+    const { isSyncOn, setIsSyncOn } = useContext(GCalContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
     const isTKeyPressed = useKeyPress('t');
@@ -26,44 +28,44 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
     const isAKeyPressed = useKeyPress('a');
 
     useEffect(() => {
-        if (isSpaceKeyPressed) {
+        if (isSpaceKeyPressed && !props.lockShortcuts) {
             setToolbarOpen(!isToolbarOpen);
         }
     }, [isSpaceKeyPressed]);
 
     useEffect(() => {
-        if (isTKeyPressed) {
+        if (isTKeyPressed && !props.lockShortcuts) {
             props.onTodayClick();
         }
     }, [isTKeyPressed]);
 
 
     useEffect(() => {
-        if (isXKeyPressed && isToolbarOpen) {
+        if (isXKeyPressed && isToolbarOpen && !props.lockShortcuts) {
             props.onModeChange && props.onModeChange('delete');
         }
     }, [isXKeyPressed]);
 
     useEffect(() => {
-        if (isCKeyPressed && isToolbarOpen) {
+        if (isCKeyPressed && isToolbarOpen && !props.lockShortcuts) {
             props.onModeChange && props.onModeChange('color');
         }
     }, [isCKeyPressed]);
 
     useEffect(() => {
-        if (isDKeyPressed && isToolbarOpen) {
+        if (isDKeyPressed && isToolbarOpen && !props.lockShortcuts) {
             props.onModeChange && props.onModeChange('duplicate');
         }
     }, [isDKeyPressed]);
 
     useEffect(() => {
-        if (isSKeyPressed && isToolbarOpen) {
+        if (isSKeyPressed && isToolbarOpen && !props.lockShortcuts) {
             props.onModeChange && props.onModeChange('select');
         }
     }, [isSKeyPressed]);
 
     useEffect(() => {
-        if (isAKeyPressed) {
+        if (isAKeyPressed && !props.lockShortcuts) {
             props.onAddClick();
         }
     }, [isAKeyPressed]);
@@ -73,6 +75,9 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
             <div className='toolbar'>
                 <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                     <i className={`bi-plus-circle`}></i>
+                </Button>
+                <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
+                    <i className={`bi-arrow-repeat`}></i>
                 </Button>
                 <DropdownButton
                     id={`dropdown-variants-${'Primary'}`}

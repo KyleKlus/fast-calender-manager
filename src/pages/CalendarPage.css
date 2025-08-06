@@ -36,6 +36,24 @@
     --fc-event-border-color: #b74f4f;
 }
 
+.fcPage .fc-timegrid-now-indicator-line.CustomNowIndicator {
+    border-width: 2px 0 0;
+    border-radius: 8px;
+}
+
+.fcPage .fc-v-event .fc-event-main-frame {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+}
+
+.fcPage .fc-v-event .fc-event-main-frame .fc-event-title-container {
+    flex-grow: 0;
+}
+
+.fcPage .fc-v-event .fc-event-main-frame .fc-event-title {
+    white-space: nowrap;
+}
+
 .fcPage .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
     margin-bottom: 0.5rem;
 }
@@ -80,6 +98,10 @@
         box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
         outline: var(--bs-border-color) solid 1.5px;
     }
+}
+
+.fcPage .fc-event.fc-timegrid-event-short {
+    font-size: xx-small;
 }
 
 .fcPage .fc-event-past {

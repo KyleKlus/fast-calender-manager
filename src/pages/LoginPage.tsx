@@ -11,6 +11,7 @@ function LoginPage(props: ILoginPageProps) {
         <div>
             {!isTryingToAutoLogin &&
                 <button onClick={() => {
+                    if (gcal === undefined) { return }
                     gcal.handleAuthClick().then((res) => {
                         setIsLoggedIn(true);
                         localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));

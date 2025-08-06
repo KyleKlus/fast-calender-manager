@@ -1,0 +1,5 @@
+.draggable-event {
+    padding: 4px 8px;
+    cursor: move;
+    display: flex;
+}

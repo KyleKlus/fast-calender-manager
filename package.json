@@ -7,7 +7,7 @@
 		"build": "rsbuild build",
 		"dev": "rsbuild dev --open",
 		"preview": "rsbuild preview",
-		"start": "rsbuild start",
+		"start": "rsbuild build && rsbuild start",
 		"deploy": "rsbuild deploy --mode github"
 	},
 	"dependencies": {

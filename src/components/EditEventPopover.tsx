@@ -6,21 +6,30 @@ import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { EventContext } from '../contexts/EventContext';
+import { convertEventInputToSimplifiedEvent, EventContext, SimplifiedEvent } from '../contexts/EventContext';
+import { PopoverMode } from '../pages/CalendarPage';
 
 export interface IEditEventPopoverProps {
     closePopover: () => void;
+    selectedEventTemplate?: SimplifiedEvent;
+    reloadTemplates: () => void;
+    popoverMode: PopoverMode;
 }
 
 const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPopoverProps) => {
     const { editEvent, addEvent, deleteEvent } = useContext(GCalContext);
     const { currentEvents } = useContext(EventContext);
-    const [isAllDay, setIsAllDay] = useState(currentEvents[0].allDay || false);
-    const [eventName, setEventName] = useState(currentEvents[0].title);
-    const [startDate, setStartDate] = useState(currentEvents[0].start ? currentEvents[0].start : DateTime.now().toJSDate());
-    const [endDate, setEndDate] = useState(currentEvents[0].end ? currentEvents[0].end : DateTime.now().plus({ hour: 1 }).toJSDate());
-    const [eventDescription, setEventDescription] = useState(currentEvents[0].extendedProps?.description);
-    const [eventColor, setEventColor] = useState<number>(colorMap.indexOf(currentEvents[0].backgroundColor) === -1 ? 0 : colorMap.indexOf(currentEvents[0].backgroundColor));
+
+    const editableEvent: SimplifiedEvent = props.popoverMode === 'edit-template' && props.selectedEventTemplate !== undefined
+        ? props.selectedEventTemplate
+        : convertEventInputToSimplifiedEvent(currentEvents[0]);
+
+    const [isAllDay, setIsAllDay] = useState(editableEvent.allDay || false);
+    const [eventName, setEventName] = useState(editableEvent.title);
+    const [startDate, setStartDate] = useState<Date>(DateTime.fromISO(editableEvent.start).toJSDate());
+    const [endDate, setEndDate] = useState<Date>(DateTime.fromISO(editableEvent.end).toJSDate());
+    const [eventDescription, setEventDescription] = useState(editableEvent.description);
+    const [eventColor, setEventColor] = useState<number>(editableEvent.colorId);
 
     return (
         <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
@@ -35,14 +44,39 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                             onClick={() => {
                                 if (eventColor === index) { return }
 
+                                if (props.popoverMode === 'edit-template') {
+                                    const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                                    let eventTemplates: SimplifiedEvent[] = [];
+                                    if (loadedEventTemplates) {
+                                        eventTemplates = JSON.parse(loadedEventTemplates);
+                                    }
+
+                                    if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
+                                        eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+                                    }
+                                    eventTemplates.push({
+                                        title: eventName,
+                                        start: startDate.toISOString(),
+                                        end: endDate.toISOString(),
+                                        allDay: isAllDay,
+                                        description: eventDescription,
+                                        colorId: index,
+                                    });
+
+                                    localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                                    props.reloadTemplates();
+                                    setEventColor(index)
+                                    return;
+                                }
+
                                 editEvent({
-                                    title: currentEvents[0].title,
+                                    title: editableEvent.title,
                                     start: DateTime.fromJSDate(startDate),
                                     end: DateTime.fromJSDate(endDate),
                                     colorId: index,
-                                    extendedProps: currentEvents[0].extendedProps,
+                                    extendedProps: { description: eventDescription },
                                 },
-                                    currentEvents[0].id,
+                                    (editableEvent.id as string), // is always defined
                                     isAllDay
                                 ).then(_ => {
                                     setEventColor(index)
@@ -53,7 +87,20 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 </div>
                 <Button
                     onClick={() => {
-                        deleteEvent(currentEvents[0].id).then(_ => {
+                        if (props.popoverMode === 'edit-template') {
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.reloadTemplates();
+                            props.closePopover();
+                            return;
+                        }
+
+                        deleteEvent((editableEvent.id as string)).then(_ => {
                             props.closePopover();
                         });
                     }}
@@ -61,6 +108,28 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 <Button
                     onClick={() => {
                         if (eventName === '') { return }
+                        if (props.popoverMode === 'edit-template') {
+                            if (props.selectedEventTemplate === undefined) { return }
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            eventTemplates.push({
+                                title: props.selectedEventTemplate.title,
+                                start: props.selectedEventTemplate.start,
+                                end: props.selectedEventTemplate.end,
+                                allDay: props.selectedEventTemplate.allDay,
+                                description: props.selectedEventTemplate.description,
+                                colorId: props.selectedEventTemplate.colorId,
+                            });
+
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.reloadTemplates();
+                            props.closePopover();
+                            return;
+                        }
+
                         addEvent(
                             {
                                 title: eventName,
@@ -68,7 +137,7 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                                 end: DateTime.fromJSDate(endDate),
                                 colorId: eventColor,
                                 extendedProps: {
-                                    ...currentEvents[0].extendedProps,
+                                    ...editableEvent.extendedProps,
                                     description: eventDescription,
                                 },
                             },
@@ -91,22 +160,17 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
             />
             <div className='edit-popover-date-input'>
                 <div>
-                    <Form.Label htmlFor="">Is allday:</Form.Label>
-                    <Form.Check
-                        type="checkbox"
-                        id="isAllDayCheckbox"
-                        label="Is allday"
-                        defaultChecked={isAllDay}
-                        onChange={() => { setIsAllDay(!isAllDay) }}
-                    />
-                </div>
-                <div>
                     <Form.Label htmlFor="">Event Start:</Form.Label>
                     <DatePicker
                         selected={startDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
-                            setStartDate(date)
+                            const newStartDate = DateTime.fromJSDate(date);
+                            const prevStartDate = DateTime.fromJSDate(startDate);
+                            const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
+                            const currentEndDate = DateTime.fromJSDate(endDate);
+                            setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
+                            setStartDate(date);
                         }}
                         showTimeSelect={!isAllDay}
                         dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
@@ -119,6 +183,11 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                         selected={endDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
+                            const newEndDate = DateTime.fromJSDate(date);
+                            const currentStartDate = DateTime.fromJSDate(startDate);
+                            if (newEndDate <= currentStartDate) {
+                                return
+                            }
                             setEndDate(date)
                         }}
                         showTimeSelect={!isAllDay}
@@ -126,6 +195,16 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                         locale="de" // Or any other locale you support
                     />
                 </div>
+            </div>
+            <div>
+                <Form.Label htmlFor="">Is allday:</Form.Label>
+                <Form.Check
+                    type="checkbox"
+                    id="isAllDayCheckbox"
+                    label="Is allday"
+                    defaultChecked={isAllDay}
+                    onChange={() => { setIsAllDay(!isAllDay) }}
+                />
             </div>
             <Form.Label htmlFor="">Description:</Form.Label>
             <Form.Control
@@ -143,6 +222,30 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 <Button
                     onClick={() => {
                         if (eventName === '') { return }
+                        if (props.popoverMode === 'edit-template') {
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
+                                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+                            }
+                            eventTemplates.push({
+                                title: eventName,
+                                start: startDate.toISOString(),
+                                end: endDate.toISOString(),
+                                allDay: isAllDay,
+                                description: eventDescription,
+                                colorId: eventColor,
+                            });
+
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.reloadTemplates();
+                            props.closePopover();
+                            return;
+                        }
+
                         editEvent(
                             {
                                 title: eventName,
@@ -150,11 +253,11 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                                 end: DateTime.fromJSDate(endDate),
                                 colorId: eventColor,
                                 extendedProps: {
-                                    ...currentEvents[0].extendedProps,
+                                    ...editableEvent.extendedProps,
                                     description: eventDescription,
                                 },
                             },
-                            currentEvents[0].id,
+                            (editableEvent.id as string), // is always defined
                             isAllDay
                         ).then(_ => {
                             props.closePopover();

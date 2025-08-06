@@ -6,9 +6,11 @@ import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { SimplifiedEvent } from '../contexts/EventContext';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
+    selectedColor?: number;
     startDate: Date | undefined;
     endDate: Date | undefined;
     isAllDay: boolean | undefined;
@@ -22,7 +24,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
     const [startDate, setStartDate] = useState(props.startDate || DateTime.now().toJSDate());
     const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate());
     const [eventDescription, setEventDescription] = useState('');
-    const [eventColor, setEventColor] = useState(0);
+    const [eventColor, setEventColor] = useState(props.selectedColor || 0);
 
     return (
         <Card className={['popover', props.popoverMode === 'add' ? 'add-popover' : 'add-template-popover', isAllDay ? 'allday' : ''].join(' ')}>
@@ -41,7 +43,12 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                         selected={startDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
-                            setStartDate(date)
+                            const newStartDate = DateTime.fromJSDate(date);
+                            const prevStartDate = DateTime.fromJSDate(startDate);
+                            const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
+                            const currentEndDate = DateTime.fromJSDate(endDate);
+                            setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
+                            setStartDate(date);
                         }}
                         showTimeSelect={!isAllDay}
                         dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
@@ -54,6 +61,11 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                         selected={endDate}
                         onChange={(date: Date | null) => {
                             if (date === null) { return }
+                            const newEndDate = DateTime.fromJSDate(date);
+                            const currentStartDate = DateTime.fromJSDate(startDate);
+                            if (newEndDate <= currentStartDate) {
+                                return
+                            }
                             setEndDate(date)
                         }}
                         showTimeSelect={!isAllDay}
@@ -95,8 +107,28 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                 }}>Cancel</Button>
                 <Button
                     onClick={() => {
-                        if (props.popoverMode !== 'add') { return }
                         if (eventName === '') { return }
+
+                        if (props.popoverMode !== 'add') {
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            eventTemplates.push({
+                                title: eventName,
+                                start: startDate.toISOString(),
+                                end: endDate.toISOString(),
+                                allDay: isAllDay,
+                                description: eventDescription,
+                                colorId: eventColor,
+                            });
+
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.closePopover();
+                            return;
+                        }
+
                         addEvent(
                             {
                                 title: eventName,

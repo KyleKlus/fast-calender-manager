@@ -1,19 +1,15 @@
 import { createContext, useEffect, useState } from 'react';
 import GCal from '../handlers/gcal';
-import env from '../env.json';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { EventInput, EventSourceInput } from '@fullcalendar/core';
 
-const config = {
-    clientId: env.CLIENT_ID,
-    apiKey: env.API_KEY,
-    scope: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks",
-    discoveryDocs: [
-        "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
-        "https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest",
-    ],
-};
+let config: {
+    clientId: string;
+    apiKey: string;
+    scope: string;
+    discoveryDocs: string[];
+} | undefined = undefined;
 
 export const colorMap = [
     '#b74f4f',
@@ -45,16 +41,45 @@ export const colorMap = [
     '',
 ];
 
-const gcal = new GCal(config);
+export const defaultColor: string = colorMap[0];
+
+let gcal: GCal | undefined = undefined;
+
+async function initGCal(): Promise<void> {
+    await fetch('env.json')
+        .then((res) => {
+            return res.json()
+        })
+        .then((env) => {
+            env.CLIENT_ID = env.CLIENT_ID || '';
+            env.API_KEY = env.API_KEY || '';
+            config = {
+                clientId: env.CLIENT_ID,
+                apiKey: env.API_KEY,
+                scope: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks",
+                discoveryDocs: [
+                    "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+                    "https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest",
+                ],
+            };
+            gcal = new GCal(config);
+        });
+}
+
+initGCal();
 
 interface IGCalContext {
     isLoggedIn: boolean;
     areEventsLoaded: boolean;
     isTryingToAutoLogin: boolean;
     isCurrentlyLoading: boolean;
-    gcal: GCal;
+    gcal: GCal | undefined;
     events: EventSourceInput;
+    isSyncOn: boolean;
+    date: DateTime;
+    setDate: (date: DateTime) => void;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
+    setIsSyncOn: (isSyncOn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
     addEvent: (
         event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } },
@@ -78,8 +103,12 @@ const GCalContext = createContext<IGCalContext>({
     areEventsLoaded: false,
     isTryingToAutoLogin: true,
     isCurrentlyLoading: false,
+    isSyncOn: false,
     gcal,
     events: [],
+    date: DateTime.now(),
+    setDate: (date: DateTime) => { },
+    setIsSyncOn: (isSyncOn: boolean) => { },
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
     addEvent: async (
@@ -105,21 +134,46 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [events, setEvents] = useState<EventInput[]>([]);
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
+    const [isSyncOn, setIsSyncOn] = useState(false);
+    const [date, setDate] = useState(DateTime.now());
+    const [autoLoginAttempts, setAutoLoginAttempts] = useState(1);
+
+    async function login(): Promise<void> {
+        if (gcal === undefined) { return }
+        await gcal.handleAuthClick().then((res) => {
+            setIsLoggedIn(true);
+            setIsTryingToAutoLogin(false);
+        });
+    }
 
     useEffect(() => {
         if (isTryingToAutoLogin) {
             setTimeout(() => {
-                gcal.handleAuthClick().then((res) => {
-
-                    setIsLoggedIn(true);
-                    setIsTryingToAutoLogin(false);
-                });
+                login();
             }, 1000);
         }
     });
 
+    useEffect(() => {
+        if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
+            loadEvents(date);
+        }
+    }, [isSyncOn]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
+                clearInterval(interval);
+                loadEvents(date);
+            }
+        }, 20000);
+        return () => {
+            clearInterval(interval);
+        }
+    });
+
     async function loadEvents(date: DateTime = DateTime.now()): Promise<void> {
-        if (!isLoggedIn || isCurrentlyLoading) { return }
+        if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
         setIsCurrentlyLoading(true);
 
         let events: EventInput[] = (await gcal.listEvents({
@@ -131,7 +185,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             orderBy: 'startTime',
         })).result.items.map((e: any) => {
             setIsCurrentlyLoading(false);
-            console.log(e.start.date);
             return {
                 id: e.id,
                 title: e.summary,
@@ -179,7 +232,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     async function addEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }, isAllDay?: boolean) {
-        if (!isLoggedIn || isCurrentlyLoading) { return }
+        if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
+
         setIsCurrentlyLoading(true);
 
         const start = event.start.toISO();
@@ -230,7 +284,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     async function deleteEvent(eventId: string) {
-        if (!isLoggedIn || isCurrentlyLoading) { return }
+        if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
+
         setIsCurrentlyLoading(true);
 
         gcal.deleteEvent(eventId).then((res: any) => {
@@ -250,7 +305,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         eventId: string,
         isAllDay?: boolean
     ) {
-        if (!isLoggedIn || isCurrentlyLoading) { return }
+        if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
+
         setIsCurrentlyLoading(true);
 
         const start = event.start.toISO();
@@ -289,9 +345,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                         },
                         backgroundColor: colorMap[event.colorId as number] || colorMap[0] as string,
                         borderColor: colorMap[event.colorId as number] || colorMap[0] as string,
-                        start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
-                        end: e.end.dateTime || e.end.date, // same
-                        allDay: e.start.date !== undefined,
+                        start: isAllDay ? startDate : start, // try timed. will fall back to all-day
+                        end: isAllDay ? endDate : end, // same
+                        allDay: isAllDay,
                     };
                 }
                 return e;
@@ -301,7 +357,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, date, setDate, isSyncOn, setIsSyncOn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );
