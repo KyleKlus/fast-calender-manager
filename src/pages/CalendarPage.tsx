@@ -21,7 +21,7 @@ export interface ICalendarPageProps { }
 export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'none';
 
 function CalendarPage(props: ICalendarPageProps) {
-    const { isLoggedIn, areEventsLoaded, events, isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
+    const { isLoggedIn, areEventsLoaded, events, isCurrentlyLoading, date, setDate, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
     const { currentEvents, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
     const [selectedColor, setSelectedColor] = useState<number>(0);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
@@ -33,7 +33,6 @@ function CalendarPage(props: ICalendarPageProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [shouldReloadTemplates, setShouldReloadTemplates] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
-    const [date, setDate] = useState(DateTime.now());
 
     const isRightArrowKeyPressed = useKeyPress('ArrowRight');
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');

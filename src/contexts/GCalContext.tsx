@@ -57,6 +57,8 @@ interface IGCalContext {
     gcal: GCal;
     events: EventSourceInput;
     isSyncOn: boolean;
+    date: DateTime;
+    setDate: (date: DateTime) => void;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     setIsSyncOn: (isSyncOn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
@@ -85,6 +87,8 @@ const GCalContext = createContext<IGCalContext>({
     isSyncOn: false,
     gcal,
     events: [],
+    date: DateTime.now(),
+    setDate: (date: DateTime) => { },
     setIsSyncOn: (isSyncOn: boolean) => { },
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
@@ -112,6 +116,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
     const [isSyncOn, setIsSyncOn] = useState(false);
+    const [date, setDate] = useState(DateTime.now());
 
     useEffect(() => {
         if (isTryingToAutoLogin) {
@@ -125,10 +130,16 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     });
 
     useEffect(() => {
+        if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
+            loadEvents(date);
+        }
+    }, [isSyncOn]);
+
+    useEffect(() => {
         const interval = setInterval(() => {
             if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
                 clearInterval(interval);
-                loadEvents(DateTime.now());
+                loadEvents(date);
             }
         }, 20000);
         return () => {
@@ -318,7 +329,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, date, setDate, isSyncOn, setIsSyncOn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );
