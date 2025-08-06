@@ -45,10 +45,6 @@ jobs:
           echo "API_KEY: $API_KEY" > public/env.json
           echo "CLIENT_ID: $CLIENT_ID" >> public/env.json
 
-      - name: Copy env file
-        run: |
-          cp env.json /public
-
       - name: Build site
         env:
           API_KEY: ${{ secrets.API_KEY }}
