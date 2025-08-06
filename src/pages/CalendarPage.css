@@ -41,6 +41,19 @@
     border-radius: 8px;
 }
 
+.fcPage .fc-v-event .fc-event-main-frame {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+}
+
+.fcPage .fc-v-event .fc-event-main-frame .fc-event-title-container {
+    flex-grow: 0;
+}
+
+.fcPage .fc-v-event .fc-event-main-frame .fc-event-title {
+    white-space: nowrap;
+}
+
 .fcPage .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
     margin-bottom: 0.5rem;
 }
