@@ -41,8 +41,8 @@ jobs:
           API_KEY: ${{ secrets.API_KEY }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
         run: |
-          echo "API_KEY: $API_KEY" > env.json
-          echo "CLIENT_ID: $CLIENT_ID" >> env.json
+          echo "API_KEY: $API_KEY" > /public/env.json
+          echo "CLIENT_ID: $CLIENT_ID" >> /public/env.json
 
       - name: Build site
         run: |
