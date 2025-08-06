@@ -47,6 +47,7 @@ export function generateFCConfig(props: IFCConfigProps): CalendarOptions {
         snapDuration: '00:15:00',
         slotDuration: '00:30:00',
         themeSystem: 'bootstrap5',
+        nowIndicatorClassNames: 'CustomNowIndicator',
         eventReceive: props.eventReceive,
         select: props.select,
         eventChange: props.eventChange,

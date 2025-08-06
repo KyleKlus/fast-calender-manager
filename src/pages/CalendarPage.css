@@ -36,6 +36,10 @@
     --fc-event-border-color: #b74f4f;
 }
 
+.fcPage .fc-timegrid-now-indicator-line.CustomNowIndicator {
+    border-width: 2px 0 0;
+}
+
 .fcPage .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
     margin-bottom: 0.5rem;
 }
