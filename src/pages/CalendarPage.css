@@ -38,6 +38,7 @@
 
 .fcPage .fc-timegrid-now-indicator-line.CustomNowIndicator {
     border-width: 2px 0 0;
+    border-radius: 8px;
 }
 
 .fcPage .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
