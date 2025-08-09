@@ -54,7 +54,9 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                 <i className="bi-chevron-up"></i>
             </div>
             <div className='event-template-drawer'>
-                {createTemplateElements(eventTemplates)}
+                <div className='event-template-container'>
+                    {createTemplateElements(eventTemplates)}
+                </div>
                 <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                     <i className={`bi-plus-circle`}></i>
                 </Button>

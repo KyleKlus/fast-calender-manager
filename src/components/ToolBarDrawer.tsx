@@ -73,12 +73,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
     return (
         <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
             <div className='toolbar'>
-                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
-                    <i className={`bi-plus-circle`}></i>
-                </Button>
-                <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
-                    <i className={`bi-arrow-repeat`}></i>
-                </Button>
                 <DropdownButton
                     id={`dropdown-variants-${'Primary'}`}
                     variant={'Primary'.toLowerCase()}
@@ -147,7 +141,17 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                         <i className={`bi-check-square${props.selectedMode === 'select' ? '-fill' : ''}`}></i>
                     </Button>
                 </ButtonGroup>
+                <div className='toolbar-divider'></div>
+                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                    <i className={`bi-plus`}></i>
+                    Event
+                </Button>
+                <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
+                    <i className={`bi-arrow-repeat`}></i>
+                    Sync
+                </Button>
                 <Button variant="primary" className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
+                    <i className={`bi-calendar-event`}></i>
                     Today
                 </Button>
             </div>

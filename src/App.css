@@ -14,17 +14,23 @@ body {
   border-width: 1.5px;
   --bs-btn-color: #fff;
   --bs-btn-bg: #c54141;
+  --bs-btn-gap: 0.4rem;
   --bs-btn-border-color: black;
   --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #e25656;
+  --bs-btn-hover-bg: #f84f4f;
   --bs-btn-hover-border-color: black;
   --bs-btn-focus-shadow-rgb: 253, 49, 49;
   --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #eb7070;
+  --bs-btn-active-bg: #853434;
   --bs-btn-active-border-color: black;
-  --bs-btn-active-shadow: inset 0 3px 5px #00000020;
   --bs-btn-disabled-color: #fff;
-  --bs-btn-disabled-bg: #a03c3c;
+  --bs-btn-disabled-bg: #a76969;
   --bs-btn-disabled-border-color: black;
+  --bs-btn-box-shadow: inset 0 2px 0 #ffffff26, 0 2px 2px #0000004f;
   --bs-btn-border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--bs-btn-box-shadow);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--bs-btn-gap);
 }

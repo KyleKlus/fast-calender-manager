@@ -3,11 +3,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
-
-}
-
-.toolbar-container {
     --toolbar-bs-btn-padding-x: .5rem;
     --toolbar-bs-btn-padding-y: .2rem;
     --toolbar-bs-btn-font-size: 1rem;
@@ -28,6 +23,7 @@
     background-color: #fff;
     justify-content: center;
     align-items: center;
+    padding: 0 1rem;
     gap: 1rem;
 }
 
@@ -57,9 +53,19 @@
     flex-wrap: wrap;
 }
 
+.toolbar-container .toolbar-spacer {
+    flex-grow: 1;
+}
+
+.toolbar-container .toolbar-divider {
+    height: 2rem;
+    width: 1px;
+    background-color: var(--bs-border-color);
+}
+
 .toolbar-container .toolbar-handle {
     width: 100%;
-    font-size: 0.8rem;
+    height: 1.5rem;
     background-color: #fff;
     display: flex;
     justify-content: center;
