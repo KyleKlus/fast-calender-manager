@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { KeyboardShortcutContext } from "../contexts/KeyboardShortcutContext";
 
 export function useKeyPress(targetKey: string) {
+    const { areShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const [isKeyPressed, setIsKeyPressed] = useState(false);
 
     useEffect(() => {
@@ -25,5 +27,5 @@ export function useKeyPress(targetKey: string) {
         };
     }, [targetKey]);
 
-    return isKeyPressed;
+    return isKeyPressed && areShortcutsEnabled;
 }
