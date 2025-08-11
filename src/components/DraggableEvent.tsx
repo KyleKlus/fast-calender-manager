@@ -2,9 +2,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Draggable } from '@fullcalendar/interaction';
 import './DraggableEvent.css';
-import { colorMap } from '../contexts/GCalContext';
 import { DateTime } from 'luxon';
 import { SimplifiedEvent } from '../contexts/EventContext';
+import { colorMap, getColorFromColorId } from './ColorSelector';
 
 interface DraggableEventProps {
     eventTemplate: SimplifiedEvent;
@@ -25,8 +25,8 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick 
                     title: eventTemplate.title,
                     duration: { minutes: durationInMinutes },
                     allday: eventTemplate.allDay,
-                    backgroundColor: colorMap[eventTemplate.colorId],
-                    borderColor: colorMap[eventTemplate.colorId],
+                    backgroundColor: getColorFromColorId(eventTemplate.colorId),
+                    borderColor: getColorFromColorId(eventTemplate.colorId),
                     extendedProps: {
                         description: eventTemplate.description,
                     },
@@ -42,7 +42,7 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick 
     return (
         <div ref={eventRef}
             className="draggable-event fc-event"
-            style={{ backgroundColor: colorMap[eventTemplate.colorId] }}
+            style={{ backgroundColor: getColorFromColorId(eventTemplate.colorId) }}
             onClick={() => { onClick && onClick() }}
         >
             {durationInHours}h - {eventTemplate.title}

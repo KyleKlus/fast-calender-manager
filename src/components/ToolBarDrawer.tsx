@@ -1,8 +1,9 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import './ToolBarDrawer.css';
 import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
-import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { useKeyPress } from '../hooks/useKeyPress';
+import { GCalContext } from '../contexts/GCalContext';
+import ColorSelector, { getColorFromColorId } from './ColorSelector';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 
@@ -78,17 +79,16 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     variant={'Primary'.toLowerCase()}
                     className='color-event-button'
                     title={
-                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: colorMap[props.selectedColor] }}></div>
+                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: getColorFromColorId(props.selectedColor) }}></div>
                     }
                 >
-                    {colorMap.filter((color, index) => color !== '').map((color, index) => (
-                        <div
-                            className={['color-swatch',].join(' ')}
-                            style={{ backgroundColor: color, borderWidth: props.selectedColor === index ? '2px' : '1px' }}
-                            key={index}
-                            onClick={() => { props.selectColor(index) }}
-                        ></div>
-                    ))}
+                    <ColorSelector
+                        selectedColor={props.selectedColor}
+                        swatchesPerRow={6}
+                        onColorChange={(colorId) => {
+                            props.selectColor(colorId);
+                        }}
+                    />
                 </DropdownButton>
                 <ButtonGroup>
                     <Button

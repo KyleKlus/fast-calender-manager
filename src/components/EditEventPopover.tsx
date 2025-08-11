@@ -2,12 +2,13 @@ import { useContext, useState } from 'react';
 import './EditEventPopover.css';
 import './Popover.css';
 import { Card, Form, Button } from "react-bootstrap";
-import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { convertEventInputToSimplifiedEvent, EventContext, SimplifiedEvent } from '../contexts/EventContext';
 import { PopoverMode } from '../pages/CalendarPage';
+import ColorSelector from './ColorSelector';
+import { GCalContext } from '../contexts/GCalContext';
 
 export interface IEditEventPopoverProps {
     closePopover: () => void;
@@ -33,58 +34,50 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
 
     return (
         <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
-            <h5>Quick Actions:</h5>
             <div className='edit-popover-quick-actions'>
-                <div className='color-menu'>
-                    {colorMap.filter((color, index) => color !== '').map((color, index) => (
-                        <div
-                            className={['color-swatch',].join(' ')}
-                            style={{ backgroundColor: color, borderWidth: eventColor === index ? '2px' : '1px' }}
-                            key={index}
-                            onClick={() => {
-                                if (eventColor === index) { return }
+                <ColorSelector
+                    selectedColor={eventColor}
+                    onColorChange={(colorId) => {
+                        setEventColor(colorId);
+                        if (props.popoverMode === 'edit-template') {
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
 
-                                if (props.popoverMode === 'edit-template') {
-                                    const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                                    let eventTemplates: SimplifiedEvent[] = [];
-                                    if (loadedEventTemplates) {
-                                        eventTemplates = JSON.parse(loadedEventTemplates);
-                                    }
+                            if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
+                                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+                            }
+                            eventTemplates.push({
+                                title: eventName,
+                                start: startDate.toISOString(),
+                                end: endDate.toISOString(),
+                                allDay: isAllDay,
+                                description: eventDescription,
+                                colorId: colorId,
+                            });
 
-                                    if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
-                                        eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-                                    }
-                                    eventTemplates.push({
-                                        title: eventName,
-                                        start: startDate.toISOString(),
-                                        end: endDate.toISOString(),
-                                        allDay: isAllDay,
-                                        description: eventDescription,
-                                        colorId: index,
-                                    });
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.reloadTemplates();
+                            setEventColor(colorId)
+                            return;
+                        }
 
-                                    localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                                    props.reloadTemplates();
-                                    setEventColor(index)
-                                    return;
-                                }
-
-                                editEvent({
-                                    title: editableEvent.title,
-                                    start: DateTime.fromJSDate(startDate),
-                                    end: DateTime.fromJSDate(endDate),
-                                    colorId: index,
-                                    extendedProps: { description: eventDescription },
-                                },
-                                    (editableEvent.id as string), // is always defined
-                                    isAllDay
-                                ).then(_ => {
-                                    setEventColor(index)
-                                });
-                            }}
-                        ></div>
-                    ))}
-                </div>
+                        editEvent({
+                            title: editableEvent.title,
+                            start: DateTime.fromJSDate(startDate),
+                            end: DateTime.fromJSDate(endDate),
+                            colorId: colorId,
+                            extendedProps: { description: eventDescription },
+                        },
+                            (editableEvent.id as string), // is always defined
+                            isAllDay
+                        ).then(_ => {
+                            setEventColor(colorId)
+                        });
+                    }}
+                />
                 <Button
                     onClick={() => {
                         if (props.popoverMode === 'edit-template') {
@@ -148,8 +141,7 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                     }}
                 ><i className='bi-copy' /></Button>
             </div>
-            <br />
-            <h5>Edit Event:</h5>
+            <hr />
             <Form.Label htmlFor="">Title:</Form.Label>
             <Form.Control
                 type="text"

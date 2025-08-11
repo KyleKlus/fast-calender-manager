@@ -3,6 +3,7 @@ import GCal from '../handlers/gcal';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { EventInput, EventSourceInput } from '@fullcalendar/core';
+import { defaultColorId, defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
 
 let config: {
     clientId: string;
@@ -10,38 +11,6 @@ let config: {
     scope: string;
     discoveryDocs: string[];
 } | undefined = undefined;
-
-export const colorMap = [
-    '#b74f4f',
-    '#7986cbff',
-    '#33b679',
-    '#8e24aaff',
-    '#e67c73ff',
-    '#f6bf26ff',
-    '#f4511eff',
-    '#039be5',
-    '#616161',
-    '#3f51b5',
-    '#0b8043',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-];
-
-export const defaultColor: string = colorMap[0];
 
 let gcal: GCal | undefined = undefined;
 
@@ -185,6 +154,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             orderBy: 'startTime',
         })).result.items.map((e: any) => {
             setIsCurrentlyLoading(false);
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             return {
                 id: e.id,
                 title: e.summary,
@@ -198,8 +168,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 extendedProps: {
                     description: e.description,
                 },
-                backgroundColor: colorMap[e.colorId as number] || colorMap[0] as string,
-                borderColor: colorMap[e.colorId as number] || colorMap[0] as string,
+                backgroundColor: color,
+                borderColor: color,
             }
         });
 
@@ -218,8 +188,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         //         isAllDay: true,
         //         url: e.webViewLink,
         //         description: e.description,
-        //         backgroundColor: colorMap[7] as string,
-        //         borderColor: colorMap[7] as string,
+        //         backgroundColor: getColorFromColorId(7] as string,
+        //         borderColor: getColorFromColorId(7] as string,
         //         extendedProps: {
         //             taskStatus: e.status,
         //         },
@@ -263,6 +233,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
         }).then((res: any) => {
             const e = res.result;
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             setEvents([...events, {
                 id: e.id,
                 title: e.summary,
@@ -276,8 +247,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 extendedProps: {
                     description: e.description,
                 },
-                backgroundColor: colorMap[e.colorId as number] || colorMap[0] as string,
-                borderColor: colorMap[e.colorId as number] || colorMap[0] as string,
+                backgroundColor: color,
+                borderColor: color,
             }]);
             setIsCurrentlyLoading(false);
         });
@@ -333,18 +304,19 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                     dateTime: end === null ? undefined : end,
                     timeZone: endZone === null ? DateTime.now().zoneName : endZone,
                 },
-            colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
+            colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
         }, eventId).then((res: any) => {
             setEvents([...events.map((e: any) => {
                 if (e.id === eventId) {
+                    const color: string = getColorFromColorId(event.colorId as number) || defaultEventColor;
                     return {
                         ...e,
                         title: event.title,
                         extendedProps: {
                             description: event.extendedProps?.description,
                         },
-                        backgroundColor: colorMap[event.colorId as number] || colorMap[0] as string,
-                        borderColor: colorMap[event.colorId as number] || colorMap[0] as string,
+                        backgroundColor: color,
+                        borderColor: color,
                         start: isAllDay ? startDate : start, // try timed. will fall back to all-day
                         end: isAllDay ? endDate : end, // same
                         allDay: isAllDay,

@@ -1,8 +1,8 @@
 import { EventInput } from '@fullcalendar/core';
 import { EventImpl } from '@fullcalendar/core/internal';
 import { createContext, useState } from 'react';
-import React from 'react'; import { colorMap } from './GCalContext';
-7
+import React from 'react';
+import { colorMap, defaultColorId } from '../components/ColorSelector';
 
 export interface SimplifiedEvent {
     id?: string;
@@ -50,6 +50,8 @@ export function convertEventInputToSimplifiedEvent(event: EventInput): Simplifie
         end = event.end;
     }
 
+    const colorId = event.backgroundColor === undefined || event.backgroundColor === '' ? defaultColorId : colorMap.indexOf(event.backgroundColor);
+
     return {
         id: event.id,
         title: (event.title as string),
@@ -58,7 +60,7 @@ export function convertEventInputToSimplifiedEvent(event: EventInput): Simplifie
         allDay: event.allDay || false,
         description: event.extendedProps?.description,
         extendedProps: event.extendedProps,
-        colorId: event.backgroundColor === undefined || event.backgroundColor === '' || colorMap.indexOf(event.backgroundColor) === -1 ? 0 : colorMap.indexOf(event.backgroundColor),
+        colorId: colorId,
         location: event.location,
     };
 }

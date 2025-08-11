@@ -1,7 +1,6 @@
 import './CalendarPage.css';
 import FullCalendar from '@fullcalendar/react';
 import { useContext, useEffect, useState } from 'react';
-import { colorMap, GCalContext } from '../contexts/GCalContext';
 
 import { generateFCConfig } from '../handlers/fullCalendarConfigHandler';
 import { DateSelectArg, EventChangeArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
@@ -15,6 +14,8 @@ import AddEventPopover from '../components/AddEventPopover';
 import EditEventPopover from '../components/EditEventPopover';
 import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
 import { useKeyPress } from '../hooks/useKeyPress';
+import { GCalContext } from '../contexts/GCalContext';
+import { defaultColorId, getColorIdFromColor } from '../components/ColorSelector';
 
 export interface ICalendarPageProps { }
 
@@ -23,7 +24,7 @@ export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'n
 function CalendarPage(props: ICalendarPageProps) {
     const { isLoggedIn, areEventsLoaded, events, isCurrentlyLoading, date, setDate, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
     const { currentEvents, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
-    const [selectedColor, setSelectedColor] = useState<number>(0);
+    const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
     const [selectedEventTemplate, setSelectedEventTemplate] = useState<SimplifiedEvent | undefined>(undefined);
@@ -66,6 +67,7 @@ function CalendarPage(props: ICalendarPageProps) {
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
+        const colorId = getColorIdFromColor(info.event.backgroundColor);
 
         switch (toolbarMode) {
             case 'none':
@@ -89,7 +91,7 @@ function CalendarPage(props: ICalendarPageProps) {
                     title: info.event.title,
                     start: DateTime.fromJSDate(info.event.start ? info.event.start : DateTime.now().toJSDate()),
                     end: DateTime.fromJSDate(info.event.end ? info.event.end : DateTime.now().plus({ hour: 1 }).toJSDate()),
-                    colorId: colorMap.indexOf(info.event.backgroundColor) === -1 ? 0 : colorMap.indexOf(info.event.backgroundColor),
+                    colorId: colorId,
                     extendedProps: {
                         ...info.event.extendedProps,
                         description: info.event.extendedProps?.description,
@@ -176,7 +178,7 @@ function CalendarPage(props: ICalendarPageProps) {
             title: info.event.title,
             start: DateTime.fromJSDate(info.event.start ? info.event.start : DateTime.now().toJSDate()),
             end: DateTime.fromJSDate(info.event.end ? info.event.end : DateTime.now().plus({ hour: 1 }).toJSDate()),
-            colorId: colorMap.indexOf(info.event.backgroundColor) === -1 ? 0 : colorMap.indexOf(info.event.backgroundColor),
+            colorId: getColorIdFromColor(info.event.backgroundColor),
             extendedProps: {
                 ...info.event.extendedProps,
                 description: info.event.extendedProps?.description,
@@ -206,7 +208,7 @@ function CalendarPage(props: ICalendarPageProps) {
             title: droppedEvent.title,
             start: DateTime.fromJSDate(droppedEvent.start ? droppedEvent.start : DateTime.now().toJSDate()),
             end: DateTime.fromJSDate(droppedEvent.end ? droppedEvent.end : DateTime.now().plus({ hour: 1 }).toJSDate()),
-            colorId: colorMap.indexOf(droppedEvent.backgroundColor) === -1 ? 0 : colorMap.indexOf(droppedEvent.backgroundColor),
+            colorId: getColorIdFromColor(droppedEvent.backgroundColor),
             extendedProps: {
                 ...droppedEvent.extendedProps,
                 description: droppedEvent.extendedProps?.description,

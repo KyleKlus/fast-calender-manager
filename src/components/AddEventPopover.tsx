@@ -2,11 +2,12 @@ import { useContext, useState } from 'react';
 import './Popover.css';
 import './AddEventPopover.css';
 import { Card, Form, Button } from "react-bootstrap";
-import { colorMap, GCalContext } from '../contexts/GCalContext';
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { SimplifiedEvent } from '../contexts/EventContext';
+import { GCalContext } from '../contexts/GCalContext';
+import ColorSelector, { defaultColorId } from './ColorSelector';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
@@ -24,7 +25,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
     const [startDate, setStartDate] = useState(props.startDate || DateTime.now().toJSDate());
     const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate());
     const [eventDescription, setEventDescription] = useState('');
-    const [eventColor, setEventColor] = useState(props.selectedColor || 0);
+    const [eventColor, setEventColor] = useState(props.selectedColor || defaultColorId);
 
     return (
         <Card className={['popover', props.popoverMode === 'add' ? 'add-popover' : 'add-template-popover', isAllDay ? 'allday' : ''].join(' ')}>
@@ -83,14 +84,12 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                 onChange={() => { setIsAllDay(!isAllDay) }}
             />
             <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', flexWrap: 'wrap', minWidth: '100%' }}>
-                {colorMap.filter((color, index) => color !== '').map((color, index) => (
-                    <div
-                        className={['color-swatch',].join(' ')}
-                        style={{ backgroundColor: color, borderWidth: eventColor === index ? '2px' : '1px' }}
-                        key={index}
-                        onClick={() => { setEventColor(index) }}
-                    ></div>
-                ))}
+                <ColorSelector
+                    selectedColor={eventColor}
+                    onColorChange={(colorId) => {
+                        setEventColor(colorId);
+                    }}
+                />
             </div>
             <Form.Label htmlFor="">Event Description:</Form.Label>
             <Form.Control

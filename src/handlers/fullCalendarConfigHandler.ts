@@ -3,8 +3,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { EventDragStartArg, EventDragStopArg, EventReceiveArg, EventResizeStopArg } from '@fullcalendar/interaction';
 import { DateTime } from 'luxon';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
-
-export const defaultEventColor = '#b74f4f';
+import { defaultEventColor } from "../components/ColorSelector";
 
 export interface IFCConfigProps {
     events: EventSourceInput;
@@ -29,7 +28,7 @@ export function generateFCConfig(props: IFCConfigProps): CalendarOptions {
         headerToolbar: {
             left: 'prev,next today',
         },
-        eventColor: '#b74f4f',
+        eventColor: defaultEventColor,
         initialDate: props.date.toFormat('yyyy-MM-dd'),
         editable: true,
         selectable: true,
