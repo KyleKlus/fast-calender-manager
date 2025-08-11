@@ -1,5 +1,3 @@
-import { EventInput } from "@fullcalendar/core";
-
 export interface ConfigGCal {
     clientId: string;
     apiKey: string;

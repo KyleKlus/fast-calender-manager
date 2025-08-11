@@ -3,17 +3,26 @@ import './EventTemplateDrawer.css';
 import { Button } from 'react-bootstrap';
 import DraggableEvent from './DraggableEvent';
 import { SimplifiedEvent } from '../contexts/EventContext';
+import { useKeyPress } from '../hooks/useKeyPress';
 
 export interface IEventTemplateDrawerProps {
     onAddClick: () => void;
     onEditClick: (eventTemplate: SimplifiedEvent) => void;
     shouldReload: boolean;
+    lockShortcuts: boolean;
     confirmReload: () => void;
 }
 
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
     const [isEventTemplateOpen, setEventTemplateOpen] = useState(false);
     const [eventTemplates, setEventTemplates] = useState<SimplifiedEvent[]>([]);
+    const isSpaceKeyPressed = useKeyPress(' ');
+
+    useEffect(() => {
+        if (isSpaceKeyPressed && !props.lockShortcuts) {
+            setEventTemplateOpen(!isEventTemplateOpen);
+        }
+    }, [isSpaceKeyPressed]);
 
     useEffect(() => {
         loadedEventTemplates();

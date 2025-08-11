@@ -305,6 +305,7 @@ function CalendarPage(props: ICalendarPageProps) {
                     <EventTemplateDrawer
                         shouldReload={shouldReloadTemplates}
                         confirmReload={() => { setShouldReloadTemplates(false) }}
+                        lockShortcuts={lockShortcuts}
                         onAddClick={() => {
                             setPopoverMode('add-template');
                             setLockShortcuts(true);
