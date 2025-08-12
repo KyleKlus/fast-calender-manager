@@ -1,9 +1,10 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import GCal from '../handlers/gcal';
 import { DateTime } from 'luxon';
 import React from 'react';
-import { EventInput, EventSourceInput } from '@fullcalendar/core';
+import { EventInput } from '@fullcalendar/core';
 import { defaultColorId, defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
+import { EventContext } from './EventContext';
 
 let config: {
     clientId: string;
@@ -37,16 +38,14 @@ async function initGCal(): Promise<void> {
 
 initGCal();
 
+export const phases: string[] = ['Arbeitszeit', 'Unizeit', 'Freizeit'];
+
 interface IGCalContext {
     isLoggedIn: boolean;
-    areEventsLoaded: boolean;
     isTryingToAutoLogin: boolean;
     isCurrentlyLoading: boolean;
     gcal: GCal | undefined;
-    events: EventSourceInput;
     isSyncOn: boolean;
-    date: DateTime;
-    setDate: (date: DateTime) => void;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     setIsSyncOn: (isSyncOn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
@@ -69,14 +68,10 @@ interface IGCalContext {
 
 const GCalContext = createContext<IGCalContext>({
     isLoggedIn: false,
-    areEventsLoaded: false,
     isTryingToAutoLogin: true,
     isCurrentlyLoading: false,
     isSyncOn: false,
     gcal,
-    events: [],
-    date: DateTime.now(),
-    setDate: (date: DateTime) => { },
     setIsSyncOn: (isSyncOn: boolean) => { },
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
@@ -98,14 +93,11 @@ const GCalContext = createContext<IGCalContext>({
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
+    const { events, setEvents, setAreEventsLoaded, date, areBGEventsEditable } = useContext(EventContext);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
-    const [events, setEvents] = useState<EventInput[]>([]);
-    const [areEventsLoaded, setAreEventsLoaded] = useState(false);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
     const [isSyncOn, setIsSyncOn] = useState(false);
-    const [date, setDate] = useState(DateTime.now());
-    const [autoLoginAttempts, setAutoLoginAttempts] = useState(1);
 
     async function login(): Promise<void> {
         if (gcal === undefined) { return }
@@ -155,6 +147,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         })).result.items.map((e: any) => {
             setIsCurrentlyLoading(false);
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = title.startsWith('Arbeitszeit') || title.startsWith('Unizeit') || title.startsWith('Freizeit') || title.startsWith('Urlaub');
+
             return {
                 id: e.id,
                 title: e.summary,
@@ -168,6 +163,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 extendedProps: {
                     description: e.description,
                 },
+                display: isBackgroundEvent ? 'background' : 'auto',
                 backgroundColor: color,
                 borderColor: color,
             }
@@ -234,6 +230,8 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         }).then((res: any) => {
             const e = res.result;
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0) && !areBGEventsEditable;
             setEvents([...events, {
                 id: e.id,
                 title: e.summary,
@@ -247,6 +245,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                 extendedProps: {
                     description: e.description,
                 },
+                display: isBackgroundEvent ? 'background' : 'auto',
                 backgroundColor: color,
                 borderColor: color,
             }]);
@@ -309,12 +308,15 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             setEvents([...events.map((e: any) => {
                 if (e.id === eventId) {
                     const color: string = getColorFromColorId(event.colorId as number) || defaultEventColor;
+                    const title: string = event.title || 'No Title';
+                    const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0) && !areBGEventsEditable;
                     return {
                         ...e,
                         title: event.title,
                         extendedProps: {
                             description: event.extendedProps?.description,
                         },
+                        display: isBackgroundEvent ? 'background' : 'auto',
                         backgroundColor: color,
                         borderColor: color,
                         start: isAllDay ? startDate : start, // try timed. will fall back to all-day
@@ -329,7 +331,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, date, setDate, isSyncOn, setIsSyncOn, areEventsLoaded, isTryingToAutoLogin, isCurrentlyLoading, gcal, events, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, isTryingToAutoLogin, isCurrentlyLoading, gcal, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
             {props.children}
         </GCalContext.Provider>
     );

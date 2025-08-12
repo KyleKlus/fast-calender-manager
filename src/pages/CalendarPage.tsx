@@ -22,8 +22,8 @@ export interface ICalendarPageProps { }
 export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'none';
 
 function CalendarPage(props: ICalendarPageProps) {
-    const { isLoggedIn, areEventsLoaded, events, isCurrentlyLoading, date, setDate, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
-    const { currentEvents, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
+    const { isLoggedIn, isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
+    const { areEventsLoaded, currentEvents, events, date, setDate, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);

@@ -4,6 +4,8 @@ import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
 import { useKeyPress } from '../hooks/useKeyPress';
 import { GCalContext } from '../contexts/GCalContext';
 import ColorSelector, { getColorFromColorId } from './ColorSelector';
+import { EventInput } from '@fullcalendar/core';
+import { EventContext } from '../contexts/EventContext';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 
@@ -19,6 +21,7 @@ export interface IToolBarDrawerProps {
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
     const { isSyncOn, setIsSyncOn } = useContext(GCalContext);
+    const { events, setEvents, areBGEventsEditable, setBGEventsEditable } = useContext(EventContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
     const isTKeyPressed = useKeyPress('t');
@@ -149,6 +152,20 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
                     <i className={`bi-arrow-repeat`}></i>
                     Sync
+                </Button>
+                <Button variant="primary" active={areBGEventsEditable} className='sync-event-button' onClick={() => {
+                    const newEvents = (events as Array<EventInput>).map(event => {
+                        let isBackgroundEvent = event.display !== 'background' && !event.allDay;
+                        return {
+                            ...event,
+                            display: isBackgroundEvent ? 'background' : 'auto',
+                        };
+                    });
+                    setEvents(newEvents);
+                    setBGEventsEditable(!areBGEventsEditable);
+                }}>
+                    <i className={`bi-pencil-square`}></i>
+                    Phases
                 </Button>
                 <Button variant="primary" className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
                     <i className={`bi-calendar-event`}></i>

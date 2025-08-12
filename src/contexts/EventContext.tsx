@@ -3,6 +3,7 @@ import { EventImpl } from '@fullcalendar/core/internal';
 import { createContext, useState } from 'react';
 import React from 'react';
 import { colorMap, defaultColorId } from '../components/ColorSelector';
+import { DateTime } from 'luxon';
 
 export interface SimplifiedEvent {
     id?: string;
@@ -70,7 +71,15 @@ export function convertEventImplToSimplifiedEvent(event: EventImpl): SimplifiedE
 }
 
 interface IEventContext {
+    events: EventInput[];
+    areEventsLoaded: boolean;
+    date: DateTime;
+    setEvents: (events: EventInput[]) => void;
+    setAreEventsLoaded: (areEventsLoaded: boolean) => void;
+    setDate: (date: DateTime) => void;
     currentEvents: EventInput[];
+    areBGEventsEditable: boolean;
+    setBGEventsEditable: (editable: boolean) => void;
     setCurrentEvents: (currentEvents: EventInput[]) => void;
     setAddCurrentEvent: (currentEvent: EventInput) => void;
     setRemoveCurrentEvent: (currentEvent: EventInput) => void;
@@ -78,6 +87,14 @@ interface IEventContext {
 
 const EventContext = createContext<IEventContext>({
     currentEvents: [],
+    events: [],
+    areEventsLoaded: false,
+    date: DateTime.now(),
+    setEvents: (events: EventInput[]) => { },
+    setAreEventsLoaded: (areEventsLoaded: boolean) => { },
+    setDate: (date: DateTime) => { },
+    areBGEventsEditable: false,
+    setBGEventsEditable: (editable: boolean) => { },
     setCurrentEvents: (currentEvents: EventInput[]) => { },
     setAddCurrentEvent: (currentEvent: EventInput) => { },
     setRemoveCurrentEvent: (currentEvent: EventInput) => { },
@@ -85,6 +102,11 @@ const EventContext = createContext<IEventContext>({
 
 function EventProvider(props: React.PropsWithChildren<{}>) {
     const [currentEvents, setCurrentEvents] = useState<EventInput[]>([]);
+    const [areBGEventsEditable, setBGEventsEditable] = useState<boolean>(false);
+    const [events, setEvents] = useState<EventInput[]>([]);
+    const [areEventsLoaded, setAreEventsLoaded] = useState(false);
+    const [date, setDate] = useState(DateTime.now());
+
 
     function setAddCurrentEvent(currentEvent: EventInput) {
         setCurrentEvents([...currentEvents, currentEvent]);
@@ -95,7 +117,7 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <EventContext.Provider value={{ currentEvents, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent }}>
+        <EventContext.Provider value={{ events, areEventsLoaded, date, setEvents, setAreEventsLoaded, setDate, currentEvents, areBGEventsEditable, setBGEventsEditable, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent }}>
             {props.children}
         </EventContext.Provider>
     );

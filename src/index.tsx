@@ -13,11 +13,11 @@ root.render(
   <React.StrictMode>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <KeyboardShortcutProvider>
-      <GCalProvider>
-        <EventProvider>
+      <EventProvider>
+        <GCalProvider>
           <App />
-        </EventProvider>
-      </GCalProvider>
+        </GCalProvider>
+      </EventProvider>
     </KeyboardShortcutProvider>
   </React.StrictMode>,
 );
