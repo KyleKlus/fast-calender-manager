@@ -5,11 +5,11 @@ import { Card, Form, Button } from "react-bootstrap";
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { convertEventInputToSimplifiedEvent, EventContext, SimplifiedEvent } from '../contexts/EventContext';
-import { PopoverMode } from '../pages/CalendarPage';
-import ColorSelector from './ColorSelector';
-import { GCalContext } from '../contexts/GCalContext';
-import { useKeyPress } from '../hooks/useKeyPress';
+import { convertEventInputToSimplifiedEvent, EventContext, SimplifiedEvent } from '../../contexts/EventContext';
+import { PopoverMode } from '../../pages/CalendarPage';
+import ColorSelector from '../ColorSelector';
+import { GCalContext } from '../../contexts/GCalContext';
+import { useKeyPress } from '../../hooks/useKeyPress';
 
 export interface IEditEventPopoverProps {
     closePopover: () => void;

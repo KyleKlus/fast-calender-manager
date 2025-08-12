@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import './EventTemplateDrawer.css';
 import { Button } from 'react-bootstrap';
-import DraggableEvent from './DraggableEvent';
-import { SimplifiedEvent } from '../contexts/EventContext';
-import { useKeyPress } from '../hooks/useKeyPress';
+import DraggableEvent from '../DraggableEvent';
+import { SimplifiedEvent } from '../../contexts/EventContext';
+import { useKeyPress } from '../../hooks/useKeyPress';
 
 export interface IEventTemplateDrawerProps {
     onAddClick: () => void;

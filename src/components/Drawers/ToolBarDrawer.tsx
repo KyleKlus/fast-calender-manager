@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import './ToolBarDrawer.css';
 import { DropdownButton, ButtonGroup, Button } from 'react-bootstrap';
-import { useKeyPress } from '../hooks/useKeyPress';
-import { GCalContext } from '../contexts/GCalContext';
-import ColorSelector, { getColorFromColorId } from './ColorSelector';
+import { useKeyPress } from '../../hooks/useKeyPress';
+import { GCalContext } from '../../contexts/GCalContext';
+import ColorSelector, { getColorFromColorId } from '../ColorSelector';
 import { EventInput } from '@fullcalendar/core';
-import { EventContext } from '../contexts/EventContext';
+import { EventContext } from '../../contexts/EventContext';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 

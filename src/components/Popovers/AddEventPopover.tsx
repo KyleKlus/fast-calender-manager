@@ -5,10 +5,10 @@ import { Card, Form, Button } from "react-bootstrap";
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { SimplifiedEvent } from '../contexts/EventContext';
-import { GCalContext } from '../contexts/GCalContext';
-import ColorSelector, { defaultColorId } from './ColorSelector';
-import { useKeyPress } from '../hooks/useKeyPress';
+import { SimplifiedEvent } from '../../contexts/EventContext';
+import { GCalContext } from '../../contexts/GCalContext';
+import ColorSelector, { defaultColorId } from '../ColorSelector';
+import { useKeyPress } from '../../hooks/useKeyPress';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
