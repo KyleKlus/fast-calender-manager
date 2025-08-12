@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './EditEventPopover.css';
 import './Popover.css';
 import { Card, Form, Button } from "react-bootstrap";
@@ -9,6 +9,7 @@ import { convertEventInputToSimplifiedEvent, EventContext, SimplifiedEvent } fro
 import { PopoverMode } from '../pages/CalendarPage';
 import ColorSelector from './ColorSelector';
 import { GCalContext } from '../contexts/GCalContext';
+import { useKeyPress } from '../hooks/useKeyPress';
 
 export interface IEditEventPopoverProps {
     closePopover: () => void;
@@ -31,6 +32,57 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
     const [endDate, setEndDate] = useState<Date>(DateTime.fromISO(editableEvent.end).toJSDate());
     const [eventDescription, setEventDescription] = useState(editableEvent.description);
     const [eventColor, setEventColor] = useState<number>(editableEvent.colorId);
+    const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
+
+    useEffect(() => {
+        if (isEnterKeyPressed) {
+            handleEditClick();
+        }
+    }, [isEnterKeyPressed]);
+
+    function handleEditClick() {
+        if (eventName === '') { return }
+        if (props.popoverMode === 'edit-template') {
+            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+            let eventTemplates: SimplifiedEvent[] = [];
+            if (loadedEventTemplates) {
+                eventTemplates = JSON.parse(loadedEventTemplates);
+            }
+            if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
+                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+            }
+            eventTemplates.push({
+                title: eventName,
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+                allDay: isAllDay,
+                description: eventDescription,
+                colorId: eventColor,
+            });
+
+            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+            props.reloadTemplates();
+            props.closePopover();
+            return;
+        }
+
+        editEvent(
+            {
+                title: eventName,
+                start: DateTime.fromJSDate(startDate),
+                end: DateTime.fromJSDate(endDate),
+                colorId: eventColor,
+                extendedProps: {
+                    ...editableEvent.extendedProps,
+                    description: eventDescription,
+                },
+            },
+            (editableEvent.id as string), // is always defined
+            isAllDay
+        ).then(_ => {
+            props.closePopover();
+        });
+    }
 
     return (
         <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
@@ -213,47 +265,7 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 }}>Cancel</Button>
                 <Button
                     onClick={() => {
-                        if (eventName === '') { return }
-                        if (props.popoverMode === 'edit-template') {
-                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                            let eventTemplates: SimplifiedEvent[] = [];
-                            if (loadedEventTemplates) {
-                                eventTemplates = JSON.parse(loadedEventTemplates);
-                            }
-                            if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
-                                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-                            }
-                            eventTemplates.push({
-                                title: eventName,
-                                start: startDate.toISOString(),
-                                end: endDate.toISOString(),
-                                allDay: isAllDay,
-                                description: eventDescription,
-                                colorId: eventColor,
-                            });
-
-                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                            props.reloadTemplates();
-                            props.closePopover();
-                            return;
-                        }
-
-                        editEvent(
-                            {
-                                title: eventName,
-                                start: DateTime.fromJSDate(startDate),
-                                end: DateTime.fromJSDate(endDate),
-                                colorId: eventColor,
-                                extendedProps: {
-                                    ...editableEvent.extendedProps,
-                                    description: eventDescription,
-                                },
-                            },
-                            (editableEvent.id as string), // is always defined
-                            isAllDay
-                        ).then(_ => {
-                            props.closePopover();
-                        });
+                        handleEditClick();
                     }}
                 >Confirm</Button>
             </div>

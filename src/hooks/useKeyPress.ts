@@ -1,7 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { KeyboardShortcutContext } from "../contexts/KeyboardShortcutContext";
 
-export function useKeyPress(targetKey: string) {
+export type EnableMode = 'inverted' | 'default' | 'external';
+
+export function useKeyPress(targetKey: string, enableMode: EnableMode = 'default', isExternallyEnabled: boolean = false) {
     const { areShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const [isKeyPressed, setIsKeyPressed] = useState(false);
 
@@ -27,5 +29,5 @@ export function useKeyPress(targetKey: string) {
         };
     }, [targetKey]);
 
-    return isKeyPressed && areShortcutsEnabled;
+    return isKeyPressed && ((enableMode === 'inverted' && !areShortcutsEnabled) || (enableMode === 'default' && areShortcutsEnabled) || (enableMode === 'external' && isExternallyEnabled));
 }

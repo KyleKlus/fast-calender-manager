@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './Popover.css';
 import './AddEventPopover.css';
 import { Card, Form, Button } from "react-bootstrap";
@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { SimplifiedEvent } from '../contexts/EventContext';
 import { GCalContext } from '../contexts/GCalContext';
 import ColorSelector, { defaultColorId } from './ColorSelector';
+import { useKeyPress } from '../hooks/useKeyPress';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
@@ -26,6 +27,52 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
     const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate());
     const [eventDescription, setEventDescription] = useState('');
     const [eventColor, setEventColor] = useState(props.selectedColor || defaultColorId);
+    const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
+
+    useEffect(() => {
+        if (isEnterKeyPressed) {
+            handleAddEventClick();
+        }
+    }, [isEnterKeyPressed]);
+
+    function handleAddEventClick() {
+        if (eventName === '') { return }
+
+        if (props.popoverMode !== 'add') {
+            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+            let eventTemplates: SimplifiedEvent[] = [];
+            if (loadedEventTemplates) {
+                eventTemplates = JSON.parse(loadedEventTemplates);
+            }
+            eventTemplates.push({
+                title: eventName,
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+                allDay: isAllDay,
+                description: eventDescription,
+                colorId: eventColor,
+            });
+
+            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+            props.closePopover();
+            return;
+        }
+
+        addEvent(
+            {
+                title: eventName,
+                start: DateTime.fromJSDate(startDate),
+                end: DateTime.fromJSDate(endDate),
+                colorId: eventColor,
+                extendedProps: {
+                    description: eventDescription,
+                },
+            },
+            isAllDay
+        ).then(_ => {
+            props.closePopover();
+        });
+    }
 
     return (
         <Card className={['popover', props.popoverMode === 'add' ? 'add-popover' : 'add-template-popover', isAllDay ? 'allday' : ''].join(' ')}>
@@ -106,42 +153,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                 }}>Cancel</Button>
                 <Button
                     onClick={() => {
-                        if (eventName === '') { return }
-
-                        if (props.popoverMode !== 'add') {
-                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                            let eventTemplates: SimplifiedEvent[] = [];
-                            if (loadedEventTemplates) {
-                                eventTemplates = JSON.parse(loadedEventTemplates);
-                            }
-                            eventTemplates.push({
-                                title: eventName,
-                                start: startDate.toISOString(),
-                                end: endDate.toISOString(),
-                                allDay: isAllDay,
-                                description: eventDescription,
-                                colorId: eventColor,
-                            });
-
-                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                            props.closePopover();
-                            return;
-                        }
-
-                        addEvent(
-                            {
-                                title: eventName,
-                                start: DateTime.fromJSDate(startDate),
-                                end: DateTime.fromJSDate(endDate),
-                                colorId: eventColor,
-                                extendedProps: {
-                                    description: eventDescription,
-                                },
-                            },
-                            isAllDay
-                        ).then(_ => {
-                            props.closePopover();
-                        });
+                        handleAddEventClick();
                     }}>Confirm</Button>
             </div>
         </Card >

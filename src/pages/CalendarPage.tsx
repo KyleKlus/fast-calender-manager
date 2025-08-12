@@ -16,12 +16,15 @@ import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalen
 import { useKeyPress } from '../hooks/useKeyPress';
 import { GCalContext } from '../contexts/GCalContext';
 import { defaultColorId, getColorIdFromColor } from '../components/ColorSelector';
+import { KeyboardShortcutContext } from '../contexts/KeyboardShortcutContext';
 
 export interface ICalendarPageProps { }
 
 export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'none';
 
 function CalendarPage(props: ICalendarPageProps) {
+    const { areShortcutsEnabled, setShortcutsEnabled } = useContext(KeyboardShortcutContext);
+
     const { isLoggedIn, isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
     const { areEventsLoaded, currentEvents, events, date, setDate, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
@@ -29,7 +32,6 @@ function CalendarPage(props: ICalendarPageProps) {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
     const [selectedEventTemplate, setSelectedEventTemplate] = useState<SimplifiedEvent | undefined>(undefined);
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
-    const [lockShortcuts, setLockShortcuts] = useState(false);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [shouldReloadTemplates, setShouldReloadTemplates] = useState(false);
@@ -39,7 +41,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
 
     useEffect(() => {
-        if (isLeftArrowKeyPressed && !lockShortcuts) {
+        if (isLeftArrowKeyPressed) {
             if (isCurrentlyLoading) return;
 
             const prevWeek = date.minus({ weeks: 1 });
@@ -50,7 +52,7 @@ function CalendarPage(props: ICalendarPageProps) {
     }, [isLeftArrowKeyPressed]);
 
     useEffect(() => {
-        if (isRightArrowKeyPressed && !lockShortcuts) {
+        if (isRightArrowKeyPressed) {
             if (isCurrentlyLoading) return;
 
             const nextWeek = date.plus({ weeks: 1 });
@@ -73,7 +75,7 @@ function CalendarPage(props: ICalendarPageProps) {
             case 'none':
                 if (popoverMode === 'none') {
                     setCurrentEvents([convertEventImplToEventInput(info.event)]);
-                    setLockShortcuts(true);
+                    setShortcutsEnabled(false);
                     setPopoverMode('edit');
                     setPopoverOpen(true);
                     break;
@@ -144,7 +146,7 @@ function CalendarPage(props: ICalendarPageProps) {
                             setSelectedEndDate(undefined);
                             setPopoverMode('none');
                             setPopoverOpen(false);
-                            setLockShortcuts(false);
+                            setShortcutsEnabled(true);
                         }}
                     />
                 );
@@ -158,7 +160,7 @@ function CalendarPage(props: ICalendarPageProps) {
                         closePopover={() => {
                             setPopoverMode('none');
                             setPopoverOpen(false);
-                            setLockShortcuts(false);
+                            setShortcutsEnabled(true);
                             setSelectedEventTemplate(undefined);
                         }}
                     />
@@ -190,7 +192,7 @@ function CalendarPage(props: ICalendarPageProps) {
         setSelectedStartDate(info.start);
         setSelectedEndDate(info.end);
         setPopoverMode('add');
-        setLockShortcuts(true);
+        setShortcutsEnabled(false);
         setPopoverOpen(true);
     }
 
@@ -223,14 +225,13 @@ function CalendarPage(props: ICalendarPageProps) {
                     < ToolBarDrawer
                         selectedMode={toolbarMode}
                         selectedColor={selectedColor}
-                        lockShortcuts={lockShortcuts}
                         selectColor={(colorId: number) => {
                             setSelectedColor(colorId);
                         }
                         }
                         onAddClick={() => {
                             setPopoverMode('add');
-                            setLockShortcuts(true);
+                            setShortcutsEnabled(false);
                             setPopoverOpen(true);
                         }}
                         onModeChange={(mode) => {
@@ -307,16 +308,15 @@ function CalendarPage(props: ICalendarPageProps) {
                     <EventTemplateDrawer
                         shouldReload={shouldReloadTemplates}
                         confirmReload={() => { setShouldReloadTemplates(false) }}
-                        lockShortcuts={lockShortcuts}
                         onAddClick={() => {
                             setPopoverMode('add-template');
-                            setLockShortcuts(true);
+                            setShortcutsEnabled(false);
                             setPopoverOpen(true);
                         }}
                         onEditClick={(eventTemplate: SimplifiedEvent) => {
                             setPopoverMode('edit-template');
                             setSelectedEventTemplate(eventTemplate);
-                            setLockShortcuts(true);
+                            setShortcutsEnabled(false);
                             setPopoverOpen(true);
                         }}
                     />
@@ -327,7 +327,7 @@ function CalendarPage(props: ICalendarPageProps) {
                                     setCurrentEvents([]);
                                     setPopoverMode('none');
                                     setPopoverOpen(false)
-                                    setLockShortcuts(false);
+                                    setShortcutsEnabled(true);
                                 }}
                                 open={popoverOpen}
                                 modal

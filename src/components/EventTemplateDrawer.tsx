@@ -9,7 +9,6 @@ export interface IEventTemplateDrawerProps {
     onAddClick: () => void;
     onEditClick: (eventTemplate: SimplifiedEvent) => void;
     shouldReload: boolean;
-    lockShortcuts: boolean;
     confirmReload: () => void;
 }
 
@@ -19,7 +18,7 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
     const isSpaceKeyPressed = useKeyPress(' ');
 
     useEffect(() => {
-        if (isSpaceKeyPressed && !props.lockShortcuts) {
+        if (isSpaceKeyPressed) {
             setEventTemplateOpen(!isEventTemplateOpen);
         }
     }, [isSpaceKeyPressed]);

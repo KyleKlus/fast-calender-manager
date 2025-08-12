@@ -12,7 +12,6 @@ export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 export interface IToolBarDrawerProps {
     selectedColor: number;
     selectedMode: ToolbarMode;
-    lockShortcuts: boolean;
     selectColor: (colorId: number) => void;
     onAddClick: () => void;
     onModeChange: (mode: ToolbarMode) => void;
@@ -30,49 +29,64 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
     const isDKeyPressed = useKeyPress('d');
     const isSKeyPressed = useKeyPress('s');
     const isAKeyPressed = useKeyPress('a');
+    const isPKeyPressed = useKeyPress('p');
 
     useEffect(() => {
-        if (isSpaceKeyPressed && !props.lockShortcuts) {
+        if (isSpaceKeyPressed) {
             setToolbarOpen(!isToolbarOpen);
         }
     }, [isSpaceKeyPressed]);
 
     useEffect(() => {
-        if (isTKeyPressed && !props.lockShortcuts) {
+        if (isTKeyPressed) {
             props.onTodayClick();
         }
     }, [isTKeyPressed]);
 
 
     useEffect(() => {
-        if (isXKeyPressed && isToolbarOpen && !props.lockShortcuts) {
+        if (isXKeyPressed && isToolbarOpen) {
             props.onModeChange && props.onModeChange('delete');
         }
     }, [isXKeyPressed]);
 
     useEffect(() => {
-        if (isCKeyPressed && isToolbarOpen && !props.lockShortcuts) {
+        if (isCKeyPressed && isToolbarOpen) {
             props.onModeChange && props.onModeChange('color');
         }
     }, [isCKeyPressed]);
 
     useEffect(() => {
-        if (isDKeyPressed && isToolbarOpen && !props.lockShortcuts) {
+        if (isDKeyPressed && isToolbarOpen) {
             props.onModeChange && props.onModeChange('duplicate');
         }
     }, [isDKeyPressed]);
 
     useEffect(() => {
-        if (isSKeyPressed && isToolbarOpen && !props.lockShortcuts) {
+        if (isSKeyPressed && isToolbarOpen) {
             props.onModeChange && props.onModeChange('select');
         }
     }, [isSKeyPressed]);
 
     useEffect(() => {
-        if (isAKeyPressed && !props.lockShortcuts) {
+        if (isAKeyPressed) {
             props.onAddClick();
         }
     }, [isAKeyPressed]);
+
+    useEffect(() => {
+        if (isPKeyPressed) {
+            setBGEventsEditable(!areBGEventsEditable);
+            const newEvents = (events as Array<EventInput>).map(event => {
+                let isBackgroundEvent = event.display !== 'background' && !event.allDay;
+                return {
+                    ...event,
+                    display: isBackgroundEvent ? 'background' : 'auto',
+                };
+            });
+            setEvents(newEvents);
+        }
+    }, [isPKeyPressed]);
 
     return (
         <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
