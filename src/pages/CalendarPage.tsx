@@ -23,7 +23,7 @@ export interface ICalendarPageProps { }
 export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'none';
 
 function CalendarPage(props: ICalendarPageProps) {
-    const { areShortcutsEnabled, setShortcutsEnabled } = useContext(KeyboardShortcutContext);
+    const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
 
     const { isLoggedIn, isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
     const { areEventsLoaded, currentEvents, events, date, setDate, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);

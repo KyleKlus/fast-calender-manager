@@ -59,27 +59,40 @@
 }
 
 .fcPage .calendar-nav-button {
+    --height: 500px;
     border: 1px solid var(--bs-border-color);
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 1.5rem;
-    height: 100%;
+    width: 2rem;
+    height: var(--height);
     background-color: #fff;
+    position: absolute;
+    top: calc(50vh - var(--height) / 2);
+    bottom: calc(50vh - var(--height) / 2);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.fcPage .calendar-right-button {
+    right: 0.8rem;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+.fcPage .calendar-left-button {
+    left: 0rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
 }
 
 .fcPage .calendar-nav-button:hover {
     background-color: #ececec;
     cursor: pointer;
+    opacity: 1;
 }
 
-.fcPage .calendar-left-button {
-    border-right: none;
-}
-
-.fcPage .calendar-right-button {
-    border-left: none;
-}
 
 .fcPage .fc-theme-bootstrap5 .fc-list,
 .fcPage .fc-theme-bootstrap5 .fc-scrollgrid,

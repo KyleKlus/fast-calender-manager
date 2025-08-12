@@ -2,4 +2,5 @@
     padding: 4px 8px;
     cursor: move;
     display: flex;
+    white-space: nowrap;
 }

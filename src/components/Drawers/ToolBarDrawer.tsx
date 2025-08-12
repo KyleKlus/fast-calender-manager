@@ -6,6 +6,8 @@ import { GCalContext } from '../../contexts/GCalContext';
 import ColorSelector, { getColorFromColorId } from '../ColorSelector';
 import { EventInput } from '@fullcalendar/core';
 import { EventContext } from '../../contexts/EventContext';
+import { DateTime } from 'luxon';
+import Drawer from './Drawer';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
 
@@ -19,8 +21,8 @@ export interface IToolBarDrawerProps {
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
-    const { isSyncOn, setIsSyncOn } = useContext(GCalContext);
-    const { events, setEvents, areBGEventsEditable, setBGEventsEditable } = useContext(EventContext);
+    const { isSyncOn, setIsSyncOn, isCurrentlyLoading, loadEvents } = useContext(GCalContext);
+    const { events, setEvents, areBGEventsEditable, setBGEventsEditable, date, setDate } = useContext(EventContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
     const isTKeyPressed = useKeyPress('t');
@@ -88,116 +90,139 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
         }
     }, [isPKeyPressed]);
 
+    function switchWeek(direction: 'prev' | 'next') {
+        if (isCurrentlyLoading) return;
+        const newWeek = date.plus({ weeks: direction === 'prev' ? -1 : 1 });
+        setDate(newWeek);
+        loadEvents(newWeek);
+        (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
+    }
+
     return (
-        <div className={['toolbar-container', isToolbarOpen ? 'isOpen' : ''].join(' ')}>
-            <div className='toolbar'>
-                <DropdownButton
-                    id={`dropdown-variants-${'Primary'}`}
-                    variant={'Primary'.toLowerCase()}
-                    className='color-event-button'
-                    title={
-                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: getColorFromColorId(props.selectedColor) }}></div>
-                    }
-                >
-                    <ColorSelector
-                        selectedColor={props.selectedColor}
-                        swatchesPerRow={6}
-                        onColorChange={(colorId) => {
-                            props.selectColor(colorId);
-                        }}
-                    />
-                </DropdownButton>
-                <ButtonGroup>
-                    <Button
-                        variant='primary'
-                        active={props.selectedMode === 'color'}
-                        className={"color-event-button"}
-                        onClick={() => {
-                            if (props.selectedMode === 'select') {
-                                // TODO: implement
-                                return;
-                            }
-                            props.onModeChange && props.onModeChange('color')
-                        }}
-                    >
-                        <i className={`bi-palette${props.selectedMode === 'color' ? '-fill' : ''}`}></i>
-                    </Button>
-                    <Button
-                        variant="primary" active={props.selectedMode === 'delete'}
-                        className='delete-event-button'
-                        onClick={() => {
-                            if (props.selectedMode === 'select') {
-                                // TODO: implement
-                                return;
-                            }
-                            props.onModeChange && props.onModeChange('delete')
-                        }}
-                    >
-                        <i className={`bi-trash${props.selectedMode === 'delete' ? '-fill' : ''}`}></i>
-                    </Button>
-                    <Button
-                        variant="primary"
-                        active={props.selectedMode === 'duplicate'}
-                        className='duplicate-event-button'
-                        onClick={() => {
-                            if (props.selectedMode === 'select') {
-                                // TODO: implement
-                                return;
-                            }
-                            props.onModeChange && props.onModeChange('duplicate')
-                        }}
-                    >
-                        <i className={`bi-copy`}></i>
-                    </Button>
-                    <Button
-                        variant="primary"
-                        active={props.selectedMode === 'select'}
-                        className='select-event-button'
-                        onClick={() => { props.onModeChange && props.onModeChange('select') }}
-                    >
-                        <i className={`bi-check-square${props.selectedMode === 'select' ? '-fill' : ''}`}></i>
-                    </Button>
-                </ButtonGroup>
-                <div className='toolbar-divider'></div>
-                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
-                    <i className={`bi-plus`}></i>
-                    Event
-                </Button>
-                <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
-                    <i className={`bi-arrow-repeat`}></i>
-                    Sync
-                </Button>
-                <Button variant="primary" active={areBGEventsEditable} className='sync-event-button' onClick={() => {
-                    const newEvents = (events as Array<EventInput>).map(event => {
-                        let isBackgroundEvent = event.display !== 'background' && !event.allDay;
-                        return {
-                            ...event,
-                            display: isBackgroundEvent ? 'background' : 'auto',
-                        };
-                    });
-                    setEvents(newEvents);
-                    setBGEventsEditable(!areBGEventsEditable);
-                }}>
-                    <i className={`bi-pencil-square`}></i>
-                    Phases
-                </Button>
-                <Button variant="primary" className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
-                    <i className={`bi-calendar-event`}></i>
-                    Today
-                </Button>
-            </div>
-            <div className='toolbar-handle'
-                onClick={() => {
-                    if (isToolbarOpen) {
-                        props.onModeChange && props.onModeChange('none')
-                    }
-                    setToolbarOpen(!isToolbarOpen)
+        <Drawer
+            isOpen={isToolbarOpen}
+            location='top'
+            className='toolbar-container'
+            drawerHandleClassName='toolbar-handle'
+            drawerClassName='toolbar'
+            setIsOpen={(isOpen) => {
+                if (isToolbarOpen) {
+                    props.onModeChange && props.onModeChange('none')
                 }
+                setToolbarOpen(isOpen);
+            }}
+            childrenWithinHandleRight={
+                <>
+                    <div
+                        className='toolbar-navigation-button left-button'
+                        onClick={() => { switchWeek('prev'); }}
+                    >
+                        <i className='bi-chevron-double-left'></i>
+                    </div>
+                    <div className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
+                        <i className={`bi-calendar-event`}></i>
+                    </div>
+                    <div
+                        className='toolbar-navigation-button right-button'
+                        onClick={() => { switchWeek('next'); }}
+                    >
+                        <i className='bi-chevron-double-right'></i>
+                    </div>
+                </>
+            }
+        >
+            <DropdownButton
+                id={`dropdown-variants-${'Primary'}`}
+                variant={'Primary'.toLowerCase()}
+                className='color-event-button'
+                title={
+                    <div className={['color-swatch',].join(' ')} style={{ backgroundColor: getColorFromColorId(props.selectedColor) }}></div>
                 }
             >
-                <i className="bi-chevron-down"></i>
-            </div>
-        </div >
+                <ColorSelector
+                    selectedColor={props.selectedColor}
+                    swatchesPerRow={6}
+                    onColorChange={(colorId) => {
+                        props.selectColor(colorId);
+                    }}
+                />
+            </DropdownButton>
+            <ButtonGroup>
+                <Button
+                    variant='primary'
+                    active={props.selectedMode === 'color'}
+                    className={"color-event-button"}
+                    onClick={() => {
+                        if (props.selectedMode === 'select') {
+                            // TODO: implement
+                            return;
+                        }
+                        props.onModeChange && props.onModeChange('color')
+                    }}
+                >
+                    <i className={`bi-palette${props.selectedMode === 'color' ? '-fill' : ''}`}></i>
+                </Button>
+                <Button
+                    variant="primary" active={props.selectedMode === 'delete'}
+                    className='delete-event-button'
+                    onClick={() => {
+                        if (props.selectedMode === 'select') {
+                            // TODO: implement
+                            return;
+                        }
+                        props.onModeChange && props.onModeChange('delete')
+                    }}
+                >
+                    <i className={`bi-trash${props.selectedMode === 'delete' ? '-fill' : ''}`}></i>
+                </Button>
+                <Button
+                    variant="primary"
+                    active={props.selectedMode === 'duplicate'}
+                    className='duplicate-event-button'
+                    onClick={() => {
+                        if (props.selectedMode === 'select') {
+                            // TODO: implement
+                            return;
+                        }
+                        props.onModeChange && props.onModeChange('duplicate')
+                    }}
+                >
+                    <i className={`bi-copy`}></i>
+                </Button>
+                <Button
+                    variant="primary"
+                    active={props.selectedMode === 'select'}
+                    className='select-event-button'
+                    onClick={() => { props.onModeChange && props.onModeChange('select') }}
+                >
+                    <i className={`bi-check-square${props.selectedMode === 'select' ? '-fill' : ''}`}></i>
+                </Button>
+            </ButtonGroup>
+            <div className='toolbar-divider'></div>
+            <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                <i className={`bi-plus`}></i>
+                Event
+            </Button>
+            <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
+                <i className={`bi-arrow-repeat`}></i>
+                Sync
+            </Button>
+            <Button variant="primary" active={areBGEventsEditable} className='sync-event-button' onClick={() => {
+                const newEvents = (events as Array<EventInput>).map(event => {
+                    let isBackgroundEvent = event.display !== 'background' && !event.allDay;
+                    return {
+                        ...event,
+                        display: isBackgroundEvent ? 'background' : 'auto',
+                    };
+                });
+                setEvents(newEvents);
+                setBGEventsEditable(!areBGEventsEditable);
+            }}>
+                <i className={`bi-pencil-square`}></i>
+                Phases
+            </Button>
+
+        </Drawer>
     );
 };
 

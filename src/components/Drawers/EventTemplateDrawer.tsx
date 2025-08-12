@@ -4,6 +4,7 @@ import { Button } from 'react-bootstrap';
 import DraggableEvent from '../DraggableEvent';
 import { SimplifiedEvent } from '../../contexts/EventContext';
 import { useKeyPress } from '../../hooks/useKeyPress';
+import Drawer from './Drawer';
 
 export interface IEventTemplateDrawerProps {
     onAddClick: () => void;
@@ -55,22 +56,22 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
     }
 
     return (
-        <div className={['event-template-drawer-container', isEventTemplateOpen ? 'isOpen' : ''].join(' ')}>
-            <div className='event-template-drawer-handle'
-                onClick={() => { setEventTemplateOpen(!isEventTemplateOpen) }}
-            >
-                <i className="bi-chevron-up"></i>
+        <Drawer
+            isOpen={isEventTemplateOpen}
+            location='bottom'
+            className='event-template-drawer'
+            drawerClassName='event-template-drawer-content'
+            drawerHandleClassName='event-template-drawer-handle'
+            setIsOpen={() => { setEventTemplateOpen(!isEventTemplateOpen) }}
+        >
+            <div className='event-template-container'>
+                {createTemplateElements(eventTemplates)}
             </div>
-            <div className='event-template-drawer'>
-                <div className='event-template-container'>
-                    {createTemplateElements(eventTemplates)}
-                </div>
-                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
-                    <i className={`bi-plus-circle`}></i>
-                </Button>
-            </div>
+            <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                <i className={`bi-plus-circle`}></i>
+            </Button>
 
-        </div>
+        </Drawer>
     );
 };
 
