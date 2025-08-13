@@ -19,6 +19,10 @@
     border-top: none;
 }
 
+.drawer-container.isOpen .drawer {
+    overflow: visible;
+}
+
 .drawer-container .drawer {
     display: flex;
     height: 0px;
@@ -49,7 +53,6 @@
 .drawer-container.isBottom.isOpen .drawer-handle {
     border-bottom: 1px solid var(--bs-border-color);
 }
-
 
 .drawer-container .drawer-handle-icon {
     flex-grow: 1;

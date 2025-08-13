@@ -4,9 +4,8 @@
 
 .event-template-drawer-content {
     height: 0px !important;
-    gap: 0.5rem;
     padding: 0 !important;
-    width: 100%
+    width: 100% !important;
 }
 
 .event-template-drawer.isOpen .event-template-drawer-content {

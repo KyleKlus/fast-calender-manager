@@ -5,15 +5,20 @@
     border: 1px solid var(--bs-border-color);
     cursor: pointer;
 
+    &:hover {
+        border-width: 2px;
+        border-style: double;
+    }
+
     &.selected {
         border-width: 2px;
-        box-shadow: 0 0 0 2px var(--bs-primary-color);
+        border-style: double;
+        box-shadow: 1px 2px 3px 0 #0000006b;
     }
 }
 
 .color-selector {
     --gap: 0.5rem;
     display: grid;
-    padding: var(--gap);
     gap: var(--gap);
 }

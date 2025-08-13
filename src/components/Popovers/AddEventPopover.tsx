@@ -76,7 +76,6 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
 
     return (
         <Card className={['popover', props.popoverMode === 'add' ? 'add-popover' : 'add-template-popover', isAllDay ? 'allday' : ''].join(' ')}>
-            <Form.Label htmlFor="">Event Name:</Form.Label>
             <Form.Control
                 type="text"
                 id="eventNameInput"
@@ -85,51 +84,45 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                 onChange={(e) => { setEventName(e.target.value) }}
             />
             <div className='add-popover-date-input'>
-                <div>
-                    <Form.Label htmlFor="">Event Start:</Form.Label>
-                    <DatePicker
-                        selected={startDate}
-                        onChange={(date: Date | null) => {
-                            if (date === null) { return }
-                            const newStartDate = DateTime.fromJSDate(date);
-                            const prevStartDate = DateTime.fromJSDate(startDate);
-                            const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
-                            const currentEndDate = DateTime.fromJSDate(endDate);
-                            setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
-                            setStartDate(date);
-                        }}
-                        showTimeSelect={!isAllDay}
-                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
-                        locale="de" // Or any other locale you support
-                    />
-                </div>
-                <div>
-                    <Form.Label htmlFor="">Event End:</Form.Label>
-                    <DatePicker
-                        selected={endDate}
-                        onChange={(date: Date | null) => {
-                            if (date === null) { return }
-                            const newEndDate = DateTime.fromJSDate(date);
-                            const currentStartDate = DateTime.fromJSDate(startDate);
-                            if (newEndDate <= currentStartDate) {
-                                return
-                            }
-                            setEndDate(date)
-                        }}
-                        showTimeSelect={!isAllDay}
-                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
-                        locale="de" // Or any other locale you support
-                    />
-                </div>
+                <DatePicker
+                    selected={startDate}
+                    onChange={(date: Date | null) => {
+                        if (date === null) { return }
+                        const newStartDate = DateTime.fromJSDate(date);
+                        const prevStartDate = DateTime.fromJSDate(startDate);
+                        const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
+                        const currentEndDate = DateTime.fromJSDate(endDate);
+                        setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
+                        setStartDate(date);
+                    }}
+                    showTimeSelect={!isAllDay}
+                    dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
+                    locale="de" // Or any other locale you support
+                />
+                <i className='bi-arrow-right' style={{ fontSize: '1.5rem' }}></i>
+                <DatePicker
+                    selected={endDate}
+                    onChange={(date: Date | null) => {
+                        if (date === null) { return }
+                        const newEndDate = DateTime.fromJSDate(date);
+                        const currentStartDate = DateTime.fromJSDate(startDate);
+                        if (newEndDate <= currentStartDate) {
+                            return
+                        }
+                        setEndDate(date)
+                    }}
+                    showTimeSelect={!isAllDay}
+                    dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
+                    locale="de" // Or any other locale you support
+                />
+                <Form.Check
+                    type="checkbox"
+                    id="isAllDayCheckbox"
+                    label="All Day"
+                    defaultChecked={isAllDay}
+                    onChange={() => { setIsAllDay(!isAllDay) }}
+                />
             </div>
-            <Form.Label htmlFor="">Is Allday:</Form.Label>
-            <Form.Check
-                type="checkbox"
-                id="isAllDayCheckbox"
-                label="Is Allday"
-                defaultChecked={isAllDay}
-                onChange={() => { setIsAllDay(!isAllDay) }}
-            />
             <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', flexWrap: 'wrap', minWidth: '100%' }}>
                 <ColorSelector
                     selectedColor={eventColor}
@@ -138,7 +131,6 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                     }}
                 />
             </div>
-            <Form.Label htmlFor="">Event Description:</Form.Label>
             <Form.Control
                 type="text"
                 as={'textarea'}

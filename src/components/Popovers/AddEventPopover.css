@@ -1,40 +1,26 @@
 .add-popover,
 .add-template-popover {
-    min-width: 500px;
+    min-width: 600px;
+    gap: 1.2rem;
 }
 
-.add-popover.isAllday,
-.add-template-popover.isAllday {
-    min-width: 358px;
+.add-popover hr,
+.add-template-popover hr {
+    margin: 0.2rem 0;
+    border-color: black;
+    opacity: 1;
 }
 
 .add-popover-date-input {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
+    align-items: center;
 }
 
 .add-popover-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
-}
-
-.color-swatch {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    border: 1px solid var(--bs-border-color);
-}
-
-.color-menu {
-    --swatch-amount: 4;
-    --gap: 0.5rem;
-    padding: var(--gap);
-    display: flex;
-    flex-direction: row;
-    gap: var(--gap);
-    min-width: calc(var(--swatch-amount) * 1.5rem + calc(var(--swatch-amount) + 1.2) * var(--gap));
-    flex-wrap: wrap;
 }
 
 .react-datepicker-wrapper input {

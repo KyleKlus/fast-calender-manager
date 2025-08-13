@@ -1,6 +1,14 @@
 .edit-popover,
 .edit-template {
     min-width: 600px;
+    gap: 1rem;
+}
+
+.edit-popover hr,
+.edit-template hr {
+    margin: 0.8rem 0;
+    border-color: black;
+    opacity: 1;
 }
 
 .edit-popover.isAllday {
@@ -15,7 +23,12 @@
 .edit-popover-quick-actions {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+}
+
+.edit-popover-quick-actions-buttons {
+    display: flex;
+    justify-content: flex-end;
     gap: 1rem;
 }
 
@@ -23,29 +36,16 @@
     max-height: 2.5rem;
 }
 
+.edit-popover-quick-actions .divider {
+    height: 2rem;
+    width: 1px;
+    background-color: var(--bs-border-color);
+}
+
 .edit-popover-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
-}
-
-.color-swatch {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    border: 1px solid var(--bs-border-color);
-}
-
-.color-menu {
-    --swatch-amount: 11;
-    --gap: 0.5rem;
-    padding: var(--gap);
-    display: flex;
-    flex-direction: row;
-    gap: var(--gap);
-    min-width: calc(var(--swatch-amount) * 1.5rem + calc(var(--swatch-amount) + 1.2) * var(--gap));
-    max-width: calc(var(--swatch-amount) * 1.5rem + calc(var(--swatch-amount) + 1.2) * var(--gap));
-    flex-wrap: wrap;
 }
 
 .edit-popover-date-input {

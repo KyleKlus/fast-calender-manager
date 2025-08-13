@@ -31,7 +31,7 @@
     --fc-button-hover-border-color: #a03c3c;
     --fc-button-active-bg-color: #8c3333;
     --fc-button-active-border-color: #8c3333;
-    --fc-today-bg-color: rgba(255, 40, 40, 0.063);
+    --fc-today-bg-color: rgba(255, 40, 40, 0);
     --fc-event-bg-color: #b74f4f;
     --fc-event-border-color: #b74f4f;
 }
