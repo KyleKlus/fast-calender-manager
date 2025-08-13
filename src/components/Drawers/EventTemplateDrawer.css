@@ -1,7 +1,12 @@
+.event-template-drawer {
+    width: 100vw;
+}
+
 .event-template-drawer-content {
     height: 0px !important;
     gap: 0.5rem;
-    padding: 0 0.5rem 0 0 !important;
+    padding: 0 !important;
+    width: 100%
 }
 
 .event-template-drawer.isOpen .event-template-drawer-content {
@@ -18,19 +23,22 @@
 .event-template-drawer.isOpen .event-template-container {
     display: flex;
     flex-direction: row;
-    justify-content: center;
     gap: 0.5rem;
+    margin: auto;
     padding: calc(0.5rem + 2px) 0.5rem 0.5rem 0.5rem;
     overflow-y: hidden;
     overflow-x: scroll;
     border-right: 1px solid var(--bs-border-color);
-    width: 100%;
+    flex-grow: 1;
 }
 
-.event-template-drawer-container.isOpen .event-template-drawer .add-event-button {
+.event-template-drawer.isOpen:not(.isEmpty) .add-event-button {
     margin-top: calc(0.5rem + 2px);
-    margin-bottom: calc(0.75rem + 8px);
+    margin-bottom: 1rem;
+    margin-right: 1rem;
 }
+
+.event-template-drawer.isOpen.isEmpty .add-event-button {}
 
 
 .event-template-drawer-container.isOpen .event-template-drawer .fc-event {

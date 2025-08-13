@@ -59,14 +59,16 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
         <Drawer
             isOpen={isEventTemplateOpen}
             location='bottom'
-            className='event-template-drawer'
+            className={['event-template-drawer', eventTemplates.length > 0 ? '' : '.isEmpty'].join(' ')}
             drawerClassName='event-template-drawer-content'
             drawerHandleClassName='event-template-drawer-handle'
             setIsOpen={() => { setEventTemplateOpen(!isEventTemplateOpen) }}
         >
-            <div className='event-template-container'>
-                {createTemplateElements(eventTemplates)}
-            </div>
+            {eventTemplates.length > 0 &&
+                <div className='event-template-container'>
+                    {createTemplateElements(eventTemplates)}
+                </div>
+            }
             <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                 <i className={`bi-plus-circle`}></i>
             </Button>

@@ -121,7 +121,7 @@ class GCal {
                     tokenObject = JSON.parse(token);
                 }
                 if (gapi.client.getToken() === null && token === null) {
-                    this.tokenClient!.requestAccessToken({ prompt: "consent" });
+                    this.tokenClient!.requestAccessToken({ prompt: "" });
                 } else {
                     this.tokenClient!.requestAccessToken({ prompt: "" });
                 }

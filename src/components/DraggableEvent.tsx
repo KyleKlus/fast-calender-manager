@@ -14,7 +14,7 @@ interface DraggableEventProps {
 const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick }) => {
     const eventRef = useRef<HTMLDivElement>(null);
     const durationInMinutes = DateTime.fromISO(eventTemplate.end).diff(DateTime.fromISO(eventTemplate.start)).as('minutes');
-    const durationInHours = durationInMinutes / 60;
+    const durationInHours = Math.floor((durationInMinutes / 60) * 100) / 100;
 
     useEffect(() => {
         const element = eventRef.current;
