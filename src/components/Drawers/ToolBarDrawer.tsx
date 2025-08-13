@@ -9,7 +9,7 @@ import { EventContext } from '../../contexts/EventContext';
 import { DateTime } from 'luxon';
 import Drawer from './Drawer';
 
-export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'select' | 'none';
+export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'none';
 
 export interface IToolBarDrawerProps {
     selectedColor: number;
@@ -66,7 +66,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
 
     useEffect(() => {
         if (isSKeyPressed && isToolbarOpen) {
-            props.onModeChange && props.onModeChange('select');
+            setIsSyncOn(!isSyncOn);
         }
     }, [isSKeyPressed]);
 
@@ -153,10 +153,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     active={props.selectedMode === 'color'}
                     className={"color-event-button"}
                     onClick={() => {
-                        if (props.selectedMode === 'select') {
-                            // TODO: implement
-                            return;
-                        }
                         props.onModeChange && props.onModeChange('color')
                     }}
                 >
@@ -166,10 +162,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     variant="primary" active={props.selectedMode === 'delete'}
                     className='delete-event-button'
                     onClick={() => {
-                        if (props.selectedMode === 'select') {
-                            // TODO: implement
-                            return;
-                        }
                         props.onModeChange && props.onModeChange('delete')
                     }}
                 >
@@ -180,29 +172,13 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     active={props.selectedMode === 'duplicate'}
                     className='duplicate-event-button'
                     onClick={() => {
-                        if (props.selectedMode === 'select') {
-                            // TODO: implement
-                            return;
-                        }
                         props.onModeChange && props.onModeChange('duplicate')
                     }}
                 >
                     <i className={`bi-copy`}></i>
                 </Button>
-                <Button
-                    variant="primary"
-                    active={props.selectedMode === 'select'}
-                    className='select-event-button'
-                    onClick={() => { props.onModeChange && props.onModeChange('select') }}
-                >
-                    <i className={`bi-check-square${props.selectedMode === 'select' ? '-fill' : ''}`}></i>
-                </Button>
             </ButtonGroup>
             <div className='toolbar-divider'></div>
-            <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
-                <i className={`bi-plus`}></i>
-                Event
-            </Button>
             <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
                 <i className={`bi-arrow-repeat`}></i>
                 Sync
@@ -221,7 +197,11 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 <i className={`bi-pencil-square`}></i>
                 Phases
             </Button>
-
+            <div className='toolbar-divider'></div>
+            <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                <i className={`bi-plus`}></i>
+                Event
+            </Button>
         </Drawer>
     );
 };

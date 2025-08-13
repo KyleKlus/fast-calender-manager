@@ -59,7 +59,7 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
         <Drawer
             isOpen={isEventTemplateOpen}
             location='bottom'
-            className={['event-template-drawer', eventTemplates.length > 0 ? '' : '.isEmpty'].join(' ')}
+            className={['event-template-drawer', eventTemplates.length > 0 ? '' : 'isEmpty'].join(' ')}
             drawerClassName='event-template-drawer-content'
             drawerHandleClassName='event-template-drawer-handle'
             setIsOpen={() => { setEventTemplateOpen(!isEventTemplateOpen) }}

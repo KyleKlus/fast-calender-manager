@@ -81,13 +81,6 @@ function CalendarPage(props: ICalendarPageProps) {
                     break;
                 }
                 break;
-            case 'select':
-                if (currentEvents.filter((e) => e.id === info.event.id).length > 0) {
-                    setRemoveCurrentEvent(convertEventImplToEventInput(info.event));
-                    break;
-                }
-                setAddCurrentEvent(convertEventImplToEventInput(info.event));
-                break;
             case 'duplicate':
                 addEvent({
                     title: info.event.title,

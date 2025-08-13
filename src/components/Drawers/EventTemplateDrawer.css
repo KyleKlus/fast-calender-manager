@@ -38,7 +38,9 @@
     margin-right: 1rem;
 }
 
-.event-template-drawer.isOpen.isEmpty .add-event-button {}
+.event-template-drawer.isOpen.isEmpty .add-event-button {
+    margin: 0 !important;
+}
 
 
 .event-template-drawer-container.isOpen .event-template-drawer .fc-event {
