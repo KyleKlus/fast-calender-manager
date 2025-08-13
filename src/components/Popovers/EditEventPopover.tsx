@@ -251,8 +251,6 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 value={eventDescription}
                 onChange={(e) => { setEventDescription(e.target.value) }}
             />
-            <hr />
-
             <div className='edit-popover-buttons'>
                 <Button onClick={() => {
                     props.closePopover();
