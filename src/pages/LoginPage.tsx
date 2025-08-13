@@ -1,6 +1,7 @@
 import './LoginPage.css';
 import { useContext } from 'react';
 import { GCalContext } from '../contexts/GCalContext';
+import { Spinner } from 'react-bootstrap';
 
 interface ILoginPageProps { }
 
@@ -21,7 +22,12 @@ function LoginPage(props: ILoginPageProps) {
                 }}>
                     Log in
                 </button>
-                : <div>Logging in...</div>
+                :
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                    <Spinner animation="border" role="status">
+                    </Spinner>
+                    <span>Logging in...</span>
+                </div>
             }
         </div >
     );

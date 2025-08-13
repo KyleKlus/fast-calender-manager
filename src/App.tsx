@@ -6,6 +6,7 @@ import CalendarPage from './pages/CalendarPage';
 import { GCalContext } from './contexts/GCalContext';
 import LoginPage from './pages/LoginPage';
 import { EventContext } from './contexts/EventContext';
+import { Spinner } from 'react-bootstrap';
 
 function App() {
   const { isLoggedIn, loadEvents } = useContext(GCalContext);
@@ -23,7 +24,11 @@ function App() {
         : <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw',
         }}>
-          <div>Loading events...</div>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+            <Spinner animation="border" role="status">
+            </Spinner>
+            <span>Loading events...</span>
+          </div>
         </div>
       : <LoginPage />
     }</>
