@@ -18,6 +18,8 @@ export interface IToolBarDrawerProps {
     onAddClick: () => void;
     onModeChange: (mode: ToolbarMode) => void;
     onTodayClick: () => void;
+    onPrevWeekClick: () => void;
+    onNextWeekClick: () => void;
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
@@ -90,14 +92,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
         }
     }, [isPKeyPressed]);
 
-    function switchWeek(direction: 'prev' | 'next') {
-        if (isCurrentlyLoading) return;
-        const newWeek = date.plus({ weeks: direction === 'prev' ? -1 : 1 });
-        setDate(newWeek);
-        loadEvents(newWeek);
-        (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
-    }
-
     return (
         <Drawer
             isOpen={isToolbarOpen}
@@ -115,7 +109,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 <>
                     <div
                         className='toolbar-navigation-button left-button'
-                        onClick={() => { switchWeek('prev'); }}
+                        onClick={() => { props.onPrevWeekClick && props.onPrevWeekClick() }}
                     >
                         <i className='bi-chevron-double-left'></i>
                     </div>
@@ -124,7 +118,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     </div>
                     <div
                         className='toolbar-navigation-button right-button'
-                        onClick={() => { switchWeek('next'); }}
+                        onClick={() => { props.onNextWeekClick && props.onNextWeekClick() }}
                     >
                         <i className='bi-chevron-double-right'></i>
                     </div>

@@ -208,6 +208,22 @@ function CalendarPage(props: ICalendarPageProps) {
         }, droppedEvent.allDay);
     };
 
+    function switchWeek(direction: 'prev' | 'next' | 'today') {
+        if (isCurrentlyLoading) return;
+        const newWeek = direction === 'today'
+            ? DateTime.now()
+            : date.plus({ weeks: direction === 'prev' ? -1 : 1 });
+
+        setDate(newWeek);
+        loadEvents(newWeek);
+
+        if (direction === 'today') {
+            (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
+            return;
+        }
+        (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
+    }
+
     return (<div className={'fcPage'}>
         < ToolBarDrawer
             selectedMode={toolbarMode}
@@ -224,13 +240,14 @@ function CalendarPage(props: ICalendarPageProps) {
             onModeChange={(mode) => {
                 setToolbarMode(toolbarMode === mode ? 'none' : mode);
             }}
+            onPrevWeekClick={() => {
+                switchWeek('prev');
+            }}
+            onNextWeekClick={() => {
+                switchWeek('next');
+            }}
             onTodayClick={() => {
-                if (isCurrentlyLoading) return;
-
-                const currentWeek = DateTime.now();
-                setDate(currentWeek);
-                loadEvents(currentWeek);
-                (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
+                switchWeek('today');
             }}
         />
         < div className='calendar-container' >
@@ -238,20 +255,8 @@ function CalendarPage(props: ICalendarPageProps) {
                 className='calendar-left-button calendar-nav-button'
                 onMouseEnter={() => {
                     if (isDragging && !isCurrentlyLoading) {
-
-                        const prevWeek = date.minus({ weeks: 1 });
-                        setDate(prevWeek);
-                        loadEvents(prevWeek);
-                        (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                        switchWeek('prev');
                     }
-                }}
-                onClick={() => {
-                    if (isCurrentlyLoading) return;
-
-                    const prevWeek = date.minus({ weeks: 1 });
-                    setDate(prevWeek);
-                    loadEvents(prevWeek);
-                    (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
                 }}
             >
                 <i className='bi-chevron-double-left'></i>
@@ -272,20 +277,9 @@ function CalendarPage(props: ICalendarPageProps) {
             <div
                 className='calendar-right-button calendar-nav-button'
                 onMouseEnter={() => {
-
                     if (isDragging && !isCurrentlyLoading) {
-                        const nextWeek = date.plus({ weeks: 1 });
-                        setDate(nextWeek);
-                        loadEvents(nextWeek);
-                        (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                        switchWeek('next');
                     }
-                }}
-                onClick={() => {
-                    if (isCurrentlyLoading) return;
-                    const nextWeek = date.plus({ weeks: 1 });
-                    setDate(nextWeek);
-                    loadEvents(nextWeek);
-                    (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
                 }}
             >
                 <i className='bi-chevron-double-right'></i>
