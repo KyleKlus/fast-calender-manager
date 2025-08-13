@@ -1,9 +1,10 @@
 .draggable-event {
+    --width: 9rem;
     padding: 4px 8px;
     cursor: move;
     display: flex;
-    max-width: 8rem;
-    min-width: 8rem;
+    max-width: var(--width);
+    min-width: var(--width);
     white-space: nowrap;
     text-wrap: nowrap;
     text-overflow: ellipsis;

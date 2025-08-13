@@ -16,6 +16,7 @@ export interface IEventTemplateDrawerProps {
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
     const [isEventTemplateOpen, setEventTemplateOpen] = useState(false);
     const [eventTemplates, setEventTemplates] = useState<SimplifiedEvent[]>([]);
+    const [draggedTemplate, setDraggedTemplate] = useState<{ event: SimplifiedEvent, index: number } | undefined>(undefined);
     const isSpaceKeyPressed = useKeyPress(' ');
 
     useEffect(() => {
@@ -47,6 +48,31 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
             templateElements.push(<DraggableEvent
                 key={eventTemplates[i].title + i}
                 eventTemplate={eventTemplates[i]}
+                setDraggedTemplate={(event) => {
+                    if (event === undefined) {
+                        setDraggedTemplate(undefined);
+                        return;
+                    }
+                    setDraggedTemplate({ event: eventTemplates[i], index: i });
+                }}
+                onMouseOver={() => {
+                    if (draggedTemplate === undefined) return;
+
+                    const draggedEventString = draggedTemplate.event.title + draggedTemplate.event.start + draggedTemplate.event.end;
+                    const indexEventString = eventTemplates[i].title + eventTemplates[i].start + eventTemplates[i].end;
+                    // Prevent swapping with itself
+                    if (draggedEventString === indexEventString) {
+                        return;
+                    }
+
+                    const oldEventTemplates = eventTemplates.slice();
+                    let newEventTemplates = [...oldEventTemplates];
+                    newEventTemplates[draggedTemplate.index] = oldEventTemplates[i];
+                    newEventTemplates[i] = oldEventTemplates[draggedTemplate.index];
+                    localStorage.setItem('eventTemplates', JSON.stringify(newEventTemplates));
+                    setEventTemplates(newEventTemplates);
+                    setDraggedTemplate({ event: newEventTemplates[i], index: i });
+                }}
                 onClick={() => {
                     props.onEditClick(eventTemplates[i]);
                 }}

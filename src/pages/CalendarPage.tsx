@@ -25,8 +25,8 @@ export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'n
 function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
 
-    const { isLoggedIn, isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
-    const { areEventsLoaded, currentEvents, events, date, setDate, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent } = useContext(EventContext);
+    const { isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
+    const { events, date, setDate, setCurrentEvents } = useContext(EventContext);
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
@@ -62,10 +62,7 @@ function CalendarPage(props: ICalendarPageProps) {
         }
     }, [isRightArrowKeyPressed]);
 
-    useEffect(() => {
-        if (areEventsLoaded && isLoggedIn) return;
-        loadEvents(date);
-    }, []);
+
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
@@ -211,128 +208,122 @@ function CalendarPage(props: ICalendarPageProps) {
         }, droppedEvent.allDay);
     };
 
-    return (
-        <>
-            {areEventsLoaded
-                ? <div className={'fcPage'}>
-                    < ToolBarDrawer
-                        selectedMode={toolbarMode}
-                        selectedColor={selectedColor}
-                        selectColor={(colorId: number) => {
-                            setSelectedColor(colorId);
-                        }
-                        }
-                        onAddClick={() => {
-                            setPopoverMode('add');
-                            setShortcutsEnabled(false);
-                            setPopoverOpen(true);
-                        }}
-                        onModeChange={(mode) => {
-                            setToolbarMode(toolbarMode === mode ? 'none' : mode);
-                        }}
-                        onTodayClick={() => {
-                            if (isCurrentlyLoading) return;
-
-                            const currentWeek = DateTime.now();
-                            setDate(currentWeek);
-                            loadEvents(currentWeek);
-                            (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
-                        }}
-                    />
-                    < div className='calendar-container' >
-                        <div
-                            className='calendar-left-button calendar-nav-button'
-                            onMouseEnter={() => {
-                                if (isDragging && !isCurrentlyLoading) {
-
-                                    const prevWeek = date.minus({ weeks: 1 });
-                                    setDate(prevWeek);
-                                    loadEvents(prevWeek);
-                                    (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
-                                }
-                            }}
-                            onClick={() => {
-                                if (isCurrentlyLoading) return;
-
-                                const prevWeek = date.minus({ weeks: 1 });
-                                setDate(prevWeek);
-                                loadEvents(prevWeek);
-                                (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
-                            }}
-                        >
-                            <i className='bi-chevron-double-left'></i>
-                        </div>
-
-                        <FullCalendar {...generateFCConfig({
-                            events,
-                            eventClick,
-                            eventChange,
-                            eventDragStart,
-                            eventDragStop,
-                            eventReceive: handleEventReceive,
-                            select,
-                            date
-                        })}
-                        />
-
-                        <div
-                            className='calendar-right-button calendar-nav-button'
-                            onMouseEnter={() => {
-
-                                if (isDragging && !isCurrentlyLoading) {
-                                    const nextWeek = date.plus({ weeks: 1 });
-                                    setDate(nextWeek);
-                                    loadEvents(nextWeek);
-                                    (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
-                                }
-                            }}
-                            onClick={() => {
-                                if (isCurrentlyLoading) return;
-                                const nextWeek = date.plus({ weeks: 1 });
-                                setDate(nextWeek);
-                                loadEvents(nextWeek);
-                                (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
-                            }}
-                        >
-                            <i className='bi-chevron-double-right'></i>
-                        </div>
-
-                    </div >
-                    <EventTemplateDrawer
-                        shouldReload={shouldReloadTemplates}
-                        confirmReload={() => { setShouldReloadTemplates(false) }}
-                        onAddClick={() => {
-                            setPopoverMode('add-template');
-                            setShortcutsEnabled(false);
-                            setPopoverOpen(true);
-                        }}
-                        onEditClick={(eventTemplate: SimplifiedEvent) => {
-                            setPopoverMode('edit-template');
-                            setSelectedEventTemplate(eventTemplate);
-                            setShortcutsEnabled(false);
-                            setPopoverOpen(true);
-                        }}
-                    />
-                    {
-                        popoverOpen && (
-                            <Popup
-                                onClose={() => {
-                                    setCurrentEvents([]);
-                                    setPopoverMode('none');
-                                    setPopoverOpen(false)
-                                    setShortcutsEnabled(true);
-                                }}
-                                open={popoverOpen}
-                                modal
-                            >
-                                {getCorrectPopoverDisplay(popoverMode)}
-                            </Popup>
-                        )
-                    }
-                </div >
-                : <div>Loading...</div>
+    return (<div className={'fcPage'}>
+        < ToolBarDrawer
+            selectedMode={toolbarMode}
+            selectedColor={selectedColor}
+            selectColor={(colorId: number) => {
+                setSelectedColor(colorId);
             }
-        </>
+            }
+            onAddClick={() => {
+                setPopoverMode('add');
+                setShortcutsEnabled(false);
+                setPopoverOpen(true);
+            }}
+            onModeChange={(mode) => {
+                setToolbarMode(toolbarMode === mode ? 'none' : mode);
+            }}
+            onTodayClick={() => {
+                if (isCurrentlyLoading) return;
+
+                const currentWeek = DateTime.now();
+                setDate(currentWeek);
+                loadEvents(currentWeek);
+                (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
+            }}
+        />
+        < div className='calendar-container' >
+            <div
+                className='calendar-left-button calendar-nav-button'
+                onMouseEnter={() => {
+                    if (isDragging && !isCurrentlyLoading) {
+
+                        const prevWeek = date.minus({ weeks: 1 });
+                        setDate(prevWeek);
+                        loadEvents(prevWeek);
+                        (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                    }
+                }}
+                onClick={() => {
+                    if (isCurrentlyLoading) return;
+
+                    const prevWeek = date.minus({ weeks: 1 });
+                    setDate(prevWeek);
+                    loadEvents(prevWeek);
+                    (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+                }}
+            >
+                <i className='bi-chevron-double-left'></i>
+            </div>
+
+            <FullCalendar {...generateFCConfig({
+                events,
+                eventClick,
+                eventChange,
+                eventDragStart,
+                eventDragStop,
+                eventReceive: handleEventReceive,
+                select,
+                date
+            })}
+            />
+
+            <div
+                className='calendar-right-button calendar-nav-button'
+                onMouseEnter={() => {
+
+                    if (isDragging && !isCurrentlyLoading) {
+                        const nextWeek = date.plus({ weeks: 1 });
+                        setDate(nextWeek);
+                        loadEvents(nextWeek);
+                        (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                    }
+                }}
+                onClick={() => {
+                    if (isCurrentlyLoading) return;
+                    const nextWeek = date.plus({ weeks: 1 });
+                    setDate(nextWeek);
+                    loadEvents(nextWeek);
+                    (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement).click();
+                }}
+            >
+                <i className='bi-chevron-double-right'></i>
+            </div>
+
+        </div >
+        <EventTemplateDrawer
+            shouldReload={shouldReloadTemplates}
+            confirmReload={() => { setShouldReloadTemplates(false) }}
+            onAddClick={() => {
+                setPopoverMode('add-template');
+                setShortcutsEnabled(false);
+                setPopoverOpen(true);
+            }}
+            onEditClick={(eventTemplate: SimplifiedEvent) => {
+                setPopoverMode('edit-template');
+                setSelectedEventTemplate(eventTemplate);
+                setShortcutsEnabled(false);
+                setPopoverOpen(true);
+            }}
+        />
+        {
+            popoverOpen && (
+                <Popup
+                    onClose={() => {
+                        setCurrentEvents([]);
+                        setPopoverMode('none');
+                        setPopoverOpen(false)
+                        setShortcutsEnabled(true);
+                    }}
+                    open={popoverOpen}
+                    modal
+                >
+                    {getCorrectPopoverDisplay(popoverMode)}
+                </Popup>
+            )
+        }
+    </div >
     );
 };
 
