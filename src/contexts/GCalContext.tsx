@@ -177,7 +177,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         })).result.items.filter((e: any) => e.due !== undefined).map((e: any) => {
             return {
                 id: e.id,
-                title: e.title,
+                title: '[ ]: ' + e.title,
                 start: DateTime.fromISO(e.due ? e.due : DateTime.now().toISO()).toFormat('yyyy-MM-dd'),
                 end: DateTime.fromISO(e.due ? e.due : DateTime.now().toISO()).toFormat('yyyy-MM-dd'), // same
                 allDay: true,
