@@ -9,17 +9,13 @@ import { PointerDragEvent } from '@fullcalendar/core/internal';
 
 interface DraggableEventProps {
     eventTemplate: SimplifiedEvent;
-    setDraggedTemplate?: (eventTemplate: SimplifiedEvent | undefined) => void;
-    onMouseOver?: (eventTemplate: SimplifiedEvent) => void;
     onClick?: () => void;
 }
 
-const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick, setDraggedTemplate, onMouseOver }) => {
+const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick }) => {
     const eventRef = useRef<HTMLDivElement>(null);
     const durationInMinutes = DateTime.fromISO(eventTemplate.end).diff(DateTime.fromISO(eventTemplate.start)).as('minutes');
     const durationInHours = Math.floor((durationInMinutes / 60) * 100) / 100;
-
-    const timer = useRef<NodeJS.Timeout>(null);
 
     useEffect(() => {
         const element = eventRef.current;
@@ -49,23 +45,6 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick,
             className="draggable-event fc-event"
             style={{ backgroundColor: getColorFromColorId(eventTemplate.colorId) }}
             onClick={() => { onClick && onClick() }}
-            onMouseOver={(e) => {
-                console.log('Mouse over event:', eventTemplate.title);
-                onMouseOver && onMouseOver(eventTemplate)
-
-            }}
-            onMouseDown={(e) => {
-                timer.current = setTimeout(() => {
-                    setDraggedTemplate && setDraggedTemplate(eventTemplate);
-                }, 1500);
-            }}
-            onMouseUp={(e) => {
-                if (timer.current) {
-                    clearTimeout(timer.current);
-                    return;
-                }
-                setDraggedTemplate && setDraggedTemplate(undefined);
-            }}
         >
             <div>{durationInHours}h</div>
             <div>|</div>

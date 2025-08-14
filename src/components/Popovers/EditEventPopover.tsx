@@ -84,6 +84,36 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
         });
     }
 
+    function switchTemplate(direction: 'prev' | 'next') {
+        if (direction === 'prev') {
+            if (props.selectedEventTemplate === undefined) { return }
+            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+            let eventTemplates: SimplifiedEvent[] = [];
+            if (loadedEventTemplates) {
+                eventTemplates = JSON.parse(loadedEventTemplates);
+            }
+            const index = eventTemplates.findIndex((e) => props.selectedEventTemplate !== undefined && e.title === props.selectedEventTemplate.title);
+            if (index === 0) { return }
+            eventTemplates.splice(index, 1);
+            eventTemplates.splice(index - 1, 0, props.selectedEventTemplate);
+            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+            props.reloadTemplates();
+            return;
+        }
+        if (props.selectedEventTemplate === undefined) { return }
+        const loadedEventTemplates = localStorage.getItem('eventTemplates');
+        let eventTemplates: SimplifiedEvent[] = [];
+        if (loadedEventTemplates) {
+            eventTemplates = JSON.parse(loadedEventTemplates);
+        }
+        const index = eventTemplates.findIndex((e) => props.selectedEventTemplate !== undefined && e.title === props.selectedEventTemplate.title);
+        if (index === eventTemplates.length - 1) { return }
+        eventTemplates.splice(index, 1);
+        eventTemplates.splice(index + 1, 0, props.selectedEventTemplate);
+        localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+        props.reloadTemplates();
+    }
+
     return (
         <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
             <div className='edit-popover-quick-actions'>
@@ -252,6 +282,9 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 onChange={(e) => { setEventDescription(e.target.value) }}
             />
             <div className='edit-popover-buttons'>
+                {props.popoverMode === 'edit-template' && <Button onClick={() => { switchTemplate('prev') }}><i className='bi-chevron-left' /></Button>}
+                {props.popoverMode === 'edit-template' && <Button onClick={() => { switchTemplate('next') }}><i className='bi-chevron-right' /></Button>}
+                {props.popoverMode === 'edit-template' && <div className='divider' style={{ flexGrow: 1 }} />}
                 <Button onClick={() => {
                     props.closePopover();
                 }}>Cancel</Button>

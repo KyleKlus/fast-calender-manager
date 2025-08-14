@@ -11,7 +11,7 @@ body {
 }
 
 .btn-primary {
-  border-width: 1.5px;
+  border-width: 1px;
   --bs-btn-color: #fff;
   --bs-btn-bg: #c54141;
   --bs-btn-gap: 0.4rem;
