@@ -46,9 +46,8 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onClick 
             style={{ backgroundColor: getColorFromColorId(eventTemplate.colorId) }}
             onClick={() => { onClick && onClick() }}
         >
-            <div>{durationInHours}h</div>
-            <div>|</div>
-            <div>{eventTemplate.title}</div>
+            <div className='duration'>{durationInHours}h</div>
+            <div className='title'>{eventTemplate.title}</div>
         </div>
     );
 };

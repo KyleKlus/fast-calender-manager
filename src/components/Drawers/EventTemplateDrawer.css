@@ -9,8 +9,8 @@
 }
 
 .event-template-drawer.isOpen .event-template-drawer-content {
-    max-height: calc(2 * var(--drawer-bs-btn-padding-y) + var(--drawer-bs-btn-font-size) + 2.5rem) !important;
-    height: calc(2 * var(--drawer-bs-btn-padding-y) + var(--drawer-bs-btn-font-size) + 2.5rem) !important;
+    max-height: calc(2 * var(--drawer-bs-btn-padding-y) + var(--drawer-bs-btn-font-size) + 2.35rem) !important;
+    height: calc(2 * var(--drawer-bs-btn-padding-y) + var(--drawer-bs-btn-font-size) + 2.35rem) !important;
 }
 
 .event-template-drawer-container .btn-primary {
@@ -31,6 +31,12 @@
     flex-grow: 1;
 }
 
+.add-template-button {
+    --bs-btn-padding-x: var(--drawer-bs-btn-padding-x);
+    --bs-btn-padding-y: var(--drawer-bs-btn-padding-y);
+    --bs-btn-font-size: var(--drawer-bs-btn-font-size);
+}
+
 .event-template-drawer-container.isOpen .event-template-drawer .fc-event {
     white-space: nowrap;
 }
@@ -43,7 +49,7 @@
     display: flex;
     flex-direction: row;
     gap: 1rem;
-    margin-top: calc(0.5rem + 2px);
+    margin-top: calc(0.5rem);
     margin-bottom: 1rem;
     margin-right: 1rem;
 }

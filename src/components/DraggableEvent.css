@@ -1,6 +1,5 @@
 .draggable-event {
     --width: 9rem;
-    padding: 4px 8px;
     cursor: move;
     display: flex;
     max-width: var(--width);
@@ -9,4 +8,17 @@
     text-wrap: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.draggable-event .duration,
+.draggable-event .title {
+    padding: 0.2rem;
+}
+
+.draggable-event .duration {
+    border-right: 1px solid black;
+}
+
+.draggable-event .title {
+    flex-grow: 1;
 }

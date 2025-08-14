@@ -72,8 +72,8 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                 </div>
             }
             <div className='event-template-buttons'>
-                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
-                    <i className={`bi-plus-circle`}></i>
+                <Button variant="primary" className='add-template-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                    <i className={`bi-clipboard-plus`}></i>
                 </Button>
             </div>
         </Drawer>
