@@ -1,18 +1,18 @@
 import './CalendarPage.css';
 import FullCalendar from '@fullcalendar/react';
+import { DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/core';
+import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
 import { useContext, useEffect, useState } from 'react';
+import { Card, } from 'react-bootstrap';
+import { DateTime } from 'luxon';
+import Popup from 'reactjs-popup';
 
 import { generateFCConfig } from '../handlers/fullCalendarConfigHandler';
-import { DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/core';
-import Popup from 'reactjs-popup';
 import ToolBarDrawer, { ToolbarMode } from '../components/Drawers/ToolBarDrawer';
 import { convertEventImplToEventInput, EventContext, SimplifiedEvent } from '../contexts/EventContext';
-import { DateTime } from 'luxon';
 import EventTemplateDrawer from '../components/Drawers/EventTemplateDrawer';
-import { Card, } from 'react-bootstrap';
 import AddEventPopover from '../components/Popovers/AddEventPopover';
 import EditEventPopover from '../components/Popovers/EditEventPopover';
-import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
 import { useKeyPress } from '../hooks/useKeyPress';
 import { GCalContext } from '../contexts/GCalContext';
 import { defaultColorId, getColorIdFromColor } from '../components/ColorSelector';
@@ -61,8 +61,6 @@ function CalendarPage(props: ICalendarPageProps) {
             (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement)?.click();
         }
     }, [isRightArrowKeyPressed]);
-
-
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import './EditEventPopover.css';
 import './Popover.css';
-import { Card, Form, Button } from "react-bootstrap";
+import { Card, Form, Button, ButtonGroup } from "react-bootstrap";
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -116,116 +116,9 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
 
     return (
         <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
-            <div className='edit-popover-quick-actions'>
-                <ColorSelector
-                    selectedColor={eventColor}
-                    onColorChange={(colorId) => {
-                        setEventColor(colorId);
-                        if (props.popoverMode === 'edit-template') {
-                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                            let eventTemplates: SimplifiedEvent[] = [];
-                            if (loadedEventTemplates) {
-                                eventTemplates = JSON.parse(loadedEventTemplates);
-                            }
 
-                            if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
-                                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-                            }
-                            eventTemplates.push({
-                                title: eventName,
-                                start: startDate.toISOString(),
-                                end: endDate.toISOString(),
-                                allDay: isAllDay,
-                                description: eventDescription,
-                                colorId: colorId,
-                            });
 
-                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                            props.reloadTemplates();
-                            setEventColor(colorId)
-                            return;
-                        }
 
-                        editEvent({
-                            title: editableEvent.title,
-                            start: DateTime.fromJSDate(startDate),
-                            end: DateTime.fromJSDate(endDate),
-                            colorId: colorId,
-                            extendedProps: { description: eventDescription },
-                        },
-                            (editableEvent.id as string), // is always defined
-                            isAllDay
-                        ).then(_ => {
-                            setEventColor(colorId)
-                        });
-                    }}
-                />
-                <div className='edit-popover-quick-actions-buttons'>
-                    <Button
-                        onClick={() => {
-                            if (props.popoverMode === 'edit-template') {
-                                const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                                let eventTemplates: SimplifiedEvent[] = [];
-                                if (loadedEventTemplates) {
-                                    eventTemplates = JSON.parse(loadedEventTemplates);
-                                }
-                                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-                                localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                                props.reloadTemplates();
-                                props.closePopover();
-                                return;
-                            }
-
-                            deleteEvent((editableEvent.id as string)).then(_ => {
-                                props.closePopover();
-                            });
-                        }}
-                    ><i className='bi-trash' /></Button>
-                    <Button
-                        onClick={() => {
-                            if (eventName === '') { return }
-                            if (props.popoverMode === 'edit-template') {
-                                if (props.selectedEventTemplate === undefined) { return }
-                                const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                                let eventTemplates: SimplifiedEvent[] = [];
-                                if (loadedEventTemplates) {
-                                    eventTemplates = JSON.parse(loadedEventTemplates);
-                                }
-                                eventTemplates.push({
-                                    title: props.selectedEventTemplate.title,
-                                    start: props.selectedEventTemplate.start,
-                                    end: props.selectedEventTemplate.end,
-                                    allDay: props.selectedEventTemplate.allDay,
-                                    description: props.selectedEventTemplate.description,
-                                    colorId: props.selectedEventTemplate.colorId,
-                                });
-
-                                localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                                props.reloadTemplates();
-                                props.closePopover();
-                                return;
-                            }
-
-                            addEvent(
-                                {
-                                    title: eventName,
-                                    start: DateTime.fromJSDate(startDate),
-                                    end: DateTime.fromJSDate(endDate),
-                                    colorId: eventColor,
-                                    extendedProps: {
-                                        ...editableEvent.extendedProps,
-                                        description: eventDescription,
-                                    },
-                                },
-                                isAllDay
-                            ).then(_ => {
-                                props.closePopover();
-                            });
-                        }}
-                    ><i className='bi-copy' /></Button>
-                </div>
-            </div>
-            <hr />
             <Form.Control
                 type="text"
                 id="eventNameInput"
@@ -281,10 +174,120 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 value={eventDescription}
                 onChange={(e) => { setEventDescription(e.target.value) }}
             />
+            <hr />
+            <ColorSelector
+                selectedColor={eventColor}
+                onColorChange={(colorId) => {
+                    setEventColor(colorId);
+                    if (props.popoverMode === 'edit-template') {
+                        const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                        let eventTemplates: SimplifiedEvent[] = [];
+                        if (loadedEventTemplates) {
+                            eventTemplates = JSON.parse(loadedEventTemplates);
+                        }
+
+                        if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
+                            eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+                        }
+                        eventTemplates.push({
+                            title: eventName,
+                            start: startDate.toISOString(),
+                            end: endDate.toISOString(),
+                            allDay: isAllDay,
+                            description: eventDescription,
+                            colorId: colorId,
+                        });
+
+                        localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                        props.reloadTemplates();
+                        setEventColor(colorId)
+                        return;
+                    }
+
+                    editEvent({
+                        title: editableEvent.title,
+                        start: DateTime.fromJSDate(startDate),
+                        end: DateTime.fromJSDate(endDate),
+                        colorId: colorId,
+                        extendedProps: { description: eventDescription },
+                    },
+                        (editableEvent.id as string), // is always defined
+                        isAllDay
+                    ).then(_ => {
+                        setEventColor(colorId)
+                    });
+                }}
+            />
             <div className='edit-popover-buttons'>
-                {props.popoverMode === 'edit-template' && <Button onClick={() => { switchTemplate('prev') }}><i className='bi-chevron-left' /></Button>}
-                {props.popoverMode === 'edit-template' && <Button onClick={() => { switchTemplate('next') }}><i className='bi-chevron-right' /></Button>}
-                {props.popoverMode === 'edit-template' && <div className='divider' style={{ flexGrow: 1 }} />}
+                {props.popoverMode === 'edit-template' &&
+                    <ButtonGroup>
+                        <Button onClick={() => { switchTemplate('prev') }}><i className='bi-chevron-left' /></Button>
+                        <Button onClick={() => { switchTemplate('next') }}><i className='bi-chevron-right' /></Button>
+                    </ButtonGroup>
+                }
+                <Button
+                    onClick={() => {
+                        if (props.popoverMode === 'edit-template') {
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.reloadTemplates();
+                            props.closePopover();
+                            return;
+                        }
+
+                        deleteEvent((editableEvent.id as string)).then(_ => {
+                            props.closePopover();
+                        });
+                    }}
+                ><i className='bi-trash' /></Button>
+                <Button
+                    onClick={() => {
+                        if (eventName === '') { return }
+                        if (props.popoverMode === 'edit-template') {
+                            if (props.selectedEventTemplate === undefined) { return }
+                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
+                            let eventTemplates: SimplifiedEvent[] = [];
+                            if (loadedEventTemplates) {
+                                eventTemplates = JSON.parse(loadedEventTemplates);
+                            }
+                            eventTemplates.push({
+                                title: props.selectedEventTemplate.title,
+                                start: props.selectedEventTemplate.start,
+                                end: props.selectedEventTemplate.end,
+                                allDay: props.selectedEventTemplate.allDay,
+                                description: props.selectedEventTemplate.description,
+                                colorId: props.selectedEventTemplate.colorId,
+                            });
+
+                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
+                            props.reloadTemplates();
+                            props.closePopover();
+                            return;
+                        }
+
+                        addEvent(
+                            {
+                                title: eventName,
+                                start: DateTime.fromJSDate(startDate),
+                                end: DateTime.fromJSDate(endDate),
+                                colorId: eventColor,
+                                extendedProps: {
+                                    ...editableEvent.extendedProps,
+                                    description: eventDescription,
+                                },
+                            },
+                            isAllDay
+                        ).then(_ => {
+                            props.closePopover();
+                        });
+                    }}
+                ><i className='bi-copy' /></Button>
+                <div className='divider' style={{ flexGrow: 1 }} />
                 <Button onClick={() => {
                     props.closePopover();
                 }}>Cancel</Button>

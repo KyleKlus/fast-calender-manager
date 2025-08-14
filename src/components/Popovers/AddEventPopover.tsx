@@ -123,14 +123,12 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                     onChange={() => { setIsAllDay(!isAllDay) }}
                 />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', flexWrap: 'wrap', minWidth: '100%' }}>
-                <ColorSelector
-                    selectedColor={eventColor}
-                    onColorChange={(colorId) => {
-                        setEventColor(colorId);
-                    }}
-                />
-            </div>
+            <ColorSelector
+                selectedColor={eventColor}
+                onColorChange={(colorId) => {
+                    setEventColor(colorId);
+                }}
+            />
             <Form.Control
                 type="text"
                 as={'textarea'}
@@ -139,6 +137,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                 value={eventDescription}
                 onChange={(e) => { setEventDescription(e.target.value) }}
             />
+            <hr />
             <div className='add-popover-buttons'>
                 <Button onClick={() => {
                     props.closePopover();

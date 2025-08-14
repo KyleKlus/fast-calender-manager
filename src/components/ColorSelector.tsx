@@ -48,15 +48,16 @@ const ColorSelector: React.FC<IColorSelectorProps> = (props: IColorSelectorProps
             gridTemplateColumns: `repeat(${props.swatchesPerRow || defaultAmountOfColors}, 1fr)`
         }}>
             {colorMap.filter((color, index) => color !== '' && index !== defaultOutOfRangeColorId).map((color, index) => (
-                <div
+                <button
                     className={['color-selector-swatch', props.selectedColor === index ? 'selected' : ''].join(' ')}
+                    role='button'
                     style={{ backgroundColor: color }}
                     key={index}
                     onClick={() => {
                         if (props.selectedColor === index) { return }
                         props.onColorChange(index);
                     }}
-                ></div>
+                ></button>
             ))}
         </div>
     );

@@ -13,6 +13,10 @@
     overflow: hidden;
 }
 
+.popup-overlay {
+    background: rgba(0, 0, 0, 0.677);
+}
+
 .fcPage .calendar-container {
     width: 100%;
     flex-grow: 1;
@@ -108,6 +112,10 @@
     &:hover:not(.fc-event-past) {
         filter: brightness(1.1);
     }
+}
+
+.fcPage .fc .fc-timegrid-slot-minor {
+    border-top-style: none;
 }
 
 .fcPage .fc .fc-bg-event {
