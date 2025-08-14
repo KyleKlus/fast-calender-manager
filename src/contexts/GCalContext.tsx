@@ -169,29 +169,29 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             }
         });
 
-        // const tasks = (await gcal.listTasks({
-        //     tasklist: '@default',
-        //     showCompleted: false,
-        //     showDeleted: false,
-        //     showDue: true,
-        // })).result.items.filter((e: any) => e.due !== undefined).map((e: any) => {
-        //     console.log(e);
-        //     return {
-        //         id: e.id,
-        //         title: e.title,
-        //         start: e.due, // try timed. will fall back to all-day
-        //         end: e.due, // same
-        //         isAllDay: true,
-        //         url: e.webViewLink,
-        //         description: e.description,
-        //         backgroundColor: getColorFromColorId(7] as string,
-        //         borderColor: getColorFromColorId(7] as string,
-        //         extendedProps: {
-        //             taskStatus: e.status,
-        //         },
-        //     }
-        // });
-        // events = events.concat(tasks);
+        const tasks = (await gcal.listTasks({
+            tasklist: '@default',
+            showCompleted: false,
+            showDeleted: false,
+            showDue: true,
+        })).result.items.filter((e: any) => e.due !== undefined).map((e: any) => {
+            return {
+                id: e.id,
+                title: e.title,
+                start: DateTime.fromISO(e.due ? e.due : DateTime.now().toISO()).toFormat('yyyy-MM-dd'),
+                end: DateTime.fromISO(e.due ? e.due : DateTime.now().toISO()).toFormat('yyyy-MM-dd'), // same
+                allDay: true,
+                url: e.webViewLink,
+                description: e.description,
+                backgroundColor: '#1c70e6ff',
+                borderColor: '#1c70e6ff',
+                extendedProps: {
+                    taskStatus: e.status,
+                    isTask: true,
+                },
+            }
+        });
+        events = events.concat(tasks);
 
         setEvents(events);
         setAreEventsLoaded(true);

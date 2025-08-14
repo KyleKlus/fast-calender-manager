@@ -247,6 +247,23 @@ class GCal {
         }
     }
 
+    public updateTask(task: { title?: string; description?: string; due?: string }, taskId: string, tasklistId: string = this.tasklist, retries: number = MAX_RETRIES): any {
+        if (gapi) {
+            return gapi.client.tasks.tasks.update({
+                tasklist: tasklistId,
+                task: taskId,
+                resource: task,
+            });
+        } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.updateTask(task, taskId, tasklistId, retries - 1);
+            }
+            console.error("Error: gapi not loaded");
+            return false;
+        }
+    }
+
 
     /**
      * Create an event from the current time for a certain period

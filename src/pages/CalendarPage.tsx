@@ -68,6 +68,11 @@ function CalendarPage(props: ICalendarPageProps) {
         info.jsEvent.preventDefault();
         const colorId = getColorIdFromColor(info.event.backgroundColor);
 
+        if (info.event.extendedProps?.isTask) {
+
+            return;
+        }
+
         switch (toolbarMode) {
             case 'none':
                 if (popoverMode === 'none') {
