@@ -19,6 +19,8 @@ interface ExtendedTokenClient extends google.accounts.oauth2.TokenClient {
     error_callback?: (resp: any) => void;
 }
 
+const MAX_RETRIES = 2;
+
 class GCal {
     tokenClient: ExtendedTokenClient | null = null;
     onLoadCallback: any = null;
@@ -176,7 +178,8 @@ class GCal {
      */
     public listUpcomingEvents(
         maxResults: number,
-        calendarId: string = this.calendar
+        calendarId: string = this.calendar,
+        retries: number = MAX_RETRIES
     ): any {
         if (gapi) {
             return gapi.client.calendar.events.list({
@@ -188,6 +191,10 @@ class GCal {
                 orderBy: "startTime",
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.listUpcomingEvents(maxResults, calendarId, retries - 1);
+            }
             console.error("Error: this.gapi not loaded");
             return false;
         }
@@ -202,7 +209,8 @@ class GCal {
      */
     public listEvents(
         queryOptions: object,
-        calendarId: string = this.calendar
+        calendarId: string = this.calendar,
+        retries: number = MAX_RETRIES
     ): any {
         if (gapi) {
             return gapi.client.calendar.events.list({
@@ -210,6 +218,10 @@ class GCal {
                 ...queryOptions,
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.listEvents(queryOptions, calendarId, retries - 1);
+            }
             console.error("Error: gapi not loaded");
             return false;
         }
@@ -217,7 +229,8 @@ class GCal {
 
     public listTasks(
         queryOptions: object,
-        tasklistId: string = this.tasklist
+        tasklistId: string = this.tasklist,
+        retries: number = MAX_RETRIES
     ): any {
         if (gapi) {
             return gapi.client.tasks.tasks.list({
@@ -225,6 +238,10 @@ class GCal {
                 ...queryOptions,
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.listTasks(queryOptions, tasklistId, retries - 1);
+            }
             console.error("Error: gapi not loaded");
             return false;
         }
@@ -271,7 +288,8 @@ class GCal {
     public createEvent(
         event: { summary?: string; description?: string; end: TimeCalendarType; start: TimeCalendarType, colorId?: string },
         calendarId: string = this.calendar,
-        sendUpdates: "all" | "externalOnly" | "none" = "none"
+        sendUpdates: "all" | "externalOnly" | "none" = "none",
+        retries: number = MAX_RETRIES
     ): any {
         if (gapi.client.getToken()) {
             return gapi.client.calendar.events.insert({
@@ -282,6 +300,10 @@ class GCal {
                 conferenceDataVersion: 1,
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.createEvent(event, calendarId, sendUpdates, retries - 1);
+            }
             console.error("Error: this.gapi not loaded");
             return false;
         }
@@ -322,15 +344,19 @@ class GCal {
      * @param {string} calendarId where the event is.
      * @returns {any} Promise resolved when the event is deleted.
      */
-    deleteEvent(eventId: string, calendarId: string = this.calendar): any {
+    deleteEvent(eventId: string, calendarId: string = this.calendar, retries: number = MAX_RETRIES): any {
         if (gapi) {
             return gapi.client.calendar.events.delete({
                 calendarId: calendarId,
                 eventId: eventId,
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.deleteEvent(eventId, calendarId, retries - 1);
+            }
             console.error("Error: gapi is not loaded use onLoad before please.");
-            return null;
+            return false;
         }
     }
 
@@ -346,6 +372,7 @@ class GCal {
         event: { summary?: string; description?: string; end: TimeCalendarType; start: TimeCalendarType, colorId?: string },
         eventId: string,
         calendarId: string = this.calendar,
+        retries: number = MAX_RETRIES
     ): any {
         if (gapi) {
             //@ts-ignore the @types/gapi.calendar package is not up to date(https://developers.google.com/calendar/api/v3/reference/events/patch)
@@ -355,6 +382,10 @@ class GCal {
                 resource: event,
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.updateEvent(event, eventId, calendarId, retries - 1);
+            }
             console.error("Error: gapi is not loaded use onLoad before please.");
             return null;
         }
@@ -367,13 +398,17 @@ class GCal {
      * @returns {any}
      */
 
-    getEvent(eventId: string, calendarId: string = this.calendar): any {
+    getEvent(eventId: string, calendarId: string = this.calendar, retries: number = MAX_RETRIES): any {
         if (gapi) {
             return gapi.client.calendar.events.get({
                 calendarId: calendarId,
                 eventId: eventId,
             });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.getEvent(eventId, calendarId, retries - 1);
+            }
             console.error("Error: gapi is not loaded use onLoad before please.");
             return null;
         }
@@ -383,10 +418,14 @@ class GCal {
      * Get Calendar List
      * @returns {any}
      */
-    listCalendars(): any {
+    listCalendars(retries: number = MAX_RETRIES): any {
         if (gapi) {
             return gapi.client.calendar.calendarList.list();
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.listCalendars(retries - 1);
+            }
             console.error("Error: gapi is not loaded use onLoad before please.");
             return null;
         }
@@ -397,10 +436,14 @@ class GCal {
      * @param {string} summary, title of the calendar.
      * @returns {any}
      */
-    createCalendar(summary: string): any {
+    createCalendar(summary: string, retries: number = MAX_RETRIES): any {
         if (gapi) {
             return gapi.client.calendar.calendars.insert({ summary: summary });
         } else {
+            if (retries > 0) {
+                this.handleAuthClick();
+                return this.createCalendar(summary, retries - 1);
+            }
             console.error("Error: gapi is not loaded use onLoad before please.");
             return null;
         }
