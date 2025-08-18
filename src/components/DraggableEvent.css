@@ -10,6 +10,16 @@
     overflow: hidden;
 }
 
+.draggable-event.is-selected {
+    outline: var(--bs-border-color) solid 2px;
+    box-shadow: inset 0 2px 2px #ffffff4f, 4px 4px 4px #00000080;
+
+    &:hover {
+        outline: var(--bs-border-color) solid 2px;
+        box-shadow: inset 0 2px 2px #ffffff4f, 4px 4px 4px #00000080;
+    }
+}
+
 .draggable-event .duration,
 .draggable-event .title {
     padding: 0.2rem;
@@ -21,4 +31,19 @@
 
 .draggable-event .title {
     flex-grow: 1;
+}
+
+.edit-template-button {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.277);
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }

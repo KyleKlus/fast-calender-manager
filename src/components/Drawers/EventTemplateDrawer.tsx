@@ -8,7 +8,9 @@ import Drawer from './Drawer';
 
 export interface IEventTemplateDrawerProps {
     onAddClick: () => void;
-    onEditClick: (eventTemplate: SimplifiedEvent) => void;
+    onEditClick: (eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => void;
+    selectedEventTemplateIndex: number;
+    setSelectedEventTemplate: (selectedEventTemplate: SimplifiedEvent | null, selectedEventTemplateIndex: number) => void;
     shouldReload: boolean;
     confirmReload: () => void;
 }
@@ -16,9 +18,7 @@ export interface IEventTemplateDrawerProps {
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
     const [isEventTemplateOpen, setEventTemplateOpen] = useState(false);
     const [eventTemplates, setEventTemplates] = useState<SimplifiedEvent[]>([]);
-    const [draggedTemplate, setDraggedTemplate] = useState<{ event: SimplifiedEvent, index: number } | undefined>(undefined);
     const isSpaceKeyPressed = useKeyPress(' ');
-    const [isInEditMode, setIsInEditMode] = useState(false);
 
     useEffect(() => {
         if (isSpaceKeyPressed) {
@@ -27,19 +27,52 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
     }, [isSpaceKeyPressed]);
 
     useEffect(() => {
-        loadedEventTemplates();
+        loadEventTemplates();
     }, []);
 
     useEffect(() => {
-        loadedEventTemplates();
+        loadEventTemplates();
         props.confirmReload();
     }, [props.shouldReload]);
 
-    function loadedEventTemplates() {
+    function loadEventTemplates() {
         const loadedEventTemplates = localStorage.getItem('eventTemplates');
         if (loadedEventTemplates) {
             setEventTemplates(JSON.parse(loadedEventTemplates));
         }
+    }
+
+    function switchTemplate(direction?: 'prev' | 'next', index?: number) {
+        const selectedIndex = props.selectedEventTemplateIndex;
+        if (selectedIndex === -1) { return }
+
+        const loadedEventTemplates = localStorage.getItem('eventTemplates');
+        let newEventTemplates: SimplifiedEvent[] = [];
+        if (loadedEventTemplates) {
+            newEventTemplates = JSON.parse(loadedEventTemplates);
+        } else {
+            return;
+        }
+
+        if ((direction === 'prev' && selectedIndex === 0) || (direction === 'next' && selectedIndex === newEventTemplates.length - 1)) {
+            props.setSelectedEventTemplate(null, -1);
+            return;
+        }
+
+        if (direction === 'prev' && index === undefined) {
+            newEventTemplates.splice(selectedIndex, 1);
+            newEventTemplates.splice(selectedIndex - 1, 0, eventTemplates[selectedIndex]);
+        } else if (direction === 'next' && index === undefined) {
+            newEventTemplates.splice(selectedIndex, 1);
+            newEventTemplates.splice(selectedIndex + 1, 0, eventTemplates[selectedIndex]);
+        } else if (index !== undefined) {
+            newEventTemplates[selectedIndex] = eventTemplates[index];
+            newEventTemplates[index] = eventTemplates[selectedIndex];
+        }
+
+        localStorage.setItem('eventTemplates', JSON.stringify(newEventTemplates));
+        loadEventTemplates();
+        props.setSelectedEventTemplate(null, -1);
     }
 
     function createTemplateElements(eventTemplates: SimplifiedEvent[]) {
@@ -49,8 +82,18 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
             templateElements.push(<DraggableEvent
                 key={eventTemplates[i].title + i}
                 eventTemplate={eventTemplates[i]}
-                onClick={() => {
-                    props.onEditClick(eventTemplates[i]);
+                isSelected={props.selectedEventTemplateIndex === i}
+                onEditClick={() => {
+                    props.onEditClick(eventTemplates[i], i);
+                }}
+                onTemplateClick={() => {
+                    if (props.selectedEventTemplateIndex === i) {
+                        props.setSelectedEventTemplate(null, -1);
+                    } else if (props.selectedEventTemplateIndex === -1) {
+                        props.setSelectedEventTemplate(eventTemplates[i], i);
+                    } else {
+                        switchTemplate(undefined, i);
+                    }
                 }}
             />);
         }

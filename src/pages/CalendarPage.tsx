@@ -30,12 +30,13 @@ function CalendarPage(props: ICalendarPageProps) {
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
-    const [selectedEventTemplate, setSelectedEventTemplate] = useState<SimplifiedEvent | undefined>(undefined);
+    const [selectedEventTemplate, setSelectedEventTemplate] = useState<{ template: SimplifiedEvent | null, index: number }>({ template: null, index: -1 });
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [shouldReloadTemplates, setShouldReloadTemplates] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
+
 
     const isRightArrowKeyPressed = useKeyPress('ArrowRight');
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
@@ -147,14 +148,14 @@ function CalendarPage(props: ICalendarPageProps) {
             case 'edit':
                 return (
                     <EditEventPopover
-                        selectedEventTemplate={selectedEventTemplate}
+                        selectedEventTemplate={selectedEventTemplate.template === null ? undefined : selectedEventTemplate.template}
                         popoverMode={popoverMode}
                         reloadTemplates={() => { setShouldReloadTemplates(true) }}
                         closePopover={() => {
                             setPopoverMode('none');
                             setPopoverOpen(false);
                             setShortcutsEnabled(true);
-                            setSelectedEventTemplate(undefined);
+                            setSelectedEventTemplate({ template: null, index: -1 });
                         }}
                     />
                 );
@@ -292,14 +293,16 @@ function CalendarPage(props: ICalendarPageProps) {
         <EventTemplateDrawer
             shouldReload={shouldReloadTemplates}
             confirmReload={() => { setShouldReloadTemplates(false) }}
+            selectedEventTemplateIndex={selectedEventTemplate.index}
+            setSelectedEventTemplate={(eventTemplate: SimplifiedEvent | null, eventTemplateIndex: number) => { setSelectedEventTemplate({ template: eventTemplate, index: eventTemplateIndex }) }}
             onAddClick={() => {
                 setPopoverMode('add-template');
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
             }}
-            onEditClick={(eventTemplate: SimplifiedEvent) => {
+            onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
                 setPopoverMode('edit-template');
-                setSelectedEventTemplate(eventTemplate);
+                setSelectedEventTemplate({ template: eventTemplate, index: eventTemplateIndex });
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
             }}
