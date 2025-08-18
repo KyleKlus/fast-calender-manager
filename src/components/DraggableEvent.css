@@ -8,6 +8,7 @@
     text-wrap: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    color: #ffffff;
 }
 
 .draggable-event.is-selected {
@@ -31,6 +32,8 @@
 
 .draggable-event .title {
     flex-grow: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .edit-template-button {
@@ -40,7 +43,7 @@
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.277);
+    background-color: rgba(255, 255, 255, 0.552);
     border: 1px solid black;
     display: flex;
     align-items: center;

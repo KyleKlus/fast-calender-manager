@@ -37,6 +37,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const [shouldReloadTemplates, setShouldReloadTemplates] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
 
+    const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
 
     const isRightArrowKeyPressed = useKeyPress('ArrowRight');
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
@@ -71,6 +72,8 @@ function CalendarPage(props: ICalendarPageProps) {
 
             return;
         }
+
+
 
         switch (toolbarMode) {
             case 'none':
@@ -131,6 +134,8 @@ function CalendarPage(props: ICalendarPageProps) {
                         selectedColor={selectedColor}
                         startDate={selectedStartDate}
                         endDate={selectedEndDate}
+                        title={selectedEventTemplate.template !== null ? selectedEventTemplate.template.title : undefined}
+                        description={selectedEventTemplate.template !== null ? selectedEventTemplate.template.description : undefined}
                         isAllDay={isAllDay}
                         closePopover={() => {
                             if (popoverMode === 'add-template') {
@@ -183,8 +188,36 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function select(info: DateSelectArg) {
+        if (!showAddPopoverWithTemplate && selectedEventTemplate.template !== null) {
+            const start = DateTime.fromJSDate(info.start);
+            const duration = DateTime.fromISO(selectedEventTemplate.template.end).diff(DateTime.fromISO(selectedEventTemplate.template.start)).as('minutes');
+            const end = DateTime.fromJSDate(info.start).plus({ minute: duration });
+
+            const isAllDay = start.toFormat('HH:mm') === end.toFormat('HH:mm');
+
+            addEvent({
+                title: selectedEventTemplate.template.title,
+                start: start,
+                end: end,
+                colorId: selectedEventTemplate.template.colorId,
+                extendedProps: {
+                    description: selectedEventTemplate.template.description,
+                },
+            }, isAllDay);
+            (document.getElementsByClassName('fc')[0] as HTMLElement).click();
+
+            return;
+        }
+
         setSelectedStartDate(info.start);
-        setSelectedEndDate(info.end);
+        if (showAddPopoverWithTemplate && selectedEventTemplate.template !== null) {
+            const duration = DateTime.fromISO(selectedEventTemplate.template.end).diff(DateTime.fromISO(selectedEventTemplate.template.start)).as('minutes');
+            const end = DateTime.fromJSDate(info.start).plus({ minute: duration });
+            setSelectedEndDate(end.toJSDate());
+            setSelectedColor(selectedEventTemplate.template.colorId);
+        } else {
+            setSelectedEndDate(info.end);
+        }
         setPopoverMode('add');
         setShortcutsEnabled(false);
         setPopoverOpen(true);
@@ -294,15 +327,18 @@ function CalendarPage(props: ICalendarPageProps) {
             shouldReload={shouldReloadTemplates}
             confirmReload={() => { setShouldReloadTemplates(false) }}
             selectedEventTemplateIndex={selectedEventTemplate.index}
-            setSelectedEventTemplate={(eventTemplate: SimplifiedEvent | null, eventTemplateIndex: number) => { setSelectedEventTemplate({ template: eventTemplate, index: eventTemplateIndex }) }}
+            setSelectedEventTemplate={(eventTemplate: SimplifiedEvent | null, eventTemplateIndex: number) => {
+                setSelectedEventTemplate({ template: eventTemplate, index: eventTemplateIndex })
+            }}
             onAddClick={() => {
                 setPopoverMode('add-template');
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
             }}
             onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
+                const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
                 setPopoverMode('edit-template');
-                setSelectedEventTemplate({ template: eventTemplate, index: eventTemplateIndex });
+                setSelectedEventTemplate(newTemplate);
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
             }}

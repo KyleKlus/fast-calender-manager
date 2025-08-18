@@ -48,14 +48,20 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onEditCl
         <div ref={eventRef}
             className={['draggable-event', 'fc-event', className, isSelected ? 'is-selected' : ''].join(' ')}
             style={{ backgroundColor: getColorFromColorId(eventTemplate.colorId) }}
-            onClick={() => { onTemplateClick && onTemplateClick() }}
+            onClick={(e) => {
+                e.stopPropagation();
+                onTemplateClick && onTemplateClick()
+            }}
             onMouseOver={() => { setIsHovered(true) }}
             onMouseOut={() => { setIsHovered(false) }}
         >
             <div className='duration'>{durationInHours}h</div>
             <div className='title'>{eventTemplate.title}</div>
             {isHovered &&
-                <button className='edit-template-button' onClick={() => { onEditClick && onEditClick() }}>
+                <button className='edit-template-button' onClick={(e) => {
+                    e.stopPropagation();
+                    onEditClick && onEditClick()
+                }}>
                     <i className='bi bi-pencil-square'></i>
                 </button>
             }

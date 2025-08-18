@@ -13,6 +13,8 @@ import { useKeyPress } from '../../hooks/useKeyPress';
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
     selectedColor?: number;
+    title?: string;
+    description?: string;
     startDate: Date | undefined;
     endDate: Date | undefined;
     isAllDay: boolean | undefined;
@@ -22,10 +24,10 @@ export interface IAddEventPopoverProps {
 const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopoverProps) => {
     const { addEvent } = useContext(GCalContext);
     const [isAllDay, setIsAllDay] = useState(props.isAllDay || false);
-    const [eventName, setEventName] = useState('');
+    const [eventName, setEventName] = useState(props.title || '');
     const [startDate, setStartDate] = useState(props.startDate || DateTime.now().toJSDate());
     const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate());
-    const [eventDescription, setEventDescription] = useState('');
+    const [eventDescription, setEventDescription] = useState(props.description || '');
     const [eventColor, setEventColor] = useState(props.selectedColor || defaultColorId);
     const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
 
