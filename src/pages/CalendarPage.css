@@ -99,19 +99,8 @@
 .fcPage .fc-event {
     --bs-btn-box-shadow: ;
     border-radius: 6px;
-    box-shadow: inset 0 2px 2px #ffffff33,
-        2px 2px 2px #00000080;
+    box-shadow: 2px 2px 2px #00000080;
     outline: var(--bs-border-color) solid 1px;
-
-    &:hover {
-        box-shadow: inset 0 2px 2px #ffffff4f,
-            4px 4px 4px #00000080;
-        outline: var(--bs-border-color) solid 1.5px;
-    }
-
-    &:hover:not(.fc-event-past) {
-        filter: brightness(1.1);
-    }
 }
 
 .fcPage .fc .fc-timegrid-slot-minor {
@@ -120,16 +109,10 @@
 
 .fcPage .fc .fc-bg-event {
     opacity: 0.8 !important;
+    border: none !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
 
-    &:hover {
-        box-shadow: inset 0 2px 2px #ffffff33,
-            2px 2px 2px #00000080;
-        outline: var(--bs-border-color) solid 1px;
-    }
-
-    &:hover:not(.fc-event-past) {
-        filter: unset;
-    }
 }
 
 .fcPage .fc-direction-ltr .fc-timegrid-col-events {
