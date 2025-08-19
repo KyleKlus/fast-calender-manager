@@ -5,6 +5,7 @@ import React from 'react';
 import { EventInput } from '@fullcalendar/core';
 import { defaultColorId, defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
 import { EventContext } from './EventContext';
+import { useKeyPress } from '../hooks/useKeyPress';
 
 let config: {
     clientId: string;
@@ -123,15 +124,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
     const [isSyncOn, setIsSyncOn] = useState(false);
 
-    async function login(): Promise<void> {
-        if (gcal === undefined) { return }
-        await gcal.handleAuthClick().then((res) => {
-            setIsLoggedIn(true);
-            setIsTryingToAutoLogin(false);
-            localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
-        });
-    }
-
     useEffect(() => {
         if (isTryingToAutoLogin) {
             setTimeout(() => {
@@ -157,6 +149,15 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             clearInterval(interval);
         }
     });
+
+    async function login(): Promise<void> {
+        if (gcal === undefined) { return }
+        await gcal.handleAuthClick().then((res) => {
+            setIsLoggedIn(true);
+            setIsTryingToAutoLogin(false);
+            localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
+        });
+    }
 
     function switchWeek(direction: 'prev' | 'next' | 'today') {
         if (isCurrentlyLoading) return;

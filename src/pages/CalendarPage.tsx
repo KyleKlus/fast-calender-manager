@@ -38,27 +38,12 @@ function CalendarPage(props: ICalendarPageProps) {
 
     const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
 
-    const isRightArrowKeyPressed = useKeyPress('ArrowRight');
-    const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
-
-    useEffect(() => {
-        if (isLeftArrowKeyPressed) {
-            switchWeek('prev');
-        }
-    }, [isLeftArrowKeyPressed]);
-
-    useEffect(() => {
-        if (isRightArrowKeyPressed) {
-            switchWeek('next');
-        }
-    }, [isRightArrowKeyPressed]);
-
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
         const colorId = getColorIdFromColor(info.event.backgroundColor);
 
         if (info.event.extendedProps?.isTask) {
-
+            window.open('https://calendar.google.com/calendar/u/0/r/tasks', '_blank');
             return;
         }
 
@@ -203,15 +188,6 @@ function CalendarPage(props: ICalendarPageProps) {
             }}
             onModeChange={(mode) => {
                 setToolbarMode(toolbarMode === mode ? 'none' : mode);
-            }}
-            onPrevWeekClick={() => {
-                switchWeek('prev');
-            }}
-            onNextWeekClick={() => {
-                switchWeek('next');
-            }}
-            onTodayClick={() => {
-                switchWeek('today');
             }}
         />
         < div className='calendar-container' >

@@ -16,14 +16,11 @@ export interface IToolBarDrawerProps {
     selectColor: (colorId: number) => void;
     onAddClick: () => void;
     onModeChange: (mode: ToolbarMode) => void;
-    onTodayClick: () => void;
-    onPrevWeekClick: () => void;
-    onNextWeekClick: () => void;
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
-    const { isSyncOn, setIsSyncOn, isCurrentlyLoading, loadEvents } = useContext(GCalContext);
-    const { events, setEvents, areBGEventsEditable, setBGEventsEditable, dateInView: date, setDateInView: setDate } = useContext(EventContext);
+    const { isSyncOn, setIsSyncOn, switchWeek } = useContext(GCalContext);
+    const { events, setEvents, areBGEventsEditable, setBGEventsEditable, setDateInView: setDate } = useContext(EventContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
     const isTKeyPressed = useKeyPress('t');
@@ -34,6 +31,21 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
     const isAKeyPressed = useKeyPress('a');
     const isPKeyPressed = useKeyPress('p');
 
+    const isRightArrowKeyPressed = useKeyPress('ArrowRight');
+    const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
+
+    useEffect(() => {
+        if (isLeftArrowKeyPressed) {
+            switchWeek('prev');
+        }
+    }, [isLeftArrowKeyPressed]);
+
+    useEffect(() => {
+        if (isRightArrowKeyPressed) {
+            switchWeek('next');
+        }
+    }, [isRightArrowKeyPressed]);
+
     useEffect(() => {
         if (isSpaceKeyPressed) {
             setToolbarOpen(!isToolbarOpen);
@@ -42,7 +54,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
 
     useEffect(() => {
         if (isTKeyPressed) {
-            props.onTodayClick();
+            switchWeek('today');
         }
     }, [isTKeyPressed]);
 
@@ -108,16 +120,16 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 <>
                     <div
                         className='toolbar-navigation-button left-button'
-                        onClick={() => { props.onPrevWeekClick && props.onPrevWeekClick() }}
+                        onClick={() => { switchWeek('prev') }}
                     >
                         <i className='bi-chevron-double-left'></i>
                     </div>
-                    <div className='today-button' onClick={() => { props.onTodayClick && props.onTodayClick() }}>
+                    <div className='today-button' onClick={() => { switchWeek('today') }}>
                         <i className={`bi-calendar-event`}></i>
                     </div>
                     <div
                         className='toolbar-navigation-button right-button'
-                        onClick={() => { props.onNextWeekClick && props.onNextWeekClick() }}
+                        onClick={() => { switchWeek('next') }}
                     >
                         <i className='bi-chevron-double-right'></i>
                     </div>
