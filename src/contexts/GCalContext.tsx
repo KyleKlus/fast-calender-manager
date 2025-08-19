@@ -117,7 +117,7 @@ const GCalContext = createContext<IGCalContext>({
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
-    const { events, setEvents, setAreEventsLoaded, dateInView: date, areBGEventsEditable } = useContext(EventContext);
+    const { events, setEvents, setAreEventsLoaded, dateInView, areBGEventsEditable, setDateInView } = useContext(EventContext);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
@@ -142,7 +142,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
 
     useEffect(() => {
         if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
-            loadEvents(date);
+            loadEvents(dateInView);
         }
     }, [isSyncOn]);
 
@@ -150,7 +150,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         const interval = setInterval(() => {
             if (isLoggedIn && !isCurrentlyLoading && isSyncOn) {
                 clearInterval(interval);
-                loadEvents(date);
+                loadEvents(dateInView);
             }
         }, 20000);
         return () => {
@@ -162,7 +162,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         if (isCurrentlyLoading) return;
         const newWeek = direction === 'today'
             ? DateTime.now()
-            : date.plus({ weeks: direction === 'prev' ? -1 : 1 });
+            : dateInView.plus({ weeks: direction === 'prev' ? -1 : 1 });
+
+        setDateInView(newWeek);
 
         loadEvents(newWeek);
 
@@ -185,7 +187,6 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             singleEvents: true,
             orderBy: 'startTime',
         })).result.items.map((e: any) => {
-            setIsCurrentlyLoading(false);
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
             const isBackgroundEvent = title.startsWith('Arbeitszeit') || title.startsWith('Unizeit') || title.startsWith('Freizeit') || title.startsWith('Urlaub');
@@ -233,6 +234,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         });
         events = events.concat(tasks);
 
+        setIsCurrentlyLoading(false);
         setEvents(events);
         setAreEventsLoaded(true);
     }
