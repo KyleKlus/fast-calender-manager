@@ -21,7 +21,7 @@ export interface IEditEventPopoverProps {
 }
 
 const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPopoverProps) => {
-    const { editEvent, addEvent, deleteEvent } = useContext(GCalContext);
+    const { editEvent, addEvent, deleteEvent, splitEvent } = useContext(GCalContext);
     const { selectedTemplate, resetSelectedTemplate, editTemplate, switchSelectedTemplate, deleteTemplate, addTemplate } = useContext(TemplateContext);
     const { selectedEvents: currentEvents } = useContext(EventContext);
 
@@ -224,6 +224,29 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                             });
                         }}
                     ><i className='bi-copy' /></Button>
+                    {props.popoverMode !== 'edit-template' &&
+                        <Button
+                            onClick={() => {
+                                if (eventName === '') { return }
+                                splitEvent(
+                                    {
+                                        title: eventName,
+                                        start: DateTime.fromJSDate(startDate),
+                                        end: DateTime.fromJSDate(endDate),
+                                        colorId: eventColor,
+                                        extendedProps: {
+                                            ...editableEvent.extendedProps,
+                                            description: eventDescription,
+                                        },
+                                    },
+                                    (editableEvent.id as string), // is always defined
+                                    isAllDay
+                                ).then(_ => {
+                                    props.closePopover();
+                                });
+                            }}
+                        ><i className='bi-hr' /></Button>
+                    }
                     <div className='divider' style={{ flexGrow: 1 }} />
                     <Button onClick={() => {
                         props.closePopover();

@@ -6,10 +6,9 @@ import { GCalContext } from '../../contexts/GCalContext';
 import ColorSelector, { getColorFromColorId } from '../ColorSelector';
 import { EventInput } from '@fullcalendar/core';
 import { EventContext } from '../../contexts/EventContext';
-import { DateTime } from 'luxon';
 import Drawer from './Drawer';
 
-export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'none';
+export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'split' | 'none';
 
 export interface IToolBarDrawerProps {
     selectedColor: number;
@@ -68,7 +67,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
 
     useEffect(() => {
         if (isSKeyPressed && isToolbarOpen) {
-            setIsSyncOn(!isSyncOn);
+            props.onModeChange && props.onModeChange('split');
         }
     }, [isSKeyPressed]);
 
@@ -170,6 +169,16 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     }}
                 >
                     <i className={`bi-copy`}></i>
+                </Button>
+                <Button
+                    variant="primary"
+                    active={props.selectedMode === 'split'}
+                    className='split-event-button'
+                    onClick={() => {
+                        props.onModeChange && props.onModeChange('split')
+                    }}
+                >
+                    <i className={`bi-hr`}></i>
                 </Button>
             </ButtonGroup>
             <div className='toolbar-divider'></div>

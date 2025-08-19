@@ -26,7 +26,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
 
-    const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek } = useContext(GCalContext);
+    const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek, splitEvent } = useContext(GCalContext);
     const { events, dateInView: date, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
@@ -100,42 +100,18 @@ function CalendarPage(props: ICalendarPageProps) {
 
                 }, info.event.id, info.event.allDay)
                 break;
-        }
-    }
+            case 'split':
+                splitEvent({
+                    title: info.event.title,
+                    start: DateTime.fromJSDate(info.event.start ? info.event.start : DateTime.now().toJSDate()),
+                    end: DateTime.fromJSDate(info.event.end ? info.event.end : DateTime.now().plus({ hour: 1 }).toJSDate()),
+                    colorId: colorId,
+                    extendedProps: {
+                        ...info.event.extendedProps,
+                        description: info.event.extendedProps?.description,
+                    },
 
-    function getCorrectPopoverDisplay(popoverMode: PopoverMode) {
-        switch (popoverMode) {
-            case 'add':
-            case 'add-template':
-                return (
-                    <AddEventPopover
-                        popoverMode={popoverMode}
-                        open={popoverOpen}
-                        selectedColor={selectedColor}
-                        startDate={selectedStartDate}
-                        endDate={selectedEndDate}
-                        closePopover={() => {
-                            setSelectedStartDate(undefined);
-                            setSelectedEndDate(undefined);
-                            setPopoverMode('none');
-                            setPopoverOpen(false);
-                            setShortcutsEnabled(true);
-                        }}
-                    />
-                );
-            case 'edit-template':
-            case 'edit':
-                return (
-                    <EditEventPopover
-                        open={popoverOpen}
-                        popoverMode={popoverMode}
-                        closePopover={() => {
-                            setPopoverMode('none');
-                            setPopoverOpen(false);
-                            setShortcutsEnabled(true);
-                        }}
-                    />
-                );
+                }, info.event.id, info.event.allDay)
         }
     }
 
@@ -288,9 +264,31 @@ function CalendarPage(props: ICalendarPageProps) {
                 setPopoverOpen(true);
             }}
         />
-        {
-            popoverOpen && popoverMode !== 'none' && (
-                getCorrectPopoverDisplay(popoverMode)
+        {popoverOpen &&
+            (popoverMode === 'add-template' || popoverMode === 'add'
+                ? <AddEventPopover
+                    popoverMode={popoverMode}
+                    open={popoverOpen}
+                    selectedColor={selectedColor}
+                    startDate={selectedStartDate}
+                    endDate={selectedEndDate}
+                    closePopover={() => {
+                        setSelectedStartDate(undefined);
+                        setSelectedEndDate(undefined);
+                        setPopoverMode('none');
+                        setPopoverOpen(false);
+                        setShortcutsEnabled(true);
+                    }}
+                />
+                : <EditEventPopover
+                    open={popoverOpen}
+                    popoverMode={popoverMode}
+                    closePopover={() => {
+                        setPopoverMode('none');
+                        setPopoverOpen(false);
+                        setShortcutsEnabled(true);
+                    }}
+                />
             )
         }
     </div >

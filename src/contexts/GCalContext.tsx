@@ -65,6 +65,17 @@ interface IGCalContext {
         isAllDay?: boolean
     ) => Promise<void>;
     switchWeek: (direction: 'prev' | 'next' | 'today') => void;
+    splitEvent: (event: {
+        title: string;
+        start: DateTime;
+        end: DateTime;
+        colorId: number;
+        extendedProps: { description?: string }
+    },
+        eventId: string,
+        isAllDay?: boolean,
+        percent?: number
+    ) => Promise<void>;
 }
 
 const GCalContext = createContext<IGCalContext>({
@@ -92,6 +103,17 @@ const GCalContext = createContext<IGCalContext>({
         isAllDay?: boolean
     ) => { },
     switchWeek: (direction: 'prev' | 'next' | 'today') => { },
+    splitEvent: async (event: {
+        title: string;
+        start: DateTime;
+        end: DateTime;
+        colorId: number;
+        extendedProps: { description?: string }
+    },
+        eventId: string,
+        isAllDay?: boolean,
+        percent?: number
+    ) => { },
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
@@ -348,8 +370,129 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         });
     }
 
+    async function splitEvent(event: {
+        title: string;
+        start: DateTime;
+        end: DateTime;
+        colorId: number;
+        extendedProps: { description?: string }
+    },
+        eventId: string,
+        isAllDay?: boolean,
+        percent: number = 50
+    ) {
+        if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
+        setIsCurrentlyLoading(true);
+        deleteEvent(eventId);
+
+        const start = event.start.toISO() as string;
+        const startDate = event.start.toFormat('yyyy-MM-dd');
+        const startZone = event.start.zoneName;
+
+        const end = event.end.toISO();
+        const endDate = event.end.toFormat('yyyy-MM-dd');
+        const endZone = event.end.zoneName;
+
+        const durationInMinutes = event.end.diff(event.start).as('minutes');
+
+        const firstHalfEnd = DateTime.fromISO(start).plus({ minutes: percent * durationInMinutes / 100 });
+        const firstHalfEndIso = firstHalfEnd.toISO();
+        const firstHalfEndDate = firstHalfEnd.toFormat('yyyy-MM-dd');
+        const secondHalfStart = DateTime.fromISO(start).plus({ minutes: (100 - percent) * durationInMinutes / 100 });
+        const secondHalfStartIso = secondHalfStart.toISO();
+        const secondHalfStartDate = secondHalfStart.toFormat('yyyy-MM-dd');
+
+        const firstEvent = await gcal.createEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: isAllDay
+                ? {
+                    date: startDate,
+                }
+                : {
+                    dateTime: start === null ? undefined : start,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: firstHalfEndDate }
+                : {
+                    dateTime: firstHalfEndIso === null ? undefined : firstHalfEndIso,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
+        }).then((res: any) => {
+            const e = res.result;
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0) && !areBGEventsEditable;
+            return {
+                id: e.id,
+                title: e.summary,
+                start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
+                // url: e.htmlLink,
+                location: e.location,
+                description: e.description,
+                attachments: e.attachments || [],
+                extendedProps: {
+                    description: e.description,
+                },
+                display: isBackgroundEvent ? 'background' : 'auto',
+                backgroundColor: color,
+                borderColor: color,
+            }
+        });
+
+        const secondEvent = await gcal.createEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: isAllDay
+                ? {
+                    date: secondHalfStartDate,
+                }
+                : {
+                    dateTime: secondHalfStartIso === null ? undefined : secondHalfStartIso,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: endDate }
+                : {
+                    dateTime: end === null ? undefined : end,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
+        }).then((res: any) => {
+            const e = res.result;
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0) && !areBGEventsEditable;
+            return {
+                id: e.id,
+                title: e.summary,
+                start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
+                // url: e.htmlLink,
+                location: e.location,
+                description: e.description,
+                attachments: e.attachments || [],
+                extendedProps: {
+                    description: e.description,
+                },
+                display: isBackgroundEvent ? 'background' : 'auto',
+                backgroundColor: color,
+                borderColor: color,
+            }
+        });
+
+        setEvents([...events.filter(e => e.id !== eventId), firstEvent, secondEvent]);
+
+        setIsCurrentlyLoading(false);
+    }
+
     return (
-        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, login, isTryingToAutoLogin, isCurrentlyLoading, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn, switchWeek }}>
+        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, login, isTryingToAutoLogin, isCurrentlyLoading, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn, switchWeek, splitEvent }}>
             {props.children}
         </GCalContext.Provider>
     );
