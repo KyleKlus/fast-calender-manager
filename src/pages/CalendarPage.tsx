@@ -17,6 +17,7 @@ import { KeyboardShortcutContext } from '../contexts/KeyboardShortcutContext';
 import { EventContext } from '../contexts/EventContext';
 import { SimplifiedEvent, convertEventImplToEventInput } from '../handlers/eventConverters';
 import { TemplateContext } from '../contexts/TemplateContext';
+import { WeatherContext } from '../contexts/WeatherContext';
 
 export interface ICalendarPageProps { }
 
@@ -25,6 +26,7 @@ export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'n
 function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
+    const { sunrise, sunset, hourlyWeather, isLoadingWeather, insertWeather } = useContext(WeatherContext);
 
     const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek, splitEvent } = useContext(GCalContext);
     const { events, dateInView: date, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
@@ -37,6 +39,12 @@ function CalendarPage(props: ICalendarPageProps) {
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
 
     const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
+
+    useEffect(() => {
+        if (hourlyWeather.length > 0) {
+            insertWeather()
+        }
+    }, []);
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
