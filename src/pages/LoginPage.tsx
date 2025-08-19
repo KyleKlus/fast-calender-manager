@@ -6,7 +6,7 @@ import { Spinner } from 'react-bootstrap';
 interface ILoginPageProps { }
 
 function LoginPage(props: ILoginPageProps) {
-    const { isTryingToAutoLogin, gcal, setIsLoggedIn } = useContext(GCalContext);
+    const { isTryingToAutoLogin, login } = useContext(GCalContext);
 
     return (
         <div style={{
@@ -14,11 +14,7 @@ function LoginPage(props: ILoginPageProps) {
         }}>
             {!isTryingToAutoLogin
                 ? <button onClick={() => {
-                    if (gcal === undefined) { return }
-                    gcal.handleAuthClick().then((res) => {
-                        setIsLoggedIn(true);
-                        localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
-                    });
+                    login();
                 }}>
                     Log in
                 </button>

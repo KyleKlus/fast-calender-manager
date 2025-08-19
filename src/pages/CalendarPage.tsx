@@ -3,13 +3,10 @@ import FullCalendar from '@fullcalendar/react';
 import { DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/core';
 import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
 import { useContext, useEffect, useState } from 'react';
-import { Card, } from 'react-bootstrap';
 import { DateTime } from 'luxon';
-import Popup from 'reactjs-popup';
 
 import { generateFCConfig } from '../handlers/fullCalendarConfigHandler';
 import ToolBarDrawer, { ToolbarMode } from '../components/Drawers/ToolBarDrawer';
-import { convertEventImplToEventInput, EventContext, SimplifiedEvent } from '../contexts/EventContext';
 import EventTemplateDrawer from '../components/Drawers/EventTemplateDrawer';
 import AddEventPopover from '../components/Popovers/AddEventPopover';
 import EditEventPopover from '../components/Popovers/EditEventPopover';
@@ -17,6 +14,9 @@ import { useKeyPress } from '../hooks/useKeyPress';
 import { GCalContext } from '../contexts/GCalContext';
 import { defaultColorId, getColorIdFromColor } from '../components/ColorSelector';
 import { KeyboardShortcutContext } from '../contexts/KeyboardShortcutContext';
+import { EventContext } from '../contexts/EventContext';
+import { SimplifiedEvent, convertEventImplToEventInput } from '../handlers/eventConverters';
+import { TemplateContext } from '../contexts/TemplateContext';
 
 export interface ICalendarPageProps { }
 
@@ -24,17 +24,16 @@ export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'n
 
 function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
+    const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
 
-    const { isCurrentlyLoading, loadEvents, deleteEvent, editEvent, addEvent } = useContext(GCalContext);
-    const { events, date, setDate, setCurrentEvents } = useContext(EventContext);
+    const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek } = useContext(GCalContext);
+    const { events, dateInView: date, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
-    const [selectedEventTemplate, setSelectedEventTemplate] = useState<{ template: SimplifiedEvent | null, index: number }>({ template: null, index: -1 });
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
-    const [shouldReloadTemplates, setShouldReloadTemplates] = useState(false);
     const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
 
     const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
@@ -44,23 +43,13 @@ function CalendarPage(props: ICalendarPageProps) {
 
     useEffect(() => {
         if (isLeftArrowKeyPressed) {
-            if (isCurrentlyLoading) return;
-
-            const prevWeek = date.minus({ weeks: 1 });
-            setDate(prevWeek);
-            loadEvents(prevWeek);
-            (document.getElementsByClassName('fc-prev-button')[0] as HTMLButtonElement)?.click();
+            switchWeek('prev');
         }
     }, [isLeftArrowKeyPressed]);
 
     useEffect(() => {
         if (isRightArrowKeyPressed) {
-            if (isCurrentlyLoading) return;
-
-            const nextWeek = date.plus({ weeks: 1 });
-            setDate(nextWeek);
-            loadEvents(nextWeek);
-            (document.getElementsByClassName('fc-next-button')[0] as HTMLButtonElement)?.click();
+            switchWeek('next');
         }
     }, [isRightArrowKeyPressed]);
 
@@ -72,8 +61,6 @@ function CalendarPage(props: ICalendarPageProps) {
 
             return;
         }
-
-
 
         switch (toolbarMode) {
             case 'none':
@@ -120,27 +107,14 @@ function CalendarPage(props: ICalendarPageProps) {
         switch (popoverMode) {
             case 'add':
             case 'add-template':
-                let isAllDay = undefined;
-                if (selectedStartDate && selectedEndDate) {
-                    const start = DateTime.fromJSDate(selectedStartDate);
-                    const end = DateTime.fromJSDate(selectedEndDate);
-
-                    isAllDay = start.toFormat('HH:mm') === end.toFormat('HH:mm');
-                }
-
                 return (
                     <AddEventPopover
                         popoverMode={popoverMode}
+                        open={popoverOpen}
                         selectedColor={selectedColor}
                         startDate={selectedStartDate}
                         endDate={selectedEndDate}
-                        title={selectedEventTemplate.template !== null ? selectedEventTemplate.template.title : undefined}
-                        description={selectedEventTemplate.template !== null ? selectedEventTemplate.template.description : undefined}
-                        isAllDay={isAllDay}
                         closePopover={() => {
-                            if (popoverMode === 'add-template') {
-                                setShouldReloadTemplates(true);
-                            }
                             setSelectedStartDate(undefined);
                             setSelectedEndDate(undefined);
                             setPopoverMode('none');
@@ -153,22 +127,15 @@ function CalendarPage(props: ICalendarPageProps) {
             case 'edit':
                 return (
                     <EditEventPopover
-                        selectedEventTemplate={selectedEventTemplate.template === null ? undefined : selectedEventTemplate.template}
+                        open={popoverOpen}
                         popoverMode={popoverMode}
-                        reloadTemplates={() => { setShouldReloadTemplates(true) }}
                         closePopover={() => {
                             setPopoverMode('none');
                             setPopoverOpen(false);
                             setShortcutsEnabled(true);
-                            setSelectedEventTemplate({ template: null, index: -1 });
                         }}
                     />
                 );
-
-            case 'none':
-                return <Card className={['popover', 'none-popover'].join(' ')}>
-                    Why is this open?
-                </Card>
         }
     }
 
@@ -188,20 +155,20 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function select(info: DateSelectArg) {
-        if (!showAddPopoverWithTemplate && selectedEventTemplate.template !== null) {
+        if (!showAddPopoverWithTemplate && selectedTemplate.template !== null) {
             const start = DateTime.fromJSDate(info.start);
-            const duration = DateTime.fromISO(selectedEventTemplate.template.end).diff(DateTime.fromISO(selectedEventTemplate.template.start)).as('minutes');
+            const duration = getTemplateDuration(selectedTemplate.template);
             const end = DateTime.fromJSDate(info.start).plus({ minute: duration });
 
             const isAllDay = start.toFormat('HH:mm') === end.toFormat('HH:mm');
 
             addEvent({
-                title: selectedEventTemplate.template.title,
+                title: selectedTemplate.template.title,
                 start: start,
                 end: end,
-                colorId: selectedEventTemplate.template.colorId,
+                colorId: selectedTemplate.template.colorId,
                 extendedProps: {
-                    description: selectedEventTemplate.template.description,
+                    description: selectedTemplate.template.description,
                 },
             }, isAllDay);
             (document.getElementsByClassName('fc')[0] as HTMLElement).click();
@@ -210,11 +177,11 @@ function CalendarPage(props: ICalendarPageProps) {
         }
 
         setSelectedStartDate(info.start);
-        if (showAddPopoverWithTemplate && selectedEventTemplate.template !== null) {
-            const duration = DateTime.fromISO(selectedEventTemplate.template.end).diff(DateTime.fromISO(selectedEventTemplate.template.start)).as('minutes');
+        if (showAddPopoverWithTemplate && selectedTemplate.template !== null) {
+            const duration = getTemplateDuration(selectedTemplate.template);
             const end = DateTime.fromJSDate(info.start).plus({ minute: duration });
             setSelectedEndDate(end.toJSDate());
-            setSelectedColor(selectedEventTemplate.template.colorId);
+            setSelectedColor(selectedTemplate.template.colorId);
         } else {
             setSelectedEndDate(info.end);
         }
@@ -244,22 +211,6 @@ function CalendarPage(props: ICalendarPageProps) {
             },
         }, droppedEvent.allDay);
     };
-
-    function switchWeek(direction: 'prev' | 'next' | 'today') {
-        if (isCurrentlyLoading) return;
-        const newWeek = direction === 'today'
-            ? DateTime.now()
-            : date.plus({ weeks: direction === 'prev' ? -1 : 1 });
-
-        setDate(newWeek);
-        loadEvents(newWeek);
-
-        if (direction === 'today') {
-            (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
-            return;
-        }
-        (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
-    }
 
     return (<div className={'fcPage'}>
         < ToolBarDrawer
@@ -324,12 +275,6 @@ function CalendarPage(props: ICalendarPageProps) {
 
         </div >
         <EventTemplateDrawer
-            shouldReload={shouldReloadTemplates}
-            confirmReload={() => { setShouldReloadTemplates(false) }}
-            selectedEventTemplateIndex={selectedEventTemplate.index}
-            setSelectedEventTemplate={(eventTemplate: SimplifiedEvent | null, eventTemplateIndex: number) => {
-                setSelectedEventTemplate({ template: eventTemplate, index: eventTemplateIndex })
-            }}
             onAddClick={() => {
                 setPopoverMode('add-template');
                 setShortcutsEnabled(false);
@@ -337,26 +282,15 @@ function CalendarPage(props: ICalendarPageProps) {
             }}
             onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
                 const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
+                setSelectedTemplate(newTemplate);
                 setPopoverMode('edit-template');
-                setSelectedEventTemplate(newTemplate);
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
             }}
         />
         {
-            popoverOpen && (
-                <Popup
-                    onClose={() => {
-                        setCurrentEvents([]);
-                        setPopoverMode('none');
-                        setPopoverOpen(false)
-                        setShortcutsEnabled(true);
-                    }}
-                    open={popoverOpen}
-                    modal
-                >
-                    {getCorrectPopoverDisplay(popoverMode)}
-                </Popup>
+            popoverOpen && popoverMode !== 'none' && (
+                getCorrectPopoverDisplay(popoverMode)
             )
         }
     </div >

@@ -3,8 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { Draggable } from '@fullcalendar/interaction';
 import './DraggableEvent.css';
 import { DateTime } from 'luxon';
-import { SimplifiedEvent } from '../contexts/EventContext';
 import { getColorFromColorId } from './ColorSelector';
+import { SimplifiedEvent } from '../handlers/eventConverters';
 
 interface DraggableEventProps {
     eventTemplate: SimplifiedEvent;
@@ -18,6 +18,7 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onEditCl
     const eventRef = useRef<HTMLDivElement>(null);
     const durationInMinutes = DateTime.fromISO(eventTemplate.end).diff(DateTime.fromISO(eventTemplate.start)).as('minutes');
     const durationInHours = Math.floor((durationInMinutes / 60) * 100) / 100;
+    const durationInDays = Math.floor(durationInMinutes / 1440) + 1;
 
     const [isHovered, setIsHovered] = React.useState(false);
 
@@ -55,7 +56,7 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onEditCl
             onMouseOver={() => { setIsHovered(true) }}
             onMouseOut={() => { setIsHovered(false) }}
         >
-            <div className='duration'>{durationInHours}h</div>
+            <div className='duration'>{eventTemplate.allDay ? durationInDays + 'd' : durationInHours + 'h'}</div>
             <div className='title'>{eventTemplate.title}</div>
             {isHovered &&
                 <button className='edit-template-button' onClick={(e) => {

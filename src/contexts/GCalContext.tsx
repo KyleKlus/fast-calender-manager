@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import GCal from '../handlers/gcal';
+import GCal from '../handlers/gcalHandler';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { EventInput } from '@fullcalendar/core';
@@ -44,8 +44,8 @@ interface IGCalContext {
     isLoggedIn: boolean;
     isTryingToAutoLogin: boolean;
     isCurrentlyLoading: boolean;
-    gcal: GCal | undefined;
     isSyncOn: boolean;
+    login: () => Promise<void>;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     setIsSyncOn: (isSyncOn: boolean) => void;
     loadEvents: (date?: DateTime) => Promise<void>;
@@ -64,6 +64,7 @@ interface IGCalContext {
         eventId: string,
         isAllDay?: boolean
     ) => Promise<void>;
+    switchWeek: (direction: 'prev' | 'next' | 'today') => void;
 }
 
 const GCalContext = createContext<IGCalContext>({
@@ -71,10 +72,10 @@ const GCalContext = createContext<IGCalContext>({
     isTryingToAutoLogin: true,
     isCurrentlyLoading: false,
     isSyncOn: false,
-    gcal,
     setIsSyncOn: (isSyncOn: boolean) => { },
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
+    login: async () => { },
     addEvent: async (
         event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } },
         isAllDay?: boolean) => { },
@@ -89,11 +90,12 @@ const GCalContext = createContext<IGCalContext>({
         },
         eventId: string,
         isAllDay?: boolean
-    ) => { }
+    ) => { },
+    switchWeek: (direction: 'prev' | 'next' | 'today') => { },
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
-    const { events, setEvents, setAreEventsLoaded, date, areBGEventsEditable } = useContext(EventContext);
+    const { events, setEvents, setAreEventsLoaded, dateInView: date, areBGEventsEditable } = useContext(EventContext);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
@@ -104,6 +106,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         await gcal.handleAuthClick().then((res) => {
             setIsLoggedIn(true);
             setIsTryingToAutoLogin(false);
+            localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
         });
     }
 
@@ -132,6 +135,21 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             clearInterval(interval);
         }
     });
+
+    function switchWeek(direction: 'prev' | 'next' | 'today') {
+        if (isCurrentlyLoading) return;
+        const newWeek = direction === 'today'
+            ? DateTime.now()
+            : date.plus({ weeks: direction === 'prev' ? -1 : 1 });
+
+        loadEvents(newWeek);
+
+        if (direction === 'today') {
+            (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
+            return;
+        }
+        (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
+    }
 
     async function loadEvents(date: DateTime = DateTime.now()): Promise<void> {
         if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
@@ -331,7 +349,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, isTryingToAutoLogin, isCurrentlyLoading, gcal, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn }}>
+        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, login, isTryingToAutoLogin, isCurrentlyLoading, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn, switchWeek }}>
             {props.children}
         </GCalContext.Provider>
     );

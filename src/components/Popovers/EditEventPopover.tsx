@@ -5,26 +5,30 @@ import { Card, Form, Button, ButtonGroup } from "react-bootstrap";
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { convertEventInputToSimplifiedEvent, EventContext, SimplifiedEvent } from '../../contexts/EventContext';
 import { PopoverMode } from '../../pages/CalendarPage';
 import ColorSelector from '../ColorSelector';
 import { GCalContext } from '../../contexts/GCalContext';
 import { useKeyPress } from '../../hooks/useKeyPress';
+import Popup from 'reactjs-popup';
+import { EventContext } from '../../contexts/EventContext';
+import { SimplifiedEvent, convertEventInputToSimplifiedEvent } from '../../handlers/eventConverters';
+import { TemplateContext } from '../../contexts/TemplateContext';
 
 export interface IEditEventPopoverProps {
     closePopover: () => void;
-    selectedEventTemplate?: SimplifiedEvent;
-    reloadTemplates: () => void;
+    open: boolean;
     popoverMode: PopoverMode;
 }
 
 const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPopoverProps) => {
     const { editEvent, addEvent, deleteEvent } = useContext(GCalContext);
-    const { currentEvents } = useContext(EventContext);
+    const { selectedTemplate, resetSelectedTemplate, editTemplate, switchSelectedTemplate, deleteTemplate, addTemplate } = useContext(TemplateContext);
+    const { selectedEvents: currentEvents } = useContext(EventContext);
 
-    const editableEvent: SimplifiedEvent = props.popoverMode === 'edit-template' && props.selectedEventTemplate !== undefined
-        ? props.selectedEventTemplate
-        : convertEventInputToSimplifiedEvent(currentEvents[0]);
+    const [editableEvent, setEditableEvent] = useState<SimplifiedEvent>(props.popoverMode === 'edit-template' && selectedTemplate.template !== null
+        ? selectedTemplate.template
+        : convertEventInputToSimplifiedEvent(currentEvents[0])
+    );
 
     const [isAllDay, setIsAllDay] = useState(editableEvent.allDay || false);
     const [eventName, setEventName] = useState(editableEvent.title);
@@ -43,25 +47,16 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
     function handleEditClick() {
         if (eventName === '') { return }
         if (props.popoverMode === 'edit-template') {
-            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-            let eventTemplates: SimplifiedEvent[] = [];
-            if (loadedEventTemplates) {
-                eventTemplates = JSON.parse(loadedEventTemplates);
-            }
-            if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
-                eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-            }
-            eventTemplates.push({
+            editTemplate({
+                ...editableEvent,
                 title: eventName,
+                description: eventDescription,
+                colorId: eventColor,
                 start: startDate.toISOString(),
                 end: endDate.toISOString(),
                 allDay: isAllDay,
-                description: eventDescription,
-                colorId: eventColor,
-            });
-
-            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-            props.reloadTemplates();
+            }, selectedTemplate.index);
+            resetSelectedTemplate();
             props.closePopover();
             return;
         }
@@ -84,220 +79,163 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
         });
     }
 
-    function switchTemplate(direction: 'prev' | 'next') {
-        if (direction === 'prev') {
-            if (props.selectedEventTemplate === undefined) { return }
-            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-            let eventTemplates: SimplifiedEvent[] = [];
-            if (loadedEventTemplates) {
-                eventTemplates = JSON.parse(loadedEventTemplates);
-            }
-            const index = eventTemplates.findIndex((e) => props.selectedEventTemplate !== undefined && e.title === props.selectedEventTemplate.title);
-            if (index === 0) { return }
-            eventTemplates.splice(index, 1);
-            eventTemplates.splice(index - 1, 0, props.selectedEventTemplate);
-            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-            props.reloadTemplates();
-            return;
-        }
-        if (props.selectedEventTemplate === undefined) { return }
-        const loadedEventTemplates = localStorage.getItem('eventTemplates');
-        let eventTemplates: SimplifiedEvent[] = [];
-        if (loadedEventTemplates) {
-            eventTemplates = JSON.parse(loadedEventTemplates);
-        }
-        const index = eventTemplates.findIndex((e) => props.selectedEventTemplate !== undefined && e.title === props.selectedEventTemplate.title);
-        if (index === eventTemplates.length - 1) { return }
-        eventTemplates.splice(index, 1);
-        eventTemplates.splice(index + 1, 0, props.selectedEventTemplate);
-        localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-        props.reloadTemplates();
-    }
-
     return (
-        <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
-
-
-
-            <Form.Control
-                type="text"
-                id="eventNameInput"
-                placeholder="Event Name"
-                value={eventName}
-                onChange={(e) => { setEventName(e.target.value) }}
-            />
-            <div className='edit-popover-date-input'>
-                <DatePicker
-                    selected={startDate}
-                    onChange={(date: Date | null) => {
-                        if (date === null) { return }
-                        const newStartDate = DateTime.fromJSDate(date);
-                        const prevStartDate = DateTime.fromJSDate(startDate);
-                        const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
-                        const currentEndDate = DateTime.fromJSDate(endDate);
-                        setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
-                        setStartDate(date);
-                    }}
-                    showTimeSelect={!isAllDay}
-                    dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
-                    locale="de" // Or any other locale you support
-                />
-                <i className='bi-arrow-right' style={{ fontSize: '1.5rem' }}></i>
-                <DatePicker
-                    selected={endDate}
-                    onChange={(date: Date | null) => {
-                        if (date === null) { return }
-                        const newEndDate = DateTime.fromJSDate(date);
-                        const currentStartDate = DateTime.fromJSDate(startDate);
-                        if (newEndDate <= currentStartDate) {
-                            return
-                        }
-                        setEndDate(date)
-                    }}
-                    showTimeSelect={!isAllDay}
-                    dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
-                    locale="de" // Or any other locale you support
-                />
-                <Form.Check
-                    type="checkbox"
-                    id="isAllDayCheckbox"
-                    label="All Day"
-                    defaultChecked={isAllDay}
-                    onChange={() => { setIsAllDay(!isAllDay) }}
-                />
-            </div>
-            <Form.Control
-                type="text"
-                as={'textarea'}
-                id="eventDescriptionInput"
-                placeholder="Event Description"
-                value={eventDescription}
-                onChange={(e) => { setEventDescription(e.target.value) }}
-            />
-            <hr />
-            <ColorSelector
-                selectedColor={eventColor}
-                onColorChange={(colorId) => {
-                    setEventColor(colorId);
-                    if (props.popoverMode === 'edit-template') {
-                        const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                        let eventTemplates: SimplifiedEvent[] = [];
-                        if (loadedEventTemplates) {
-                            eventTemplates = JSON.parse(loadedEventTemplates);
-                        }
-
-                        if (eventTemplates.findIndex((e) => e.title === editableEvent.title) !== -1) {
-                            eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-                        }
-                        eventTemplates.push({
-                            title: eventName,
-                            start: startDate.toISOString(),
-                            end: endDate.toISOString(),
-                            allDay: isAllDay,
-                            description: eventDescription,
-                            colorId: colorId,
-                        });
-
-                        localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                        props.reloadTemplates();
-                        setEventColor(colorId)
-                        return;
-                    }
-
-                    editEvent({
-                        title: editableEvent.title,
-                        start: DateTime.fromJSDate(startDate),
-                        end: DateTime.fromJSDate(endDate),
-                        colorId: colorId,
-                        extendedProps: { description: eventDescription },
-                    },
-                        (editableEvent.id as string), // is always defined
-                        isAllDay
-                    ).then(_ => {
-                        setEventColor(colorId)
-                    });
-                }}
-            />
-            <div className='edit-popover-buttons'>
-                {props.popoverMode === 'edit-template' &&
-                    <ButtonGroup>
-                        <Button onClick={() => { switchTemplate('prev') }}><i className='bi-chevron-left' /></Button>
-                        <Button onClick={() => { switchTemplate('next') }}><i className='bi-chevron-right' /></Button>
-                    </ButtonGroup>
+        <Popup
+            open={props.open}
+            modal
+            onClose={() => {
+                if (selectedTemplate.template !== null && editableEvent.title === selectedTemplate.template.title && editableEvent.start === selectedTemplate.template.start && editableEvent.end === selectedTemplate.template.end && editableEvent.allDay === selectedTemplate.template.allDay) {
+                    resetSelectedTemplate();
                 }
-                <Button
-                    onClick={() => {
-                        if (props.popoverMode === 'edit-template') {
-                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                            let eventTemplates: SimplifiedEvent[] = [];
-                            if (loadedEventTemplates) {
-                                eventTemplates = JSON.parse(loadedEventTemplates);
+                props.closePopover();
+            }}
+        >
+            <Card className={['popover', 'edit-popover', isAllDay ? 'allday' : ''].join(' ')}>
+                <Form.Control
+                    type="text"
+                    id="eventNameInput"
+                    placeholder="Event Name"
+                    value={eventName}
+                    onChange={(e) => { setEventName(e.target.value) }}
+                />
+                <div className='edit-popover-date-input'>
+                    <DatePicker
+                        selected={startDate}
+                        onChange={(date: Date | null) => {
+                            if (date === null) { return }
+                            const newStartDate = DateTime.fromJSDate(date);
+                            const prevStartDate = DateTime.fromJSDate(startDate);
+                            const diff = newStartDate.diff(prevStartDate, 'seconds').seconds;
+                            const currentEndDate = DateTime.fromJSDate(endDate);
+                            setEndDate(currentEndDate.plus({ second: diff }).toJSDate());
+                            setStartDate(date);
+                        }}
+                        showTimeSelect={!isAllDay}
+                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
+                        locale="de" // Or any other locale you support
+                    />
+                    <i className='bi-arrow-right' style={{ fontSize: '1.5rem' }}></i>
+                    <DatePicker
+                        selected={endDate}
+                        onChange={(date: Date | null) => {
+                            if (date === null) { return }
+                            const newEndDate = DateTime.fromJSDate(date);
+                            const currentStartDate = DateTime.fromJSDate(startDate);
+                            if (newEndDate <= currentStartDate) {
+                                return
                             }
-                            eventTemplates.splice(eventTemplates.findIndex((e) => e.title === editableEvent.title), 1);
-                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                            props.reloadTemplates();
-                            props.closePopover();
+                            setEndDate(date)
+                        }}
+                        showTimeSelect={!isAllDay}
+                        dateFormat={isAllDay ? 'dd.MM.yyyy' : 'dd.MM.yyyy | HH:mm'}
+                        locale="de" // Or any other locale you support
+                    />
+                    <Form.Check
+                        type="checkbox"
+                        id="isAllDayCheckbox"
+                        label="All Day"
+                        defaultChecked={isAllDay}
+                        onChange={() => { setIsAllDay(!isAllDay) }}
+                    />
+                </div>
+                <Form.Control
+                    type="text"
+                    as={'textarea'}
+                    id="eventDescriptionInput"
+                    placeholder="Event Description"
+                    value={eventDescription}
+                    onChange={(e) => { setEventDescription(e.target.value) }}
+                />
+                <hr />
+                <ColorSelector
+                    selectedColor={eventColor}
+                    onColorChange={(colorId) => {
+                        setEventColor(colorId);
+                        if (props.popoverMode === 'edit-template') {
+                            editTemplate({
+                                ...editableEvent,
+                                colorId: colorId,
+                            }, selectedTemplate.index);
+                            setEventColor(colorId)
                             return;
                         }
 
-                        deleteEvent((editableEvent.id as string)).then(_ => {
-                            props.closePopover();
-                        });
-                    }}
-                ><i className='bi-trash' /></Button>
-                <Button
-                    onClick={() => {
-                        if (eventName === '') { return }
-                        if (props.popoverMode === 'edit-template') {
-                            if (props.selectedEventTemplate === undefined) { return }
-                            const loadedEventTemplates = localStorage.getItem('eventTemplates');
-                            let eventTemplates: SimplifiedEvent[] = [];
-                            if (loadedEventTemplates) {
-                                eventTemplates = JSON.parse(loadedEventTemplates);
-                            }
-                            eventTemplates.push({
-                                title: props.selectedEventTemplate.title,
-                                start: props.selectedEventTemplate.start,
-                                end: props.selectedEventTemplate.end,
-                                allDay: props.selectedEventTemplate.allDay,
-                                description: props.selectedEventTemplate.description,
-                                colorId: props.selectedEventTemplate.colorId,
-                            });
-
-                            localStorage.setItem('eventTemplates', JSON.stringify(eventTemplates));
-                            props.reloadTemplates();
-                            props.closePopover();
-                            return;
-                        }
-
-                        addEvent(
-                            {
-                                title: eventName,
-                                start: DateTime.fromJSDate(startDate),
-                                end: DateTime.fromJSDate(endDate),
-                                colorId: eventColor,
-                                extendedProps: {
-                                    ...editableEvent.extendedProps,
-                                    description: eventDescription,
-                                },
-                            },
+                        editEvent({
+                            title: editableEvent.title,
+                            start: DateTime.fromJSDate(startDate),
+                            end: DateTime.fromJSDate(endDate),
+                            colorId: colorId,
+                            extendedProps: { description: eventDescription },
+                        },
+                            (editableEvent.id as string), // is always defined
                             isAllDay
                         ).then(_ => {
-                            props.closePopover();
+                            setEventColor(colorId)
                         });
                     }}
-                ><i className='bi-copy' /></Button>
-                <div className='divider' style={{ flexGrow: 1 }} />
-                <Button onClick={() => {
-                    props.closePopover();
-                }}>Cancel</Button>
-                <Button
-                    onClick={() => {
-                        handleEditClick();
-                    }}
-                >Confirm</Button>
-            </div>
-        </Card >
+                />
+                <div className='edit-popover-buttons'>
+                    {props.popoverMode === 'edit-template' &&
+                        <ButtonGroup>
+                            <Button onClick={() => { switchSelectedTemplate('prev') }}><i className='bi-chevron-left' /></Button>
+                            <Button onClick={() => { switchSelectedTemplate('next') }}><i className='bi-chevron-right' /></Button>
+                        </ButtonGroup>
+                    }
+                    <Button
+                        onClick={() => {
+                            if (props.popoverMode === 'edit-template') {
+                                deleteTemplate(selectedTemplate.index);
+                                resetSelectedTemplate();
+                                props.closePopover();
+                                return;
+                            }
+
+                            deleteEvent((editableEvent.id as string)).then(_ => {
+                                props.closePopover();
+                            });
+                        }}
+                    ><i className='bi-trash' /></Button>
+                    <Button
+                        onClick={() => {
+                            if (eventName === '') { return }
+                            if (props.popoverMode === 'edit-template') {
+                                addTemplate({
+                                    ...editableEvent,
+                                });
+                                resetSelectedTemplate();
+                                props.closePopover();
+                                return;
+                            }
+
+                            addEvent(
+                                {
+                                    title: eventName,
+                                    start: DateTime.fromJSDate(startDate),
+                                    end: DateTime.fromJSDate(endDate),
+                                    colorId: eventColor,
+                                    extendedProps: {
+                                        ...editableEvent.extendedProps,
+                                        description: eventDescription,
+                                    },
+                                },
+                                isAllDay
+                            ).then(_ => {
+                                props.closePopover();
+                            });
+                        }}
+                    ><i className='bi-copy' /></Button>
+                    <div className='divider' style={{ flexGrow: 1 }} />
+                    <Button onClick={() => {
+                        props.closePopover();
+                    }}>Cancel</Button>
+                    <Button
+                        onClick={() => {
+                            handleEditClick();
+                        }}
+                    >Confirm</Button>
+                </div>
+            </Card >
+        </Popup>
     );
 };
 

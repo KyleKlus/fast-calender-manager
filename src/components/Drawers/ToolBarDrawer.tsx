@@ -24,7 +24,7 @@ export interface IToolBarDrawerProps {
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
     const { isSyncOn, setIsSyncOn, isCurrentlyLoading, loadEvents } = useContext(GCalContext);
-    const { events, setEvents, areBGEventsEditable, setBGEventsEditable, date, setDate } = useContext(EventContext);
+    const { events, setEvents, areBGEventsEditable, setBGEventsEditable, dateInView: date, setDateInView: setDate } = useContext(EventContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
     const isTKeyPressed = useKeyPress('t');

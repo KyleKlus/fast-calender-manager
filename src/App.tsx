@@ -10,7 +10,7 @@ import { Spinner } from 'react-bootstrap';
 
 function App() {
   const { isLoggedIn, loadEvents } = useContext(GCalContext);
-  const { areEventsLoaded, date } = useContext(EventContext);
+  const { areEventsLoaded, dateInView: date } = useContext(EventContext);
 
   useEffect(() => {
     if (areEventsLoaded && isLoggedIn) return;
