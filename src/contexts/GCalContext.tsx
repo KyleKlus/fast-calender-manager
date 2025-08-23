@@ -6,6 +6,7 @@ import { EventInput } from '@fullcalendar/core';
 import { defaultColorId, defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
 import { EventContext } from './EventContext';
 import { useKeyPress } from '../hooks/useKeyPress';
+import { DateInViewContext } from './DateInViewContext';
 
 let config: {
     clientId: string;
@@ -120,7 +121,8 @@ const GCalContext = createContext<IGCalContext>({
 });
 
 function GCalProvider(props: React.PropsWithChildren<{}>) {
-    const { events, setEvents, setAreEventsLoaded, dateInView, areBGEventsEditable, setDateInView } = useContext(EventContext);
+    const { events, setEvents, setAreEventsLoaded, areBGEventsEditable } = useContext(EventContext);
+    const { dateInView, setDateInView } = useContext(DateInViewContext);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
