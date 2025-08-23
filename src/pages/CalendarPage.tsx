@@ -5,12 +5,11 @@ import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalen
 import { useContext, useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 
-import { generateFCConfig } from '../handlers/fullCalendarConfigHandler';
+import { getDefaultConfig } from '../handlers/defaultFCConfig';
 import ToolBarDrawer, { ToolbarMode } from '../components/Drawers/ToolBarDrawer';
 import EventTemplateDrawer from '../components/Drawers/EventTemplateDrawer';
 import AddEventPopover from '../components/Popovers/AddEventPopover';
 import EditEventPopover from '../components/Popovers/EditEventPopover';
-import { useKeyPress } from '../hooks/useKeyPress';
 import { GCalContext } from '../contexts/GCalContext';
 import { defaultColorId, getColorIdFromColor } from '../components/ColorSelector';
 import { KeyboardShortcutContext } from '../contexts/KeyboardShortcutContext';
@@ -18,6 +17,7 @@ import { EventContext } from '../contexts/EventContext';
 import { SimplifiedEvent, convertEventImplToEventInput } from '../handlers/eventConverters';
 import { TemplateContext } from '../contexts/TemplateContext';
 import { WeatherContext } from '../contexts/WeatherContext';
+import { DateInViewContext } from '../contexts/DateInViewContext';
 
 export interface ICalendarPageProps { }
 
@@ -26,10 +26,11 @@ export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'n
 function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
-    const { sunrise, sunset, hourlyWeather, isLoadingWeather, insertWeather } = useContext(WeatherContext);
+    const { hourlyWeather, insertWeather } = useContext(WeatherContext);
 
     const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek, splitEvent } = useContext(GCalContext);
-    const { events, dateInView: date, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
+    const { events, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
+    const { dateInView } = useContext(DateInViewContext);
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
@@ -210,16 +211,15 @@ function CalendarPage(props: ICalendarPageProps) {
                 <i className='bi-chevron-double-left'></i>
             </div>
 
-            <FullCalendar {...generateFCConfig({
-                events,
-                eventClick,
-                eventChange,
-                eventDragStart,
-                eventDragStop,
-                eventReceive: handleEventReceive,
-                select,
-                date
-            })}
+            <FullCalendar {...getDefaultConfig()}
+                events={events}
+                eventClick={eventClick}
+                eventChange={eventChange}
+                eventDragStart={eventDragStart}
+                eventDragStop={eventDragStop}
+                eventReceive={handleEventReceive}
+                select={select}
+                initialDate={dateInView.toFormat('yyyy-MM-dd')}
             />
 
             <div
