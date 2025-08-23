@@ -26,7 +26,7 @@ export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'n
 function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
-    const { hourlyWeather, insertWeather } = useContext(WeatherContext);
+    const { hourlyWeather, insertWeather, showWeather } = useContext(WeatherContext);
 
     const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek, splitEvent } = useContext(GCalContext);
     const { events, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
@@ -49,6 +49,7 @@ function CalendarPage(props: ICalendarPageProps) {
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
+        if (showWeather) { return }
         const colorId = getColorIdFromColor(info.event.backgroundColor);
 
         if (info.event.extendedProps?.isTask) {
@@ -110,6 +111,8 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function eventChange(info: EventChangeArg) {
+        if (showWeather) { return }
+
         const isAllDay = info.event.allDay;
 
         editEvent({
@@ -125,6 +128,8 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function select(info: DateSelectArg) {
+        if (showWeather) { return }
+
         if (!showAddPopoverWithTemplate && selectedTemplate.template !== null) {
             const start = DateTime.fromJSDate(info.start);
             const duration = getTemplateDuration(selectedTemplate.template);
@@ -161,14 +166,20 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function eventDragStart(info: EventDragStartArg) {
+        if (showWeather) { return }
+
         setIsDragging(true);
     }
 
     function eventDragStop(info: EventDragStopArg) {
+        if (showWeather) { return }
+
         setIsDragging(false);
     }
 
     const handleEventReceive = (info: EventReceiveArg) => {
+        if (showWeather) { return }
+
         const droppedEvent = info.event;
         addEvent({
             title: droppedEvent.title,
@@ -182,7 +193,7 @@ function CalendarPage(props: ICalendarPageProps) {
         }, droppedEvent.allDay);
     };
 
-    return (<div className={'fcPage'}>
+    return (<div className={['fcPage', showWeather ? 'fcPageWeather' : ''].join(' ')}>
         < ToolBarDrawer
             selectedMode={toolbarMode}
             selectedColor={selectedColor}
@@ -191,6 +202,7 @@ function CalendarPage(props: ICalendarPageProps) {
             }
             }
             onAddClick={() => {
+                if (showWeather) { return }
                 setPopoverMode('add');
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
@@ -234,20 +246,22 @@ function CalendarPage(props: ICalendarPageProps) {
             </div>
 
         </div >
-        <EventTemplateDrawer
-            onAddClick={() => {
-                setPopoverMode('add-template');
-                setShortcutsEnabled(false);
-                setPopoverOpen(true);
-            }}
-            onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
-                const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
-                setSelectedTemplate(newTemplate);
-                setPopoverMode('edit-template');
-                setShortcutsEnabled(false);
-                setPopoverOpen(true);
-            }}
-        />
+        {!showWeather &&
+            <EventTemplateDrawer
+                onAddClick={() => {
+                    setPopoverMode('add-template');
+                    setShortcutsEnabled(false);
+                    setPopoverOpen(true);
+                }}
+                onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
+                    const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
+                    setSelectedTemplate(newTemplate);
+                    setPopoverMode('edit-template');
+                    setShortcutsEnabled(false);
+                    setPopoverOpen(true);
+                }}
+            />
+        }
         {popoverOpen &&
             (popoverMode === 'add-template' || popoverMode === 'add'
                 ? <AddEventPopover

@@ -1,14 +1,30 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import React from 'react';
 import { DateTime } from 'luxon';
+import { DateInViewContext } from './DateInViewContext';
 
 interface IWeatherContext {
     sunrise: DateTime | null;
     sunset: DateTime | null;
-    hourlyWeather: any[];
+    showWeather: boolean;
+    dailyWeather: IDailyWeather[];
+    setShowWeather: (showWeather: boolean) => void;
+    hourlyWeather: IHourlyWeather[];
     isLoadingWeather: boolean;
     reloadWeather: () => void;
     insertWeather: () => void;
+}
+
+export interface IHourlyWeather {
+    conditionIcon: string;
+    condition: string;
+    temperature: number;
+}
+
+export interface IDailyWeather {
+    hourlyWeather: IHourlyWeather[];
+    sunrise: DateTime | null;
+    sunset: DateTime | null;
 }
 
 const WeatherContext = createContext<IWeatherContext>({
@@ -16,14 +32,22 @@ const WeatherContext = createContext<IWeatherContext>({
     sunset: null,
     hourlyWeather: [],
     isLoadingWeather: false,
+    showWeather: false,
+    dailyWeather: [],
+    setShowWeather: (showWeather: boolean) => { },
     reloadWeather: () => { },
     insertWeather: () => { },
 });
 
+export const nightWeatherColor = '#dce4fe';
+export const dayWeatherColor = '#fef7dc';
+
 function WeatherProvider(props: React.PropsWithChildren<{}>) {
+    const [showWeather, setShowWeather] = useState(false);
     const [sunrise, setSunrise] = useState<DateTime | null>(null);
     const [sunset, setSunset] = useState<DateTime | null>(null);
-    const [hourlyWeather, setHourlyWeather] = useState<{ conditionIcon: string, condition: string, temperature: number }[]>([]);
+    const [hourlyWeather, setHourlyWeather] = useState<IHourlyWeather[]>([]);
+    const [dailyWeather, setDailyWeather] = useState<IDailyWeather[]>([]);
     const [reload, setReload] = useState(true);
     const [isLoadingWeather, setIsLoadingWeather] = useState(false);
 
@@ -52,7 +76,7 @@ function WeatherProvider(props: React.PropsWithChildren<{}>) {
 
     function fetchWeather() {
         setIsLoadingWeather(true);
-        fetch(`https://api.weatherapi.com/v1/forecast.json?key=f26c7c1bc9fc4e7bb20184029251908&q=52.3,9.7&days=1&aqi=no&alerts=no`)
+        fetch(`https://api.weatherapi.com/v1/forecast.json?key=f26c7c1bc9fc4e7bb20184029251908&q=52.3,9.7&days=14&aqi=no&alerts=no`)
             .then(async (response) => {
                 if (!response.ok) {
                     setIsLoadingWeather(false);
@@ -61,16 +85,24 @@ function WeatherProvider(props: React.PropsWithChildren<{}>) {
                 }
 
                 const data = await response.json();
-
-                setHourlyWeather(data.forecast.forecastday[0].hour.map((h: any) => {
+                const dailyWeather: IDailyWeather[] = data.forecast.forecastday.map((d: any) => {
                     return {
-                        conditionIcon: h.condition.icon,
-                        condition: h.condition.text,
-                        temperature: h.temp_c,
+                        hourlyWeather: d.hour.map((h: any) => {
+                            return {
+                                conditionIcon: h.condition.icon,
+                                condition: h.condition.text,
+                                temperature: h.temp_c,
+                            }
+                        }),
+                        sunrise: DateTime.fromFormat(d.astro.sunrise, 'hh:mm a'),
+                        sunset: DateTime.fromFormat(d.astro.sunset, 'hh:mm a'),
                     }
-                }));
-                setSunrise(DateTime.fromFormat(data.forecast.forecastday[0].astro.sunrise, 'hh:mm a'));
-                setSunset(DateTime.fromFormat(data.forecast.forecastday[0].astro.sunset, 'hh:mm a'));
+                });
+
+                setHourlyWeather(dailyWeather[0].hourlyWeather);
+                setSunrise(dailyWeather[0].sunrise);
+                setSunset(dailyWeather[0].sunset);
+                setDailyWeather(dailyWeather);
 
                 setIsLoadingWeather(false);
                 setReload(false);
@@ -107,7 +139,7 @@ function WeatherProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <WeatherContext.Provider value={{ sunrise, sunset, hourlyWeather, isLoadingWeather, reloadWeather, insertWeather }}>
+        <WeatherContext.Provider value={{ sunrise, sunset, hourlyWeather, isLoadingWeather, dailyWeather, reloadWeather, showWeather, setShowWeather, insertWeather }}>
             {props.children}
         </WeatherContext.Provider>
     );

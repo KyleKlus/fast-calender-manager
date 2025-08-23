@@ -5,7 +5,6 @@ import React from 'react';
 import { EventInput } from '@fullcalendar/core';
 import { defaultColorId, defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
 import { EventContext } from './EventContext';
-import { useKeyPress } from '../hooks/useKeyPress';
 import { DateInViewContext } from './DateInViewContext';
 
 let config: {
@@ -67,7 +66,7 @@ interface IGCalContext {
         eventId: string,
         isAllDay?: boolean
     ) => Promise<void>;
-    switchWeek: (direction: 'prev' | 'next' | 'today') => void;
+    switchWeek: (direction: 'prev' | 'next' | 'today', dontLoadEvents?: boolean) => void;
     splitEvent: (event: {
         title: string;
         start: DateTime;
@@ -165,7 +164,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         });
     }
 
-    function switchWeek(direction: 'prev' | 'next' | 'today') {
+    function switchWeek(direction: 'prev' | 'next' | 'today', dontLoadEvents: boolean = false) {
         if (isCurrentlyLoading) return;
         const newWeek = direction === 'today'
             ? DateTime.now()
@@ -173,7 +172,9 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
 
         setDateInView(newWeek);
 
-        loadEvents(newWeek);
+        if (!dontLoadEvents) {
+            loadEvents(newWeek);
+        }
 
         if (direction === 'today') {
             (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();

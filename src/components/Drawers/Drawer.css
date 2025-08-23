@@ -46,6 +46,15 @@
     align-items: center;
 }
 
+.drawer-container .drawer-handle.disabled .drawer-handle-icon {
+    cursor: default;
+    opacity: 0.5;
+
+    &:hover {
+        background-color: transparent;
+    }
+}
+
 .drawer-container.isTop.isOpen .drawer-handle {
     border-top: 1px solid var(--bs-border-color);
 }

@@ -7,6 +7,8 @@ import ColorSelector, { getColorFromColorId } from '../ColorSelector';
 import { EventInput } from '@fullcalendar/core';
 import { EventContext } from '../../contexts/EventContext';
 import Drawer from './Drawer';
+import { WeatherContext } from '../../contexts/WeatherContext';
+import { DateInViewContext } from '../../contexts/DateInViewContext';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'split' | 'none';
 
@@ -20,6 +22,7 @@ export interface IToolBarDrawerProps {
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
     const { isSyncOn, setIsSyncOn, switchWeek } = useContext(GCalContext);
+    const { showWeather, setShowWeather } = useContext(WeatherContext);
     const { events, setEvents, areBGEventsEditable, setBGEventsEditable } = useContext(EventContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
@@ -108,7 +111,8 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
             isOpen={isToolbarOpen}
             location='top'
             className='toolbar-container'
-            drawerHandleClassName='toolbar-handle'
+            disableHandle={showWeather}
+            drawerHandleClassName={'toolbar-handle'}
             drawerClassName='toolbar'
             setIsOpen={(isOpen) => {
                 if (isToolbarOpen) {
@@ -116,20 +120,33 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 }
                 setToolbarOpen(isOpen);
             }}
+            childrenWithinHandleLeft={
+                <div
+                    className={['weather-button', showWeather ? 'active' : ''].join(' ')}
+                    onClick={() => {
+                        setShowWeather(!showWeather)
+                        switchWeek('today', !showWeather);
+                    }}
+                >
+                    <i className='bi-cloud-sun'></i>
+                </div>
+            }
             childrenWithinHandleRight={
                 <>
                     <div
                         className='toolbar-navigation-button left-button'
-                        onClick={() => { switchWeek('prev') }}
+                        onClick={() => { switchWeek('prev', showWeather) }}
                     >
                         <i className='bi-chevron-double-left'></i>
                     </div>
-                    <div className='today-button' onClick={() => { switchWeek('today') }}>
+                    <div className='today-button' onClick={() => { switchWeek('today', showWeather) }}>
                         <i className={`bi-calendar-event`}></i>
                     </div>
                     <div
                         className='toolbar-navigation-button right-button'
-                        onClick={() => { switchWeek('next') }}
+                        onClick={() => {
+                            switchWeek('next', showWeather)
+                        }}
                     >
                         <i className='bi-chevron-double-right'></i>
                     </div>
@@ -217,7 +234,7 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 <i className={`bi-plus`}></i>
                 Event
             </Button>
-        </Drawer>
+        </Drawer >
     );
 };
 

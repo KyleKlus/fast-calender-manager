@@ -41,6 +41,8 @@
     background-color: var(--bs-border-color);
 }
 
+.toolbar-handle .today-button,
+.toolbar-handle .weather-button,
 .toolbar-handle .toolbar-navigation-button {
     display: flex;
     justify-content: center;
@@ -54,18 +56,8 @@
     }
 }
 
-.toolbar-handle .today-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 1.5rem;
-    width: 3rem;
-    gap: 0.5rem;
-
-    &:hover {
-        background-color: #ececec;
-        cursor: pointer;
-    }
+.toolbar-handle .weather-button.active {
+    background-color: #ececec;
 }
 
 .toolbar-handle .toolbar-navigation-button.left-button,

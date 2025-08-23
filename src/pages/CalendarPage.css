@@ -133,11 +133,11 @@
     margin: 0px 5% 0px 5px;
 }
 
-.fcPage .fc-event.fc-timegrid-event-short .fc-event-time {
+.fcPage .fc-timegrid-event-short .fc-event-time {
     display: none;
 }
 
-.fcPage .fc-event.fc-event-past {
+.fcPage:not(.fcPageWeather) .fc-event.fc-event-past {
     filter: saturate(0.3) brightness(1.6);
     background-color: transparent;
     color: var(--bs-secondary-color);
