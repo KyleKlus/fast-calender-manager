@@ -46,6 +46,7 @@ interface IGCalContext {
     isTryingToAutoLogin: boolean;
     isCurrentlyLoading: boolean;
     isSyncOn: boolean;
+    isAuthLoading: boolean;
     login: () => Promise<void>;
     setIsLoggedIn: (isLoggedIn: boolean) => void;
     setIsSyncOn: (isSyncOn: boolean) => void;
@@ -84,6 +85,7 @@ const GCalContext = createContext<IGCalContext>({
     isTryingToAutoLogin: true,
     isCurrentlyLoading: false,
     isSyncOn: false,
+    isAuthLoading: true,
     setIsSyncOn: (isSyncOn: boolean) => { },
     setIsLoggedIn: (isLoggedIn: boolean) => { },
     loadEvents: async (date: DateTime = DateTime.now()) => { },
@@ -120,6 +122,7 @@ const GCalContext = createContext<IGCalContext>({
 function GCalProvider(props: React.PropsWithChildren<{}>) {
     const { events, setEvents, setAreEventsLoaded, dateInView, areBGEventsEditable, setDateInView } = useContext(EventContext);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
     const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(false);
     const [isSyncOn, setIsSyncOn] = useState(false);
@@ -154,6 +157,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         if (gcal === undefined) { return }
         await gcal.handleAuthClick().then((res) => {
             setIsLoggedIn(true);
+            setIsAuthLoading(false);
             setIsTryingToAutoLogin(false);
             localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
         });
@@ -176,6 +180,10 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
         (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
     }
 
+    function setIsAuthValid(isAuthValid: boolean) {
+        setIsAuthLoading(!isAuthValid);
+    }
+
     async function loadEvents(date: DateTime = DateTime.now()): Promise<void> {
         if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
         setIsCurrentlyLoading(true);
@@ -187,7 +195,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             showDeleted: false,
             singleEvents: true,
             orderBy: 'startTime',
-        })).result.items.map((e: any) => {
+        }, setIsAuthValid)).result.items.map((e: any) => {
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
             const isBackgroundEvent = title.startsWith('Arbeitszeit') || title.startsWith('Unizeit') || title.startsWith('Freizeit') || title.startsWith('Urlaub');
@@ -216,7 +224,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
             showCompleted: false,
             showDeleted: false,
             showDue: true,
-        })).result.items.filter((e: any) => e.due !== undefined).map((e: any) => {
+        }, setIsAuthValid)).result.items.filter((e: any) => e.due !== undefined).map((e: any) => {
             return {
                 id: e.id,
                 title: '[ ]: ' + e.title,
@@ -270,7 +278,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                     timeZone: endZone === null ? DateTime.now().zoneName : endZone,
                 },
             colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
-        }).then((res: any) => {
+        }, setIsAuthValid).then((res: any) => {
             const e = res.result;
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
@@ -301,7 +309,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
 
         setIsCurrentlyLoading(true);
 
-        gcal.deleteEvent(eventId).then((res: any) => {
+        gcal.deleteEvent(eventId, setIsAuthValid).then((res: any) => {
             setEvents([...events.filter((e) => e.id !== eventId)]);
             setIsCurrentlyLoading(false);
         });
@@ -347,7 +355,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                     timeZone: endZone === null ? DateTime.now().zoneName : endZone,
                 },
             colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
-        }, eventId).then((res: any) => {
+        }, eventId, setIsAuthValid).then((res: any) => {
             setEvents([...events.map((e: any) => {
                 if (e.id === eventId) {
                     const color: string = getColorFromColorId(event.colorId as number) || defaultEventColor;
@@ -423,7 +431,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                     timeZone: endZone === null ? DateTime.now().zoneName : endZone,
                 },
             colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
-        }).then((res: any) => {
+        }, setIsAuthValid).then((res: any) => {
             const e = res.result;
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
@@ -465,7 +473,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
                     timeZone: endZone === null ? DateTime.now().zoneName : endZone,
                 },
             colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
-        }).then((res: any) => {
+        }, setIsAuthValid).then((res: any) => {
             const e = res.result;
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
@@ -495,7 +503,7 @@ function GCalProvider(props: React.PropsWithChildren<{}>) {
     }
 
     return (
-        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, login, isTryingToAutoLogin, isCurrentlyLoading, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn, switchWeek, splitEvent }}>
+        <GCalContext.Provider value={{ isLoggedIn, isSyncOn, setIsSyncOn, login, isAuthLoading, isTryingToAutoLogin, isCurrentlyLoading, loadEvents, addEvent, editEvent, deleteEvent, setIsLoggedIn, switchWeek, splitEvent }}>
             {props.children}
         </GCalContext.Provider>
     );

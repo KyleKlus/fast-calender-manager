@@ -9,7 +9,7 @@ import { EventContext } from './contexts/EventContext';
 import { Spinner } from 'react-bootstrap';
 
 function App() {
-  const { isLoggedIn, loadEvents } = useContext(GCalContext);
+  const { isLoggedIn, loadEvents, isAuthLoading } = useContext(GCalContext);
   const { areEventsLoaded, dateInView: date } = useContext(EventContext);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ function App() {
 
   return (
     <>{isLoggedIn
-      ? areEventsLoaded
+      ? areEventsLoaded && !isAuthLoading
         ? <CalendarPage />
         : <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw',
@@ -27,7 +27,7 @@ function App() {
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
             <Spinner animation="border" role="status">
             </Spinner>
-            <span>Loading events...</span>
+            <span>{isAuthLoading ? 'Reauthenticating...' : 'Loading Events...'}</span>
           </div>
         </div>
       : <LoginPage />
