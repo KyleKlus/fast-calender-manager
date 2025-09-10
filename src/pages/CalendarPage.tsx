@@ -246,22 +246,22 @@ function CalendarPage(props: ICalendarPageProps) {
             </div>
 
         </div >
-        {!showWeather &&
-            <EventTemplateDrawer
-                onAddClick={() => {
-                    setPopoverMode('add-template');
-                    setShortcutsEnabled(false);
-                    setPopoverOpen(true);
-                }}
-                onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
-                    const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
-                    setSelectedTemplate(newTemplate);
-                    setPopoverMode('edit-template');
-                    setShortcutsEnabled(false);
-                    setPopoverOpen(true);
-                }}
-            />
-        }
+        {/* {!showWeather && */}
+        <EventTemplateDrawer
+            onAddClick={() => {
+                setPopoverMode('add-template');
+                setShortcutsEnabled(false);
+                setPopoverOpen(true);
+            }}
+            onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
+                const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
+                setSelectedTemplate(newTemplate);
+                setPopoverMode('edit-template');
+                setShortcutsEnabled(false);
+                setPopoverOpen(true);
+            }}
+        />
+        {/* } */}
         {popoverOpen &&
             (popoverMode === 'add-template' || popoverMode === 'add'
                 ? <AddEventPopover

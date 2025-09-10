@@ -27,7 +27,7 @@ const Drawer: React.FC<IDrawerProps> = (props: IDrawerProps) => {
                         }
                         setIsOpen(!isOpen);
                     }}>
-                        <i className="bi-chevron-up"></i>
+                        <i className="bi-chevron-compact-up"></i>
                     </div>
                     <div className='drawer-handle-children drawer-handle-children-right'>{childrenWithinHandleRight}</div>
                 </div>
@@ -45,7 +45,7 @@ const Drawer: React.FC<IDrawerProps> = (props: IDrawerProps) => {
                         }
                         setIsOpen(!isOpen);
                     }}>
-                        <i className="bi-chevron-down"></i>
+                        <i className="bi-chevron-compact-down"></i>
                     </div>
                     <div className='drawer-handle-children drawer-handle-children-right'>{childrenWithinHandleRight}</div>
                 </div>

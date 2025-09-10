@@ -8,7 +8,6 @@ import { EventInput } from '@fullcalendar/core';
 import { EventContext } from '../../contexts/EventContext';
 import Drawer from './Drawer';
 import { WeatherContext } from '../../contexts/WeatherContext';
-import { DateInViewContext } from '../../contexts/DateInViewContext';
 
 export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'split' | 'none';
 
@@ -21,46 +20,20 @@ export interface IToolBarDrawerProps {
 }
 
 const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps) => {
-    const { isSyncOn, setIsSyncOn, switchWeek } = useContext(GCalContext);
-    const { showWeather, setShowWeather } = useContext(WeatherContext);
-    const { events, setEvents, areBGEventsEditable, setBGEventsEditable } = useContext(EventContext);
+    const { showWeather } = useContext(WeatherContext);
     const [isToolbarOpen, setToolbarOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
-    const isTKeyPressed = useKeyPress('t');
     const isXKeyPressed = useKeyPress('x');
     const isCKeyPressed = useKeyPress('c');
     const isDKeyPressed = useKeyPress('d');
     const isSKeyPressed = useKeyPress('s');
     const isAKeyPressed = useKeyPress('a');
-    const isPKeyPressed = useKeyPress('p');
-
-    const isRightArrowKeyPressed = useKeyPress('ArrowRight');
-    const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
-
-    useEffect(() => {
-        if (isLeftArrowKeyPressed) {
-            switchWeek('prev');
-        }
-    }, [isLeftArrowKeyPressed]);
-
-    useEffect(() => {
-        if (isRightArrowKeyPressed) {
-            switchWeek('next');
-        }
-    }, [isRightArrowKeyPressed]);
 
     useEffect(() => {
         if (isSpaceKeyPressed) {
             setToolbarOpen(!isToolbarOpen);
         }
     }, [isSpaceKeyPressed]);
-
-    useEffect(() => {
-        if (isTKeyPressed) {
-            switchWeek('today');
-        }
-    }, [isTKeyPressed]);
-
 
     useEffect(() => {
         if (isXKeyPressed && isToolbarOpen) {
@@ -92,20 +65,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
         }
     }, [isAKeyPressed]);
 
-    useEffect(() => {
-        if (isPKeyPressed) {
-            setBGEventsEditable(!areBGEventsEditable);
-            const newEvents = (events as Array<EventInput>).map(event => {
-                let isBackgroundEvent = event.display !== 'background' && !event.allDay;
-                return {
-                    ...event,
-                    display: isBackgroundEvent ? 'background' : 'auto',
-                };
-            });
-            setEvents(newEvents);
-        }
-    }, [isPKeyPressed]);
-
     return (
         <Drawer
             isOpen={isToolbarOpen}
@@ -120,38 +79,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                 }
                 setToolbarOpen(isOpen);
             }}
-            childrenWithinHandleLeft={
-                <div
-                    className={['weather-button', showWeather ? 'active' : ''].join(' ')}
-                    onClick={() => {
-                        setShowWeather(!showWeather)
-                        switchWeek('today', !showWeather);
-                    }}
-                >
-                    <i className='bi-cloud-sun'></i>
-                </div>
-            }
-            childrenWithinHandleRight={
-                <>
-                    <div
-                        className='toolbar-navigation-button left-button'
-                        onClick={() => { switchWeek('prev', showWeather) }}
-                    >
-                        <i className='bi-chevron-double-left'></i>
-                    </div>
-                    <div className='today-button' onClick={() => { switchWeek('today', showWeather) }}>
-                        <i className={`bi-calendar-event`}></i>
-                    </div>
-                    <div
-                        className='toolbar-navigation-button right-button'
-                        onClick={() => {
-                            switchWeek('next', showWeather)
-                        }}
-                    >
-                        <i className='bi-chevron-double-right'></i>
-                    </div>
-                </>
-            }
         >
             <DropdownButton
                 id={`dropdown-variants-${'Primary'}`}
@@ -210,25 +137,6 @@ const ToolBarDrawer: React.FC<IToolBarDrawerProps> = (props: IToolBarDrawerProps
                     <i className={`bi-hr`}></i>
                 </Button>
             </ButtonGroup>
-            <div className='toolbar-divider'></div>
-            <Button variant="primary" active={isSyncOn} className='sync-event-button' onClick={() => { setIsSyncOn(!isSyncOn) }}>
-                <i className={`bi-arrow-repeat`}></i>
-                Sync
-            </Button>
-            <Button variant="primary" active={areBGEventsEditable} className='sync-event-button' onClick={() => {
-                const newEvents = (events as Array<EventInput>).map(event => {
-                    let isBackgroundEvent = event.display !== 'background' && !event.allDay;
-                    return {
-                        ...event,
-                        display: isBackgroundEvent ? 'background' : 'auto',
-                    };
-                });
-                setEvents(newEvents);
-                setBGEventsEditable(!areBGEventsEditable);
-            }}>
-                <i className={`bi-pencil-square`}></i>
-                Phases
-            </Button>
             <div className='toolbar-divider'></div>
             <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                 <i className={`bi-plus`}></i>
