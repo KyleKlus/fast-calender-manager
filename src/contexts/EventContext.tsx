@@ -53,8 +53,13 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
                     const hourlyWeatherItem = dailyWeatherItem.hourlyWeather[j];
                     let isAtNight = currentDateTime.diff(sunrise).as('hours') <= 0 || currentDateTime.diff(sunset).as('hours') >= 0;
 
+                    let title = `${Math.round(hourlyWeatherItem.temperature)}°C ${hourlyWeatherItem.condition}`;
+                    if (title.includes('nearby')) {
+                        title = title.replace('nearby', '');
+                    }
+
                     const newEvent = {
-                        title: `${Math.round(hourlyWeatherItem.temperature)}°C`,
+                        title: `${title}`,
                         start: currentDateTime.toISO(),
                         end: currentDateTime.plus({ minutes: 30 }).toISO(),
                         allDay: false,
@@ -74,7 +79,7 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
 
                     newEvents.push({
                         ...newEvent,
-                        title: `${hourlyWeatherItem.condition}`,
+                        title: ``,
                         start: currentDateTime.toISO(),
                         end: currentDateTime.plus({ minutes: 30 }).toISO(),
                         backgroundColor: isAtNight ? nightWeatherColor : dayWeatherColor,

@@ -38,6 +38,7 @@
     --fc-today-bg-color: rgba(255, 40, 40, 0);
     --fc-event-bg-color: #b74f4f;
     --fc-event-border-color: #b74f4f;
+    user-select: none;
 }
 
 .fcPage .fc-timegrid-now-indicator-line.CustomNowIndicator {
