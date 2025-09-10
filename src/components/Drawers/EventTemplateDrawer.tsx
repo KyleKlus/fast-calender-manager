@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import './EventTemplateDrawer.css';
-import { Button } from 'react-bootstrap';
+import { Button, ButtonGroup, DropdownButton } from 'react-bootstrap';
 import DraggableEvent from '../DraggableEvent';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import Drawer from './Drawer';
@@ -10,10 +10,18 @@ import { GCalContext } from '../../contexts/GCalContext';
 import { WeatherContext } from '../../contexts/WeatherContext';
 import { EventInput } from '@fullcalendar/core';
 import { EventContext } from '../../contexts/EventContext';
+import ColorSelector, { getColorFromColorId } from '../ColorSelector';
+
+export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'split' | 'none';
 
 export interface IEventTemplateDrawerProps {
+    selectedColor: number;
+    selectedMode: ToolbarMode;
+    selectColor: (colorId: number) => void;
     onAddClick: () => void;
-    onEditClick: (eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => void;
+    onModeChange: (mode: ToolbarMode) => void;
+    onAddTemplateClick: () => void;
+    onEditTemplateClick: (eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => void;
 }
 
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
@@ -29,6 +37,42 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
 
     const isRightArrowKeyPressed = useKeyPress('ArrowRight');
     const isLeftArrowKeyPressed = useKeyPress('ArrowLeft');
+
+    const isXKeyPressed = useKeyPress('x');
+    const isCKeyPressed = useKeyPress('c');
+    const isDKeyPressed = useKeyPress('d');
+    const isSKeyPressed = useKeyPress('s');
+    const isAKeyPressed = useKeyPress('a');
+
+    useEffect(() => {
+        if (isXKeyPressed && isDrawerOpen) {
+            props.onModeChange && props.onModeChange('delete');
+        }
+    }, [isXKeyPressed]);
+
+    useEffect(() => {
+        if (isCKeyPressed && isDrawerOpen) {
+            props.onModeChange && props.onModeChange('color');
+        }
+    }, [isCKeyPressed]);
+
+    useEffect(() => {
+        if (isDKeyPressed && isDrawerOpen) {
+            props.onModeChange && props.onModeChange('duplicate');
+        }
+    }, [isDKeyPressed]);
+
+    useEffect(() => {
+        if (isSKeyPressed && isDrawerOpen) {
+            props.onModeChange && props.onModeChange('split');
+        }
+    }, [isSKeyPressed]);
+
+    useEffect(() => {
+        if (isAKeyPressed) {
+            props.onAddClick();
+        }
+    }, [isAKeyPressed]);
 
     useEffect(() => {
         if (isLeftArrowKeyPressed) {
@@ -63,7 +107,7 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                 eventTemplate={templates[i]}
                 isSelected={selectedTemplate.index === i}
                 onEditClick={() => {
-                    props.onEditClick(templates[i], i);
+                    props.onEditTemplateClick(templates[i], i);
                 }}
                 onTemplateClick={() => {
                     if (selectedTemplate.index === i) {
@@ -148,11 +192,72 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                 </div>
             }
             <div className='event-template-buttons'>
-                <Button variant="primary" className='add-template-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
+                <Button variant="primary" className='add-template-button' onClick={() => { props.onAddTemplateClick && props.onAddTemplateClick() }}>
                     <i className={`bi-clipboard-plus`}></i>
                 </Button>
-
-
+                <div className='toolbar-divider'></div>
+                <DropdownButton
+                    id={`dropdown-variants-${'Primary'}`}
+                    variant={'Primary'.toLowerCase()}
+                    className='color-event-button'
+                    title={
+                        <div className={['color-swatch',].join(' ')} style={{ backgroundColor: getColorFromColorId(props.selectedColor) }}></div>
+                    }
+                >
+                    <ColorSelector
+                        selectedColor={props.selectedColor}
+                        swatchesPerRow={6}
+                        onColorChange={(colorId) => {
+                            props.selectColor(colorId);
+                        }}
+                    />
+                </DropdownButton>
+                <ButtonGroup>
+                    <Button
+                        variant='primary'
+                        active={props.selectedMode === 'color'}
+                        className={"color-event-button"}
+                        onClick={() => {
+                            props.onModeChange && props.onModeChange('color')
+                        }}
+                    >
+                        <i className={`bi-palette${props.selectedMode === 'color' ? '-fill' : ''}`}></i>
+                    </Button>
+                    <Button
+                        variant="primary" active={props.selectedMode === 'delete'}
+                        className='delete-event-button'
+                        onClick={() => {
+                            props.onModeChange && props.onModeChange('delete')
+                        }}
+                    >
+                        <i className={`bi-trash${props.selectedMode === 'delete' ? '-fill' : ''}`}></i>
+                    </Button>
+                    <Button
+                        variant="primary"
+                        active={props.selectedMode === 'duplicate'}
+                        className='duplicate-event-button'
+                        onClick={() => {
+                            props.onModeChange && props.onModeChange('duplicate')
+                        }}
+                    >
+                        <i className={`bi-copy`}></i>
+                    </Button>
+                    <Button
+                        variant="primary"
+                        active={props.selectedMode === 'split'}
+                        className='split-event-button'
+                        onClick={() => {
+                            props.onModeChange && props.onModeChange('split')
+                        }}
+                    >
+                        <i className={`bi-hr`}></i>
+                    </Button>
+                </ButtonGroup>
+                <div className='toolbar-divider'></div>
+                <Button variant="primary" className='add-event-button' onClick={() => { props.onAddTemplateClick && props.onAddTemplateClick() }}>
+                    <i className={`bi-plus`}></i>
+                    Event
+                </Button>
 
             </div>
         </Drawer>

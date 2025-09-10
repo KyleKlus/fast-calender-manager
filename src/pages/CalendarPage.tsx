@@ -6,8 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 
 import { getDefaultConfig } from '../handlers/defaultFCConfig';
-import ToolBarDrawer, { ToolbarMode } from '../components/Drawers/ToolBarDrawer';
-import EventTemplateDrawer from '../components/Drawers/EventTemplateDrawer';
+import EventTemplateDrawer, { ToolbarMode } from '../components/Drawers/EventTemplateDrawer';
 import AddEventPopover from '../components/Popovers/AddEventPopover';
 import EditEventPopover from '../components/Popovers/EditEventPopover';
 import { GCalContext } from '../contexts/GCalContext';
@@ -194,23 +193,6 @@ function CalendarPage(props: ICalendarPageProps) {
     };
 
     return (<div className={['fcPage', showWeather ? 'fcPageWeather' : ''].join(' ')}>
-        < ToolBarDrawer
-            selectedMode={toolbarMode}
-            selectedColor={selectedColor}
-            selectColor={(colorId: number) => {
-                setSelectedColor(colorId);
-            }
-            }
-            onAddClick={() => {
-                if (showWeather) { return }
-                setPopoverMode('add');
-                setShortcutsEnabled(false);
-                setPopoverOpen(true);
-            }}
-            onModeChange={(mode) => {
-                setToolbarMode(toolbarMode === mode ? 'none' : mode);
-            }}
-        />
         < div className='calendar-container' >
             <div
                 className='calendar-left-button calendar-nav-button'
@@ -246,14 +228,28 @@ function CalendarPage(props: ICalendarPageProps) {
             </div>
 
         </div >
-        {/* {!showWeather && */}
         <EventTemplateDrawer
+            selectedMode={toolbarMode}
+            selectedColor={selectedColor}
+            selectColor={(colorId: number) => {
+                setSelectedColor(colorId);
+            }
+            }
             onAddClick={() => {
+                if (showWeather) { return }
+                setPopoverMode('add');
+                setShortcutsEnabled(false);
+                setPopoverOpen(true);
+            }}
+            onModeChange={(mode) => {
+                setToolbarMode(toolbarMode === mode ? 'none' : mode);
+            }}
+            onAddTemplateClick={() => {
                 setPopoverMode('add-template');
                 setShortcutsEnabled(false);
                 setPopoverOpen(true);
             }}
-            onEditClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
+            onEditTemplateClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
                 const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
                 setSelectedTemplate(newTemplate);
                 setPopoverMode('edit-template');
@@ -261,7 +257,6 @@ function CalendarPage(props: ICalendarPageProps) {
                 setPopoverOpen(true);
             }}
         />
-        {/* } */}
         {popoverOpen &&
             (popoverMode === 'add-template' || popoverMode === 'add'
                 ? <AddEventPopover
