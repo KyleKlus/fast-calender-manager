@@ -1,5 +1,6 @@
 import './ColorSelector.css';
 
+// Color mapping for event colors (Based on Google Calendar colors)
 export const colorMap = [
     '#b74f4f',
     '#7986cbff',
@@ -42,6 +43,14 @@ export interface IColorSelectorProps {
     onColorChange: (colorId: number) => void;
 }
 
+/**
+ * ColorSelector Component
+ *
+ * This component is responsible for rendering a color selector.
+ *
+ * @param props
+ * @returns JSX.Element
+ */
 const ColorSelector: React.FC<IColorSelectorProps> = (props: IColorSelectorProps) => {
     return (
         <div className='color-selector' style={{

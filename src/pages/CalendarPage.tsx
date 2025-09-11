@@ -20,27 +20,43 @@ import { DateInViewContext } from '../contexts/DateInViewContext';
 
 export interface ICalendarPageProps { }
 
+/**
+ * PopoverMode type
+ *
+ * This type represents the different modes of the popover, which determines what content is shown in the popover.
+ */
 export type PopoverMode = 'add' | 'add-template' | 'edit' | 'edit-template' | 'none';
 
+/**
+ * CalendarPage Component
+ *
+ * This component is responsible for rendering the calendar and handling all user interactions.
+ *
+ * @param props
+ * @returns
+ */
 function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
     const { hourlyWeather, insertWeather, showWeather } = useContext(WeatherContext);
-
     const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek, splitEvent } = useContext(GCalContext);
     const { events, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
     const { dateInView } = useContext(DateInViewContext);
+
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
+
     const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>(undefined);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>(undefined);
-    const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
+
+    const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
-    const [popoverMode, setPopoverMode] = useState<PopoverMode>('none');
+    const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
 
     const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
 
     useEffect(() => {
+        // Done in this way, because one cant modify the calendar in any other way
         if (hourlyWeather.length > 0) {
             insertWeather()
         }
@@ -48,14 +64,17 @@ function CalendarPage(props: ICalendarPageProps) {
 
     function eventClick(info: EventClickArg) {
         info.jsEvent.preventDefault();
-        if (showWeather) { return }
+
+        if (showWeather) { return } // Disables all interactions when weather is shown
         const colorId = getColorIdFromColor(info.event.backgroundColor);
 
+        // Opens the google task list if the event is a task
         if (info.event.extendedProps?.isTask) {
             window.open('https://calendar.google.com/calendar/u/0/r/tasks', '_blank');
             return;
         }
 
+        // Handles all modes, which are selected from the toolbar
         switch (toolbarMode) {
             case 'none':
                 if (popoverMode === 'none') {
@@ -127,7 +146,7 @@ function CalendarPage(props: ICalendarPageProps) {
     }
 
     function select(info: DateSelectArg) {
-        if (showWeather) { return }
+        if (showWeather) { return } // Disables all interactions when weather is shown
 
         if (!showAddPopoverWithTemplate && selectedTemplate.template !== null) {
             const start = DateTime.fromJSDate(info.start);
@@ -159,6 +178,7 @@ function CalendarPage(props: ICalendarPageProps) {
         } else {
             setSelectedEndDate(info.end);
         }
+
         setPopoverMode('add');
         setShortcutsEnabled(false);
         setPopoverOpen(true);
@@ -176,7 +196,7 @@ function CalendarPage(props: ICalendarPageProps) {
         setIsDragging(false);
     }
 
-    const handleEventReceive = (info: EventReceiveArg) => {
+    const eventReceive = (info: EventReceiveArg) => {
         if (showWeather) { return }
 
         const droppedEvent = info.event;
@@ -192,99 +212,99 @@ function CalendarPage(props: ICalendarPageProps) {
         }, droppedEvent.allDay);
     };
 
-    return (<div className={['fcPage', showWeather ? 'fcPageWeather' : ''].join(' ')}>
-        < div className='calendar-container' >
-            <div
-                className='calendar-left-button calendar-nav-button'
-                onMouseEnter={() => {
-                    if (isDragging && !isCurrentlyLoading) {
-                        switchWeek('prev');
-                    }
-                }}
-            >
-                <i className='bi-chevron-double-left'></i>
-            </div>
+    return (
+        <div className={['fcPage', showWeather ? 'fcPageWeather' : ''].join(' ')}>
+            <div className='calendar-container' >
+                <div
+                    className='calendar-left-button calendar-nav-button'
+                    onMouseEnter={() => {
+                        if (isDragging && !isCurrentlyLoading) {
+                            switchWeek('prev');
+                        }
+                    }}
+                >
+                    <i className='bi-chevron-double-left' />
+                </div>
+                <FullCalendar {...getDefaultConfig()}
+                    events={events}
+                    eventClick={eventClick}
+                    eventChange={eventChange}
+                    eventDragStart={eventDragStart}
+                    eventDragStop={eventDragStop}
+                    eventReceive={eventReceive}
+                    select={select}
+                    initialDate={dateInView.toFormat('yyyy-MM-dd')}
+                />
 
-            <FullCalendar {...getDefaultConfig()}
-                events={events}
-                eventClick={eventClick}
-                eventChange={eventChange}
-                eventDragStart={eventDragStart}
-                eventDragStop={eventDragStop}
-                eventReceive={handleEventReceive}
-                select={select}
-                initialDate={dateInView.toFormat('yyyy-MM-dd')}
+                <div
+                    className='calendar-right-button calendar-nav-button'
+                    onMouseEnter={() => {
+                        if (isDragging && !isCurrentlyLoading) {
+                            switchWeek('next');
+                        }
+                    }}
+                >
+                    <i className='bi-chevron-double-right' />
+                </div>
+            </div >
+            {/* Also a toolbar now */}
+            <EventTemplateDrawer
+                selectedMode={toolbarMode}
+                selectedColor={selectedColor}
+                selectColor={(colorId: number) => {
+                    setSelectedColor(colorId);
+                }
+                }
+                onAddClick={() => {
+                    if (showWeather) { return }
+                    setPopoverMode('add');
+                    setShortcutsEnabled(false);
+                    setPopoverOpen(true);
+                }}
+                onModeChange={(mode) => {
+                    setToolbarMode(toolbarMode === mode ? 'none' : mode);
+                }}
+                onAddTemplateClick={() => {
+                    setPopoverMode('add-template');
+                    setShortcutsEnabled(false);
+                    setPopoverOpen(true);
+                }}
+                onEditTemplateClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
+                    const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
+                    setSelectedTemplate(newTemplate);
+                    setPopoverMode('edit-template');
+                    setShortcutsEnabled(false);
+                    setPopoverOpen(true);
+                }}
             />
-
-            <div
-                className='calendar-right-button calendar-nav-button'
-                onMouseEnter={() => {
-                    if (isDragging && !isCurrentlyLoading) {
-                        switchWeek('next');
-                    }
-                }}
-            >
-                <i className='bi-chevron-double-right'></i>
-            </div>
-
+            {popoverOpen &&
+                (popoverMode === 'add-template' || popoverMode === 'add'
+                    ? <AddEventPopover
+                        popoverMode={popoverMode}
+                        open={popoverOpen}
+                        selectedColor={selectedColor}
+                        startDate={selectedStartDate}
+                        endDate={selectedEndDate}
+                        closePopover={() => {
+                            setSelectedStartDate(undefined);
+                            setSelectedEndDate(undefined);
+                            setPopoverMode('none');
+                            setPopoverOpen(false);
+                            setShortcutsEnabled(true);
+                        }}
+                    />
+                    : <EditEventPopover
+                        open={popoverOpen}
+                        popoverMode={popoverMode}
+                        closePopover={() => {
+                            setPopoverMode('none');
+                            setPopoverOpen(false);
+                            setShortcutsEnabled(true);
+                        }}
+                    />
+                )
+            }
         </div >
-        <EventTemplateDrawer
-            selectedMode={toolbarMode}
-            selectedColor={selectedColor}
-            selectColor={(colorId: number) => {
-                setSelectedColor(colorId);
-            }
-            }
-            onAddClick={() => {
-                if (showWeather) { return }
-                setPopoverMode('add');
-                setShortcutsEnabled(false);
-                setPopoverOpen(true);
-            }}
-            onModeChange={(mode) => {
-                setToolbarMode(toolbarMode === mode ? 'none' : mode);
-            }}
-            onAddTemplateClick={() => {
-                setPopoverMode('add-template');
-                setShortcutsEnabled(false);
-                setPopoverOpen(true);
-            }}
-            onEditTemplateClick={(eventTemplate: SimplifiedEvent, eventTemplateIndex: number) => {
-                const newTemplate = { template: eventTemplate, index: eventTemplateIndex }
-                setSelectedTemplate(newTemplate);
-                setPopoverMode('edit-template');
-                setShortcutsEnabled(false);
-                setPopoverOpen(true);
-            }}
-        />
-        {popoverOpen &&
-            (popoverMode === 'add-template' || popoverMode === 'add'
-                ? <AddEventPopover
-                    popoverMode={popoverMode}
-                    open={popoverOpen}
-                    selectedColor={selectedColor}
-                    startDate={selectedStartDate}
-                    endDate={selectedEndDate}
-                    closePopover={() => {
-                        setSelectedStartDate(undefined);
-                        setSelectedEndDate(undefined);
-                        setPopoverMode('none');
-                        setPopoverOpen(false);
-                        setShortcutsEnabled(true);
-                    }}
-                />
-                : <EditEventPopover
-                    open={popoverOpen}
-                    popoverMode={popoverMode}
-                    closePopover={() => {
-                        setPopoverMode('none');
-                        setPopoverOpen(false);
-                        setShortcutsEnabled(true);
-                    }}
-                />
-            )
-        }
-    </div >
     );
 };
 

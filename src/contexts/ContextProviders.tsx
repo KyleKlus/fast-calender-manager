@@ -6,8 +6,7 @@ import { KeyboardShortcutProvider } from './KeyboardShortcutContext';
 import { TemplateProvider } from './TemplateContext';
 import { WeatherProvider } from './WeatherContext';
 
-export default function AppProviders(props: React.PropsWithChildren<{}>) {
-
+export default function ContextProviders(props: React.PropsWithChildren<{}>) {
     return (
         <KeyboardShortcutProvider>
             <DateInViewProvider>

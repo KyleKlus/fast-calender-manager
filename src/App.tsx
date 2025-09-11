@@ -24,11 +24,21 @@ function App() {
       ? areEventsLoaded && !isAuthLoading
         ? <CalendarPage />
         : <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          width: '100vw',
         }}>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-            <Spinner animation="border" role="status">
-            </Spinner>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem'
+          }}>
+            <Spinner animation="border" role="status" />
             <span>{isAuthLoading ? 'Reauthenticating...' : 'Loading Events...'}</span>
           </div>
         </div>

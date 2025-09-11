@@ -14,6 +14,14 @@ interface DraggableEventProps {
     onTemplateClick?: () => void;
 }
 
+/**
+ * DraggableEvent Component
+ *
+ * This component is responsible for rendering a draggable template.
+ *
+ * @param props
+ * @returns JSX.Element
+ */
 const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onEditClick, onTemplateClick, className, isSelected }) => {
     const eventRef = useRef<HTMLDivElement>(null);
     const durationInMinutes = DateTime.fromISO(eventTemplate.end).diff(DateTime.fromISO(eventTemplate.start)).as('minutes');
@@ -63,7 +71,7 @@ const DraggableEvent: React.FC<DraggableEventProps> = ({ eventTemplate, onEditCl
                     e.stopPropagation();
                     onEditClick && onEditClick()
                 }}>
-                    <i className='bi bi-pencil-square'></i>
+                    <i className='bi-pencil-square' />
                 </button>
             }
         </div>

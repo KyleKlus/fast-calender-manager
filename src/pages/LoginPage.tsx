@@ -9,9 +9,8 @@ function LoginPage(props: ILoginPageProps) {
     const { isTryingToAutoLogin, login } = useContext(GCalContext);
 
     return (
-        <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw',
-        }}>
+        <div
+            className={['login-page'].join(' ')}>
             {!isTryingToAutoLogin
                 ? <button onClick={() => {
                     login();
@@ -19,7 +18,7 @@ function LoginPage(props: ILoginPageProps) {
                     Log in
                 </button>
                 :
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                <div className={['spinner-container'].join(' ')}>
                     <Spinner animation="border" role="status">
                     </Spinner>
                     <span>Logging in...</span>
