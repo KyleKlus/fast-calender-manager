@@ -7,14 +7,16 @@ import { GCalContext } from './contexts/GCalContext';
 import LoginPage from './pages/LoginPage';
 import { EventContext } from './contexts/EventContext';
 import { Spinner } from 'react-bootstrap';
+import { DateInViewContext } from './contexts/DateInViewContext';
 
 function App() {
   const { isLoggedIn, loadEvents, isAuthLoading } = useContext(GCalContext);
-  const { areEventsLoaded, dateInView: date } = useContext(EventContext);
+  const { areEventsLoaded } = useContext(EventContext);
+  const { dateInView } = useContext(DateInViewContext);
 
   useEffect(() => {
     if (areEventsLoaded && isLoggedIn) return;
-    loadEvents(date);
+    loadEvents(dateInView);
   }, [isLoggedIn]);
 
   return (
