@@ -1,26 +1,30 @@
 import './LoginPage.css';
 import { useContext } from 'react';
 import { GCalContext } from '../contexts/GCalContext';
+import { Spinner } from 'react-bootstrap';
 
 interface ILoginPageProps { }
 
 function LoginPage(props: ILoginPageProps) {
-    const { isTryingToAutoLogin, gcal, setIsLoggedIn } = useContext(GCalContext);
+    const { isTryingToAutoLogin, login } = useContext(GCalContext);
 
     return (
-        <div>
-            {!isTryingToAutoLogin &&
-                <button onClick={() => {
-                    if (gcal === undefined) { return }
-                    gcal.handleAuthClick().then((res) => {
-                        setIsLoggedIn(true);
-                        localStorage.setItem("u_token", JSON.stringify(gapi.client.getToken()));
-                    });
+        <div
+            className={['login-page'].join(' ')}>
+            {!isTryingToAutoLogin
+                ? <button onClick={() => {
+                    login();
                 }}>
                     Log in
                 </button>
+                :
+                <div className={['spinner-container'].join(' ')}>
+                    <Spinner animation="border" role="status">
+                    </Spinner>
+                    <span>Logging in...</span>
+                </div>
             }
-        </div>
+        </div >
     );
 };
 

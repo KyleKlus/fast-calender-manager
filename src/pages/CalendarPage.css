@@ -13,6 +13,10 @@
     overflow: hidden;
 }
 
+.popup-overlay {
+    background: rgba(0, 0, 0, 0.677);
+}
+
 .fcPage .calendar-container {
     width: 100%;
     flex-grow: 1;
@@ -31,9 +35,10 @@
     --fc-button-hover-border-color: #a03c3c;
     --fc-button-active-bg-color: #8c3333;
     --fc-button-active-border-color: #8c3333;
-    --fc-today-bg-color: rgba(255, 40, 40, 0.063);
+    --fc-today-bg-color: rgba(255, 40, 40, 0);
     --fc-event-bg-color: #b74f4f;
     --fc-event-border-color: #b74f4f;
+    user-select: none;
 }
 
 .fcPage .fc-timegrid-now-indicator-line.CustomNowIndicator {
@@ -59,26 +64,30 @@
 }
 
 .fcPage .calendar-nav-button {
-    border: 1px solid var(--bs-border-color);
+    --height: 80vh;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 1.2rem;
-    height: 100%;
-    background-color: #fff;
+    height: var(--height);
+    position: absolute;
+    top: calc(50vh - var(--height) / 2);
+    bottom: calc(50vh - var(--height) / 2);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
 }
 
 .fcPage .calendar-nav-button:hover {
-    background-color: #ececec;
-    cursor: pointer;
-}
-
-.fcPage .calendar-left-button {
-    border-right: none;
+    opacity: 1;
 }
 
 .fcPage .calendar-right-button {
-    border-left: none;
+    right: 0.8rem;
+}
+
+.fcPage .calendar-left-button {
+    left: 0rem;
 }
 
 .fcPage .fc-theme-bootstrap5 .fc-list,
@@ -89,28 +98,49 @@
 }
 
 .fcPage .fc-event {
+    --bs-btn-box-shadow: ;
     border-radius: 6px;
-    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+    box-shadow: 2px 2px 2px #00000080;
     outline: var(--bs-border-color) solid 1px;
-
-    &:hover:not(.fc-event-past) {
-        filter: brightness(1.1);
-        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
-        outline: var(--bs-border-color) solid 1.5px;
-    }
 }
 
-.fcPage .fc-event.fc-timegrid-event-short {
-    font-size: xx-small;
+.fcPage .fc .fc-timegrid-slot-minor {
+    border-top-style: none;
 }
 
-.fcPage .fc-event-past {
-    filter: saturate(0.4) brightness(1.4);
+.fcPage .fc .fc-timegrid-slot-label.night {
+    background-color: #dce4fe;
+}
+
+.fcPage .fc .fc-timegrid-slot-label:not(.night) {
+    background-color: #fef7dc;
+}
+
+.fcPage .fc .fc-timegrid-slot-label.fc-timegrid-slot-minor {
+    font-size: 0.6rem;
+    text-align: center;
+    font-style: italic;
+}
+
+.fcPage .fc .fc-bg-event {
+    opacity: 0.8 !important;
+    border: none !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+
+}
+
+.fcPage .fc-direction-ltr .fc-timegrid-col-events {
+    margin: 0px 5% 0px 5px;
+}
+
+.fcPage .fc-timegrid-event-short .fc-event-time {
+    display: none;
+}
+
+.fcPage:not(.fcPageWeather) .fc-event.fc-event-past {
+    filter: saturate(0.3) brightness(1.6);
+    background-color: transparent;
+    color: var(--bs-secondary-color);
     --fc-event-text-color: #3b3a3a;
-    box-shadow: none;
-
-    &:hover {
-        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
-        outline: var(--bs-border-color) solid 1.5px;
-    }
 }

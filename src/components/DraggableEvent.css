@@ -1,5 +1,57 @@
 .draggable-event {
-    padding: 4px 8px;
+    --width: 9rem;
     cursor: move;
     display: flex;
+    max-width: var(--width);
+    min-width: var(--width);
+    white-space: nowrap;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: #ffffff;
+    position: relative;
+
+    &:hover {
+        box-shadow: 4px 4px 4px #00000080;
+    }
+}
+
+.draggable-event.is-selected {
+    outline: var(--bs-border-color) solid 2px;
+    box-shadow: 4px 4px 4px #00000080;
+
+    &:hover {
+        outline: var(--bs-border-color) solid 2px;
+        box-shadow: 4px 4px 4px #00000080;
+    }
+}
+
+.draggable-event .duration,
+.draggable-event .title {
+    padding: 0.2rem;
+}
+
+.draggable-event .duration {
+    border-right: 1px solid black;
+}
+
+.draggable-event .title {
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.edit-template-button {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.552);
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }

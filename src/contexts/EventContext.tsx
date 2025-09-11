@@ -1,99 +1,107 @@
 import { EventInput } from '@fullcalendar/core';
-import { EventImpl } from '@fullcalendar/core/internal';
-import { createContext, useState } from 'react';
-import React from 'react'; import { colorMap } from './GCalContext';
-7
-
-export interface SimplifiedEvent {
-    id?: string;
-    title: string;
-    start: string;
-    end: string;
-    allDay: boolean;
-    description: string;
-    colorId: number;
-    location?: string;
-    extendedProps?: { description?: string };
-}
-
-export function convertEventImplToEventInput(event: EventImpl): EventInput {
-    const start = event.start === null ? undefined : event.start;
-    const end = event.end === null ? undefined : event.end;
-
-    return {
-        id: event.id,
-        title: event.title,
-        start: start,
-        end: end,
-        allDay: event.allDay,
-        backgroundColor: event.backgroundColor,
-        borderColor: event.borderColor,
-        extendedProps: {
-            description: event.extendedProps?.description,
-        },
-    };
-}
-
-export function convertEventInputToSimplifiedEvent(event: EventInput): SimplifiedEvent {
-    let start: string = '';
-    let end: string = '';
-
-    if (event.start !== undefined && typeof event.start === typeof new Date()) {
-        start = (event.start as Date).toISOString();
-    } else if (event.start !== undefined && typeof event.start === 'string') {
-        start = event.start;
-    }
-
-    if (event.end !== undefined && typeof event.end === typeof new Date()) {
-        end = (event.end as Date).toISOString();
-    } else if (event.end !== undefined && typeof event.end === 'string') {
-        end = event.end;
-    }
-
-    return {
-        id: event.id,
-        title: (event.title as string),
-        start: start,
-        end: end,
-        allDay: event.allDay || false,
-        description: event.extendedProps?.description,
-        extendedProps: event.extendedProps,
-        colorId: event.backgroundColor === undefined || event.backgroundColor === '' || colorMap.indexOf(event.backgroundColor) === -1 ? 0 : colorMap.indexOf(event.backgroundColor),
-        location: event.location,
-    };
-}
-
-export function convertEventImplToSimplifiedEvent(event: EventImpl): SimplifiedEvent {
-    return convertEventInputToSimplifiedEvent(convertEventImplToEventInput(event));
-}
+import { createContext, useContext, useEffect, useState } from 'react';
+import React from 'react';
+import { DateTime } from 'luxon';
+import { DateInViewContext } from './DateInViewContext';
+import { dayWeatherColor, IDailyWeather, nightWeatherColor, WeatherContext } from './WeatherContext';
 
 interface IEventContext {
-    currentEvents: EventInput[];
-    setCurrentEvents: (currentEvents: EventInput[]) => void;
-    setAddCurrentEvent: (currentEvent: EventInput) => void;
-    setRemoveCurrentEvent: (currentEvent: EventInput) => void;
+    events: EventInput[];
+    areEventsLoaded: boolean;
+    selectedEvents: EventInput[];
+    areBGEventsEditable: boolean;
+    setEvents: (events: EventInput[]) => void;
+    setAreEventsLoaded: (areEventsLoaded: boolean) => void;
+    setBGEventsEditable: (editable: boolean) => void;
+    setSelectedEvents: (selectedEvents: EventInput[]) => void;
+    setAddSelectedEvent: (selectedEvent: EventInput) => void;
+    setRemoveSelectedEvent: (selectedEvent: EventInput) => void;
 }
 
 const EventContext = createContext<IEventContext>({
-    currentEvents: [],
-    setCurrentEvents: (currentEvents: EventInput[]) => { },
-    setAddCurrentEvent: (currentEvent: EventInput) => { },
-    setRemoveCurrentEvent: (currentEvent: EventInput) => { },
+    selectedEvents: [],
+    events: [],
+    areEventsLoaded: false,
+    areBGEventsEditable: false,
+    setEvents: (events: EventInput[]) => { },
+    setAreEventsLoaded: (areEventsLoaded: boolean) => { },
+    setBGEventsEditable: (editable: boolean) => { },
+    setSelectedEvents: (selectedEvents: EventInput[]) => { },
+    setAddSelectedEvent: (selectedEvent: EventInput) => { },
+    setRemoveSelectedEvent: (selectedEvent: EventInput) => { },
 });
 
 function EventProvider(props: React.PropsWithChildren<{}>) {
-    const [currentEvents, setCurrentEvents] = useState<EventInput[]>([]);
+    const { showWeather, dailyWeather } = useContext(WeatherContext);
+    const [selectedEvents, setSelectedEvents] = useState<EventInput[]>([]);
+    const [areBGEventsEditable, setBGEventsEditable] = useState<boolean>(false);
+    const [events, setEvents] = useState<EventInput[]>([]);
+    const [areEventsLoaded, setAreEventsLoaded] = useState(false);
 
-    function setAddCurrentEvent(currentEvent: EventInput) {
-        setCurrentEvents([...currentEvents, currentEvent]);
+    useEffect(() => {
+        if (showWeather) {
+            const newEvents: EventInput[] = [];
+
+            for (let i = 0; i < dailyWeather.length; i++) {
+                const dailyWeatherItem = dailyWeather[i];
+                let currentDateTime = DateTime.now().plus({ days: i }).startOf('day');
+                if (dailyWeatherItem.sunrise === null || dailyWeatherItem.sunset === null) { return }
+                const sunrise = currentDateTime.set({ hour: dailyWeatherItem.sunrise.hour, minute: dailyWeatherItem.sunrise.minute });
+                const sunset = currentDateTime.set({ hour: dailyWeatherItem.sunset.hour, minute: dailyWeatherItem.sunset.minute });
+
+                for (let j = 0; j < dailyWeatherItem.hourlyWeather.length; j++) {
+                    const hourlyWeatherItem = dailyWeatherItem.hourlyWeather[j];
+                    let isAtNight = currentDateTime.diff(sunrise).as('hours') <= 0 || currentDateTime.diff(sunset).as('hours') >= 0;
+
+                    let title = `${Math.round(hourlyWeatherItem.temperature)}°C ${hourlyWeatherItem.condition}`;
+                    if (title.includes('nearby')) {
+                        title = title.replace('nearby', '');
+                    }
+
+                    const newEvent = {
+                        title: `${title}`,
+                        start: currentDateTime.toISO(),
+                        end: currentDateTime.plus({ minutes: 30 }).toISO(),
+                        allDay: false,
+                        description: hourlyWeatherItem.condition,
+                        extendedProps: {
+                            description: hourlyWeatherItem.condition,
+                        },
+                        display: 'background',
+                        backgroundColor: isAtNight ? nightWeatherColor : dayWeatherColor,
+                        borderColor: isAtNight ? nightWeatherColor : dayWeatherColor,
+                    }
+                    currentDateTime = currentDateTime.plus({ minutes: 30 });
+
+                    newEvents.push(newEvent);
+
+                    isAtNight = currentDateTime.diff(sunrise).as('hours') <= 0 || currentDateTime.diff(sunset).as('hours') >= 0;
+
+                    newEvents.push({
+                        ...newEvent,
+                        title: ``,
+                        start: currentDateTime.toISO(),
+                        end: currentDateTime.plus({ minutes: 30 }).toISO(),
+                        backgroundColor: isAtNight ? nightWeatherColor : dayWeatherColor,
+                        borderColor: isAtNight ? nightWeatherColor : dayWeatherColor,
+                    });
+                    currentDateTime = currentDateTime.plus({ minutes: 30 });
+                }
+            }
+            setEvents(newEvents);
+        }
+    }, [showWeather]);
+
+    function setAddSelectedEvent(selectedEvent: EventInput) {
+        setSelectedEvents([...selectedEvents, selectedEvent]);
     }
 
-    function setRemoveCurrentEvent(currentEvent: EventInput) {
-        setCurrentEvents(currentEvents.filter((e) => e !== currentEvent));
+    function setRemoveSelectedEvent(selectedEvent: EventInput) {
+        setSelectedEvents(selectedEvents.filter((e) => e !== selectedEvent));
     }
 
     return (
-        <EventContext.Provider value={{ currentEvents, setCurrentEvents, setAddCurrentEvent, setRemoveCurrentEvent }}>
+        <EventContext.Provider value={{ events, areEventsLoaded, setEvents, setAreEventsLoaded, selectedEvents, areBGEventsEditable, setBGEventsEditable, setSelectedEvents, setAddSelectedEvent, setRemoveSelectedEvent }}>
             {props.children}
         </EventContext.Provider>
     );

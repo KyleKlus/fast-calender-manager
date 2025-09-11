@@ -1,0 +1,24 @@
+.color-selector-swatch {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 1px solid var(--bs-border-color);
+    cursor: pointer;
+
+    &:hover {
+        border-width: 2px;
+        border-style: double;
+    }
+
+    &.selected {
+        border-width: 2px;
+        border-style: double;
+        box-shadow: 1px 2px 3px 0 #0000006b;
+    }
+}
+
+.color-selector {
+    --gap: 0.5rem;
+    display: grid;
+    gap: var(--gap);
+}

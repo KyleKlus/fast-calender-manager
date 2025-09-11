@@ -1,5 +1,3 @@
-import { EventInput } from "@fullcalendar/core";
-
 export interface ConfigGCal {
     clientId: string;
     apiKey: string;
@@ -20,6 +18,8 @@ interface ExtendedTokenClient extends google.accounts.oauth2.TokenClient {
     callback?: (resp: any) => void;
     error_callback?: (resp: any) => void;
 }
+
+const MAX_RETRIES = 2;
 
 class GCal {
     tokenClient: ExtendedTokenClient | null = null;
@@ -123,7 +123,7 @@ class GCal {
                     tokenObject = JSON.parse(token);
                 }
                 if (gapi.client.getToken() === null && token === null) {
-                    this.tokenClient!.requestAccessToken({ prompt: "consent" });
+                    this.tokenClient!.requestAccessToken({ prompt: "" });
                 } else {
                     this.tokenClient!.requestAccessToken({ prompt: "" });
                 }
@@ -154,6 +154,42 @@ class GCal {
         }
     }
 
+    public async onError(callback: any, setLoginState: any, loginState: boolean = true, retries: number = MAX_RETRIES): Promise<any> {
+        try {
+            if (gapi) {
+                // if (retries === MAX_RETRIES) { throw new Error("Test"); }
+                return await callback();
+            } else {
+                if (loginState) {
+                    setLoginState(false);
+                }
+                await this.handleAuthClick();
+                return await this.onError(callback, setLoginState, false, retries - 1).then(res => {
+                    if (loginState) {
+                        setLoginState(true);
+                    }
+                    return res;
+                });
+            }
+        } catch (e) {
+            if (retries > 0) {
+                if (loginState) {
+                    setLoginState(false);
+                }
+                await this.handleAuthClick();
+                return await this.onError(callback, setLoginState, false, retries - 1).then(res => {
+                    if (loginState) {
+                        setLoginState(true);
+                    }
+                    return res;
+                });
+            } else {
+                console.error("Error: this.gapi not loaded");
+                return await Promise.reject(e);
+            }
+        }
+    }
+
     /**
      * Sign out user google account
      */
@@ -166,7 +202,6 @@ class GCal {
                 gapi.client.setToken(null);
             }
         } else {
-            console.error("Error: this.gapi not loaded");
         }
     }
 
@@ -176,12 +211,13 @@ class GCal {
      * @param {string} calendarId to see by default use the calendar attribute
      * @returns {any}
      */
-    public listUpcomingEvents(
+    public async listUpcomingEvents(
         maxResults: number,
-        calendarId: string = this.calendar
-    ): any {
-        if (gapi) {
-            return gapi.client.calendar.events.list({
+        setLoginState: any,
+        calendarId: string = this.calendar,
+    ): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.events.list({
                 calendarId: calendarId,
                 timeMin: new Date().toISOString(),
                 showDeleted: false,
@@ -189,10 +225,7 @@ class GCal {
                 maxResults: maxResults,
                 orderBy: "startTime",
             });
-        } else {
-            console.error("Error: this.gapi not loaded");
-            return false;
-        }
+        }, setLoginState);
     }
 
     /**
@@ -202,36 +235,41 @@ class GCal {
      * @param {string} calendarId to see by default use the calendar attribute
      * @returns {any}
      */
-    public listEvents(
+    public async listEvents(
         queryOptions: object,
-        calendarId: string = this.calendar
-    ): any {
-        if (gapi) {
-            return gapi.client.calendar.events.list({
+        setLoginState: any,
+        calendarId: string = this.calendar,
+    ): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.events.list({
                 calendarId,
                 ...queryOptions,
             });
-        } else {
-            console.error("Error: gapi not loaded");
-            return false;
-        }
+        }, setLoginState);
     }
 
-    public listTasks(
+    public async listTasks(
         queryOptions: object,
-        tasklistId: string = this.tasklist
-    ): any {
-        if (gapi) {
-            return gapi.client.tasks.tasks.list({
+        setLoginState: any,
+        tasklistId: string = this.tasklist,
+    ): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.tasks.tasks.list({
                 tasklist: tasklistId,
                 ...queryOptions,
             });
-        } else {
-            console.error("Error: gapi not loaded");
-            return false;
-        }
+        }, setLoginState);
     }
 
+    public async updateTask(task: { title?: string; description?: string; due?: string }, taskId: string, setLoginState: any, tasklistId: string = this.tasklist): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.tasks.tasks.update({
+                tasklist: tasklistId,
+                task: taskId,
+                resource: task,
+            });
+        }, setLoginState);
+    }
 
     /**
      * Create an event from the current time for a certain period
@@ -242,11 +280,12 @@ class GCal {
      * @param {string} timeZone The time zone in which the time is specified. (Formatted as an IANA Time Zone Database name, e.g. "Europe/Zurich".)
      * @returns {any}
      */
-    public createEventFromNow(
+    public async createEventFromNow(
         { time, summary, description = "" }: any,
+        setLoginState: any,
         calendarId: string = this.calendar,
         timeZone: string = "Europe/Paris"
-    ): any {
+    ): Promise<any> {
         const event = {
             summary,
             description,
@@ -260,7 +299,7 @@ class GCal {
             },
         };
 
-        return this.createEvent(event, calendarId);
+        return await this.createEvent(event, calendarId, setLoginState);
     }
 
     /**
@@ -270,23 +309,21 @@ class GCal {
      * @param {string} sendUpdates Acceptable values are: "all", "externalOnly", "none"
      * @returns {any}
      */
-    public createEvent(
+    public async createEvent(
         event: { summary?: string; description?: string; end: TimeCalendarType; start: TimeCalendarType, colorId?: string },
+        setLoginState: any,
         calendarId: string = this.calendar,
         sendUpdates: "all" | "externalOnly" | "none" = "none"
-    ): any {
-        if (gapi.client.getToken()) {
-            return gapi.client.calendar.events.insert({
+    ): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.events.insert({
                 calendarId: calendarId,
                 resource: event,
                 //@ts-ignore the @types/gapi.calendar package is not up to date(https://developers.google.com/calendar/api/v3/reference/events/insert)
                 sendUpdates,
                 conferenceDataVersion: 1,
             });
-        } else {
-            console.error("Error: this.gapi not loaded");
-            return false;
-        }
+        }, setLoginState);
     }
 
     /**
@@ -296,12 +333,13 @@ class GCal {
      * @param {string} sendUpdates Acceptable values are: "all", "externalOnly", "none"
      * @returns {any}
      */
-    public createEventWithVideoConference(
+    public async createEventWithVideoConference(
         event: any,
+        setLoginState: any,
         calendarId: string = this.calendar,
         sendUpdates: "all" | "externalOnly" | "none" = "none"
-    ): any {
-        return this.createEvent(
+    ): Promise<any> {
+        return await this.createEvent(
             {
                 ...event,
                 conferenceData: {
@@ -314,6 +352,7 @@ class GCal {
                 },
             },
             calendarId,
+            setLoginState,
             sendUpdates
         );
     }
@@ -324,16 +363,13 @@ class GCal {
      * @param {string} calendarId where the event is.
      * @returns {any} Promise resolved when the event is deleted.
      */
-    deleteEvent(eventId: string, calendarId: string = this.calendar): any {
-        if (gapi) {
-            return gapi.client.calendar.events.delete({
+    async deleteEvent(eventId: string, setLoginState: any, calendarId: string = this.calendar): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.events.delete({
                 calendarId: calendarId,
                 eventId: eventId,
             });
-        } else {
-            console.error("Error: gapi is not loaded use onLoad before please.");
-            return null;
-        }
+        }, setLoginState);
     }
 
     /**
@@ -344,22 +380,20 @@ class GCal {
      * @param {string} sendUpdates Acceptable values are: "all", "externalOnly", "none"
      * @returns {any}
      */
-    updateEvent(
+    async updateEvent(
         event: { summary?: string; description?: string; end: TimeCalendarType; start: TimeCalendarType, colorId?: string },
         eventId: string,
-        calendarId: string = this.calendar,
-    ): any {
-        if (gapi) {
+        setLoginState: any,
+        calendarId: string = this.calendar
+    ): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
             //@ts-ignore the @types/gapi.calendar package is not up to date(https://developers.google.com/calendar/api/v3/reference/events/patch)
-            return gapi.client.calendar.events.update({
+            return await gapi.client.calendar.events.update({
                 calendarId: calendarId,
                 eventId: eventId,
                 resource: event,
             });
-        } else {
-            console.error("Error: gapi is not loaded use onLoad before please.");
-            return null;
-        }
+        }, setLoginState);
     }
 
     /**
@@ -369,29 +403,23 @@ class GCal {
      * @returns {any}
      */
 
-    getEvent(eventId: string, calendarId: string = this.calendar): any {
-        if (gapi) {
-            return gapi.client.calendar.events.get({
+    async getEvent(eventId: string, setLoginState: any, calendarId: string = this.calendar): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.events.get({
                 calendarId: calendarId,
                 eventId: eventId,
             });
-        } else {
-            console.error("Error: gapi is not loaded use onLoad before please.");
-            return null;
-        }
+        }, setLoginState);
     }
 
     /**
      * Get Calendar List
      * @returns {any}
      */
-    listCalendars(): any {
-        if (gapi) {
-            return gapi.client.calendar.calendarList.list();
-        } else {
-            console.error("Error: gapi is not loaded use onLoad before please.");
-            return null;
-        }
+    async listCalendars(setLoginState: any): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.calendarList.list();
+        }, setLoginState);
     }
 
     /**
@@ -399,13 +427,10 @@ class GCal {
      * @param {string} summary, title of the calendar.
      * @returns {any}
      */
-    createCalendar(summary: string): any {
-        if (gapi) {
-            return gapi.client.calendar.calendars.insert({ summary: summary });
-        } else {
-            console.error("Error: gapi is not loaded use onLoad before please.");
-            return null;
-        }
+    async createCalendar(summary: string, setLoginState: any): Promise<any> {
+        return await this.onError(async (): Promise<any> => {
+            return await gapi.client.calendar.calendars.insert({ summary: summary });
+        }, setLoginState);
     }
 }
 
