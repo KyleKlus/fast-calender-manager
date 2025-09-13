@@ -2,18 +2,18 @@ import './ColorSelector.css';
 
 // Color mapping for event colors (Based on Google Calendar colors)
 export const colorMap = [
-    '#b74f4f',
-    '#7986cbff',
-    '#33b679',
+    '#cf4b4bff',
+    '#2468a0ff',
+    '#33b670ff',
     '#8e24aaff',
-    '#e67c73ff',
-    '#f6bf26ff',
+    '#ca469cff',
+    '#f9b01eff',
     '#f4511eff',
-    '#039be5',
-    '#616161',
-    '#3f51b5',
+    '#038be5ff',
+    '#605F5E',
+    '#394bb4ff',
     '#0b8043',
-    '#d50000ff',
+    '#FB3640',
     '#000000',
 ];
 
