@@ -99,9 +99,13 @@
 
 .fcPage .fc-event {
     --bs-btn-box-shadow: ;
-    border-radius: 6px;
+    border-radius: 10px;
     box-shadow: 2px 2px 2px #00000080;
-    outline: var(--bs-border-color) solid 1px;
+    outline: var(--bs-border-color) solid 1.5px;
+}
+
+.fcPage .fc-timegrid-event .fc-event-main {
+    padding: 1px 4px 0px;
 }
 
 .fcPage .fc .fc-timegrid-slot-minor {
@@ -127,7 +131,7 @@
     border: none !important;
     border-radius: 0px !important;
     box-shadow: none !important;
-
+    outline-width: 1px !important;
 }
 
 .fcPage .fc-direction-ltr .fc-timegrid-col-events {
@@ -136,6 +140,18 @@
 
 .fcPage .fc-timegrid-event-short .fc-event-time {
     display: none;
+}
+
+.fcPage .fc-timegrid-event-short .fc-event-main {
+    padding: 0px 4px 0px;
+}
+
+.fcPage .fc-timegrid-event-short .fc-event-main-frame {
+    justify-content: center;
+}
+
+.fcPage .fc-timegrid-event-short .fc-event-title {
+    line-height: .85em;
 }
 
 .fcPage:not(.fcPageWeather) .fc-event.fc-event-past {
