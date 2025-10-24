@@ -19,3 +19,7 @@ dist/
 
 # Env
 env.json
+
+.qodo
+
+out/
