@@ -1,25 +1,40 @@
 import React from 'react';
 import { DateInViewProvider } from './DateInViewContext';
 import { EventProvider } from './EventContext';
-import { GCalProvider } from './GCalContext';
 import { KeyboardShortcutProvider } from './KeyboardShortcutContext';
 import { TemplateProvider } from './TemplateContext';
 import { WeatherProvider } from './WeatherContext';
+import { DataSourceProvider } from './DataSourceProvider';
+import IDataSource from '../handlers/IDataSource';
 
-export default function ContextProviders(props: React.PropsWithChildren<{}>) {
+export interface IContextProvidersProps {
+    externalDataSource?: IDataSource
+}
+
+/**
+ * ContextProviders Component
+ *
+ * This component is responsible for providing all contexts to the rest of the application. It also handles any external data sources, if provided.
+ *
+ * @param props
+ * @returns
+ */
+function ContextProviders(props: React.PropsWithChildren<IContextProvidersProps>) {
     return (
         <KeyboardShortcutProvider>
-            <DateInViewProvider>
-                <WeatherProvider>
-                    <TemplateProvider>
-                        <EventProvider>
-                            <GCalProvider>
+            <DataSourceProvider externalDataSource={props.externalDataSource}>
+                <DateInViewProvider>
+                    <WeatherProvider>
+                        <TemplateProvider>
+                            <EventProvider>
                                 {props.children}
-                            </GCalProvider>
-                        </EventProvider>
-                    </TemplateProvider>
-                </WeatherProvider>
-            </DateInViewProvider>
-        </KeyboardShortcutProvider>
+                            </EventProvider>
+                        </TemplateProvider>
+                    </WeatherProvider>
+                </DateInViewProvider>
+            </DataSourceProvider>
+        </KeyboardShortcutProvider >
     );
 };
+
+export default ContextProviders;

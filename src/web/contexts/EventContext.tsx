@@ -2,8 +2,11 @@ import { EventInput } from '@fullcalendar/core';
 import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
 import { DateTime } from 'luxon';
+import { dayWeatherColor, nightWeatherColor, WeatherContext } from './WeatherContext';
+import { DataSourceContext } from './DataSourceProvider';
 import { DateInViewContext } from './DateInViewContext';
-import { dayWeatherColor, IDailyWeather, nightWeatherColor, WeatherContext } from './WeatherContext';
+
+export const phases: string[] = ['Arbeitszeit', 'Unizeit', 'Freizeit'];
 
 interface IEventContext {
     events: EventInput[];
@@ -31,12 +34,15 @@ const EventContext = createContext<IEventContext>({
     setRemoveSelectedEvent: (selectedEvent: EventInput) => { },
 });
 
-function EventProvider(props: React.PropsWithChildren<{}>) {
+function EventProvider(props: React.PropsWithChildren<{ externalEventHandler?: IEventContext }>) {
     const { showWeather, dailyWeather } = useContext(WeatherContext);
+    const { isCurrentlyLoading, setIsCurrentlyLoading, loadEvents, addEvent, deleteEvent, editEvent } = useContext(DataSourceContext);
+    const { dateInView, setDateInView } = useContext(DateInViewContext);
     const [selectedEvents, setSelectedEvents] = useState<EventInput[]>([]);
     const [areBGEventsEditable, setBGEventsEditable] = useState<boolean>(false);
     const [events, setEvents] = useState<EventInput[]>([]);
     const [areEventsLoaded, setAreEventsLoaded] = useState(false);
+
 
     useEffect(() => {
         if (showWeather) {
@@ -100,8 +106,153 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
         setSelectedEvents(selectedEvents.filter((e) => e !== selectedEvent));
     }
 
+    function switchWeek(direction: 'prev' | 'next' | 'today', dontLoadEvents: boolean = false) {
+        if (isCurrentlyLoading) return;
+        const newWeek = direction === 'today'
+            ? DateTime.now()
+            : dateInView.plus({ weeks: direction === 'prev' ? -1 : 1 });
+
+        setDateInView(newWeek);
+
+        if (!dontLoadEvents) {
+            loadEvents(newWeek);
+        }
+
+        if (direction === 'today') {
+            (document.getElementsByClassName('fc-today-button')[0] as HTMLButtonElement).click();
+            return;
+        }
+        (document.getElementsByClassName(`fc-${direction}-button`)[0] as HTMLButtonElement).click();
+    }
+
+    async function splitEvent(event: {
+        title: string;
+        start: DateTime;
+        end: DateTime;
+        colorId: number;
+        extendedProps: { description?: string }
+    },
+        eventId: string,
+        isAllDay?: boolean,
+        percent: number = 50
+    ) {
+        if (!isLoggedIn || isCurrentlyLoading || gcal === undefined) { return }
+        setIsCurrentlyLoading(true);
+        deleteEvent(eventId);
+
+        const start = event.start.toISO() as string;
+        const startDate = event.start.toFormat('yyyy-MM-dd');
+        const startZone = event.start.zoneName;
+
+        const end = event.end.toISO();
+        const endDate = event.end.toFormat('yyyy-MM-dd');
+        const endZone = event.end.zoneName;
+
+        const durationInMinutes = event.end.diff(event.start).as('minutes');
+
+        const firstHalfEnd = DateTime.fromISO(start).plus({ minutes: percent * durationInMinutes / 100 });
+        const firstHalfEndIso = firstHalfEnd.toISO();
+        const firstHalfEndDate = firstHalfEnd.toFormat('yyyy-MM-dd');
+        const secondHalfStart = DateTime.fromISO(start).plus({ minutes: (100 - percent) * durationInMinutes / 100 });
+        const secondHalfStartIso = secondHalfStart.toISO();
+        const secondHalfStartDate = secondHalfStart.toFormat('yyyy-MM-dd');
+
+        const firstEvent = await gcal.createEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: isAllDay
+                ? {
+                    date: startDate,
+                }
+                : {
+                    dateTime: start === null ? undefined : start,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: firstHalfEndDate }
+                : {
+                    dateTime: firstHalfEndIso === null ? undefined : firstHalfEndIso,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
+        }, setIsAuthValid).then((res: any) => {
+            const e = res.result;
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0) && !areBGEventsEditable;
+            return {
+                id: e.id,
+                title: e.summary,
+                start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
+                // url: e.htmlLink,
+                location: e.location,
+                description: e.description,
+                attachments: e.attachments || [],
+                extendedProps: {
+                    description: e.description,
+                },
+                display: isBackgroundEvent ? 'background' : 'auto',
+                backgroundColor: color,
+                borderColor: color,
+            }
+        });
+
+        const secondEvent = await gcal.createEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: isAllDay
+                ? {
+                    date: secondHalfStartDate,
+                }
+                : {
+                    dateTime: secondHalfStartIso === null ? undefined : secondHalfStartIso,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: endDate }
+                : {
+                    dateTime: end === null ? undefined : end,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
+        }, setIsAuthValid).then((res: any) => {
+            const e = res.result;
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0) && !areBGEventsEditable;
+            return {
+                id: e.id,
+                title: e.summary,
+                start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
+                // url: e.htmlLink,
+                location: e.location,
+                description: e.description,
+                attachments: e.attachments || [],
+                extendedProps: {
+                    description: e.description,
+                },
+                display: isBackgroundEvent ? 'background' : 'auto',
+                backgroundColor: color,
+                borderColor: color,
+            }
+        });
+
+        setEvents([...events.filter(e => e.id !== eventId), firstEvent, secondEvent]);
+
+        setIsCurrentlyLoading(false);
+    }
+
+
     return (
-        <EventContext.Provider value={{ events, areEventsLoaded, setEvents, setAreEventsLoaded, selectedEvents, areBGEventsEditable, setBGEventsEditable, setSelectedEvents, setAddSelectedEvent, setRemoveSelectedEvent }}>
+        <EventContext.Provider value={
+            showWeather || !props.externalEventHandler
+                ? { events, areEventsLoaded, setEvents, setAreEventsLoaded, selectedEvents, areBGEventsEditable, setBGEventsEditable, setSelectedEvents, setAddSelectedEvent, setRemoveSelectedEvent }
+                : props.externalEventHandler
+        }>
             {props.children}
         </EventContext.Provider>
     );
