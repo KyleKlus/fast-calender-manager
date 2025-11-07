@@ -1,0 +1,56 @@
+.floatingToolDrawer {
+    --tool-drawer-height: 32px;
+    position: absolute;
+    bottom: calc(2 * var(--drawer-bs-btn-padding-y) + var(--drawer-bs-btn-font-size) + 1rem);
+    right: 1.5rem;
+    height: var(--tool-drawer-height);
+    z-index: 10;
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.moreToolsDrawer {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    width: 0;
+    transform: scaleX(0) translateX(202px);
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    opacity: 0;
+    transform-origin: right;
+    transition: width 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+
+    &.isOpen {
+        width: 202px;
+        opacity: 1;
+        transform: scaleX(1) translateX(0px);
+    }
+}
+
+.moreToolsDrawerButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &.isOpen *:nth-child(2) {
+        display: none;
+    }
+}
+
+.moreToolsDrawerIcon {
+    transition: transform .4s ease;
+
+    &.isOpen {
+        transform: rotateY(180deg);
+    }
+}
+
+.floatingToolDrawer.isOpen {
+    transform: translateY(-3.7rem);
+}

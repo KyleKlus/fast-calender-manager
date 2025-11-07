@@ -2,7 +2,7 @@ import './CalendarPage.css';
 import FullCalendar from '@fullcalendar/react';
 import { DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/core';
 import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { DateTime } from 'luxon';
 
 import { getDefaultConfig } from '../handlers/defaultFCConfig';
@@ -52,6 +52,9 @@ function CalendarPage(props: ICalendarPageProps) {
     const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('none');
 
     const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
+
+    const pendingNextWeekSwitch = useRef(undefined as NodeJS.Timeout | undefined);
+    const pendingPrevWeekSwitch = useRef(undefined as NodeJS.Timeout | undefined);
 
     useEffect(() => {
         // Done in this way, because one cant modify the calendar in any other way
@@ -211,13 +214,22 @@ function CalendarPage(props: ICalendarPageProps) {
     };
 
     return (
-        <div className={['fcPage', showWeather ? 'fcPageWeather' : ''].join(' ')}>
+        <div className={['fcPage', showWeather ? 'fcPageWeather' : '', `toolBarMode-${toolbarMode}`].join(' ')}>
             <div className='calendar-container' >
                 <div
                     className='calendar-left-button calendar-nav-button'
+                    onMouseLeave={() => {
+                        if (pendingPrevWeekSwitch.current !== undefined) {
+                            clearTimeout(pendingPrevWeekSwitch.current);
+                            pendingPrevWeekSwitch.current = undefined;
+                        }
+                    }}
                     onMouseEnter={() => {
                         if (isDragging && !isCurrentlyLoading) {
-                            switchWeek('prev');
+                            pendingPrevWeekSwitch.current = setTimeout(() => {
+                                switchWeek('prev');
+                                pendingPrevWeekSwitch.current = undefined;
+                            }, 1000);
                         }
                     }}
                 >
@@ -233,12 +245,20 @@ function CalendarPage(props: ICalendarPageProps) {
                     select={select}
                     initialDate={dateInView.toFormat('yyyy-MM-dd')}
                 />
-
                 <div
                     className='calendar-right-button calendar-nav-button'
+                    onMouseLeave={() => {
+                        if (pendingNextWeekSwitch.current !== undefined) {
+                            clearTimeout(pendingNextWeekSwitch.current);
+                            pendingNextWeekSwitch.current = undefined;
+                        }
+                    }}
                     onMouseEnter={() => {
                         if (isDragging && !isCurrentlyLoading) {
-                            switchWeek('next');
+                            pendingNextWeekSwitch.current = setTimeout(() => {
+                                switchWeek('next');
+                                pendingNextWeekSwitch.current = undefined;
+                            }, 1000);
                         }
                     }}
                 >
@@ -260,6 +280,9 @@ function CalendarPage(props: ICalendarPageProps) {
                     setPopoverOpen(true);
                 }}
                 onModeChange={(mode) => {
+                    if (toolbarMode === 'paste-template') {
+                        setSelectedTemplate({ template: null, index: -1 });
+                    }
                     setToolbarMode(toolbarMode === mode ? 'none' : mode);
                 }}
                 onAddTemplateClick={() => {

@@ -1,5 +1,6 @@
 .event-template-drawer {
     width: 100vw;
+    position: relative;
 }
 
 .event-template-drawer-content {
@@ -99,7 +100,13 @@
     height: 1.5rem;
     width: 3rem;
 
-    &:hover {
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    &:not(.disabled):hover {
         background-color: #ececec;
         cursor: pointer;
     }

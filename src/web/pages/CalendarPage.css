@@ -4,6 +4,27 @@
     height: 100vh;
 }
 
+
+.fcPage.toolBarMode-delete .fc-event {
+    cursor: url('./cursors/trash-fill.svg'), auto;
+}
+
+.fcPage.toolBarMode-split .fc-event {
+    cursor: url('./cursors/arrows-expand.svg'), auto;
+}
+
+.fcPage.toolBarMode-duplicate .fc-event {
+    cursor: url('./cursors/copy.svg'), auto;
+}
+
+.fcPage.toolBarMode-color .fc-event {
+    cursor: url('./cursors/brush.svg'), auto;
+}
+
+.fcPage.toolBarMode-paste-template {
+    cursor: url('./cursors/clipboard2-plus-fill.svg'), auto;
+}
+
 .fcPage .fc-header-toolbar {
     padding: 0;
     margin: 0 !important;
@@ -65,6 +86,8 @@
 
 .fcPage .calendar-nav-button {
     --height: 80vh;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -84,10 +107,14 @@
 
 .fcPage .calendar-right-button {
     right: 0.8rem;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
 }
 
 .fcPage .calendar-left-button {
     left: 0rem;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 .fcPage .fc-theme-bootstrap5 .fc-list,

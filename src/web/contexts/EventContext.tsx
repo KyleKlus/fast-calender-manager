@@ -103,6 +103,7 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
 
     useEffect(() => {
         if (showWeather) {
+            enableBGEventsEditable(false);
             const newEvents: EventInput[] = [];
 
             for (let i = 0; i < dailyWeather.length; i++) {
@@ -232,6 +233,7 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
     }
 
     function setBGEventsEditable(editable: boolean) {
+        if (showWeather) return;
         const newEvents = (events as Array<EventInput>).map(event => {
             let isBackgroundEvent = event.display !== 'background' && !event.allDay;
             return {
