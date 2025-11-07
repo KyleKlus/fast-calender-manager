@@ -7,7 +7,6 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { PopoverMode } from '../../pages/CalendarPage';
 import ColorSelector from '../ColorSelector';
-import { GCalContext } from '../../contexts/GCalContext';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import Popup from 'reactjs-popup';
 import { EventContext } from '../../contexts/EventContext';
@@ -21,13 +20,12 @@ export interface IEditEventPopoverProps {
 }
 
 const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPopoverProps) => {
-    const { editEvent, addEvent, deleteEvent, splitEvent } = useContext(GCalContext);
     const { selectedTemplate, resetSelectedTemplate, editTemplate, switchSelectedTemplate, deleteTemplate, addTemplate } = useContext(TemplateContext);
-    const { selectedEvents: currentEvents } = useContext(EventContext);
+    const { selectedEvents, editEvent, addEvent, removeEvent, splitEvent } = useContext(EventContext);
 
     const [editableEvent, setEditableEvent] = useState<SimplifiedEvent>(props.popoverMode === 'edit-template' && selectedTemplate.template !== null
         ? selectedTemplate.template
-        : convertEventInputToSimplifiedEvent(currentEvents[0])
+        : convertEventInputToSimplifiedEvent(selectedEvents[0])
     );
 
     const [isAllDay, setIsAllDay] = useState(editableEvent.allDay || false);
@@ -36,10 +34,11 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
     const [endDate, setEndDate] = useState<Date>(DateTime.fromISO(editableEvent.end).toJSDate());
     const [eventDescription, setEventDescription] = useState(editableEvent.description);
     const [eventColor, setEventColor] = useState<number>(editableEvent.colorId);
+    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
     const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
 
     useEffect(() => {
-        if (isEnterKeyPressed) {
+        if (isEnterKeyPressed && !isTextareaFocused) {
             handleEditClick();
         }
     }, [isEnterKeyPressed]);
@@ -143,6 +142,8 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                     as={'textarea'}
                     id="eventDescriptionInput"
                     placeholder="Event Description"
+                    onFocus={() => { setIsTextareaFocused(true) }}
+                    onBlur={() => { setIsTextareaFocused(false) }}
                     value={eventDescription}
                     onChange={(e) => { setEventDescription(e.target.value) }}
                 />
@@ -190,7 +191,7 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                                 return;
                             }
 
-                            deleteEvent((editableEvent.id as string)).then(_ => {
+                            removeEvent((editableEvent.id as string)).then(_ => {
                                 props.closePopover();
                             });
                         }}

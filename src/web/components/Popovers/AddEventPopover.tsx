@@ -8,8 +8,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import ColorSelector, { defaultColorId } from '../ColorSelector';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import Popup from 'reactjs-popup';
-import { GCalContext } from '../../contexts/GCalContext';
 import { TemplateContext } from '../../contexts/TemplateContext';
+import { EventContext } from '../../contexts/EventContext';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
@@ -21,7 +21,7 @@ export interface IAddEventPopoverProps {
 }
 
 const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopoverProps) => {
-    const { addEvent } = useContext(GCalContext);
+    const { addEvent } = useContext(EventContext);
     const { selectedTemplate, resetSelectedTemplate, addTemplate } = useContext(TemplateContext);
     const [isAllDay, setIsAllDay] = useState(getIsAllDay(props.startDate, props.endDate));
     const [eventName, setEventName] = useState(selectedTemplate.template !== null
@@ -39,10 +39,11 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
         ? selectedTemplate.template.colorId
         : props.selectedColor || defaultColorId
     );
+    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
     const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
 
     useEffect(() => {
-        if (isEnterKeyPressed) {
+        if (isEnterKeyPressed && !isTextareaFocused) {
             handleAddEventClick();
         }
     }, [isEnterKeyPressed]);
@@ -159,6 +160,8 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                     id="eventDescriptionInput"
                     placeholder="Event Description"
                     value={eventDescription}
+                    onFocus={() => { setIsTextareaFocused(true) }}
+                    onBlur={() => { setIsTextareaFocused(false) }}
                     onChange={(e) => { setEventDescription(e.target.value) }}
                 />
                 <hr />
