@@ -19,7 +19,7 @@ function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
         <div className={['floatingToolDrawer', props.isTemplateDrawerOpen ? 'isOpen' : ''].join(' ')}>
             <Button
                 variant='primary'
-                className='moreToolsDrawerButton'
+                className={['moreToolsDrawerButton', isMoreToolsDrawerOpen ? 'isOpen' : ''].join(' ')}
                 onClick={() => {
                     setIsMoreToolsDrawerOpen(!isMoreToolsDrawerOpen);
                 }}

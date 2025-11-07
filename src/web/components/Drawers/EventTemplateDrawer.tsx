@@ -10,7 +10,7 @@ import { WeatherContext } from '../../contexts/WeatherContext';
 import { EventContext } from '../../contexts/EventContext';
 import FloatingToolDrawer from './FloatingToolDrawer';
 
-export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'split' | 'none';
+export type ToolbarMode = 'color' | 'delete' | 'duplicate' | 'split' | 'none' | 'paste-template';
 
 export interface IEventTemplateDrawerProps {
     selectedColor: number;
@@ -24,7 +24,7 @@ export interface IEventTemplateDrawerProps {
 
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
     const { templates, areTemplatesLoaded, selectedTemplate, setSelectedTemplate, swapTemplates, resetSelectedTemplate } = useContext(TemplateContext);
-    const { events, areBGEventsEditable, setBGEventsEditable, isSyncOn, setIsSyncOn, switchWeek } = useContext(EventContext);
+    const { areBGEventsEditable, setBGEventsEditable, isSyncOn, setIsSyncOn, switchWeek } = useContext(EventContext);
 
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');

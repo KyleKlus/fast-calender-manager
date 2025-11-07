@@ -54,6 +54,14 @@ function CalendarPage(props: ICalendarPageProps) {
     const [showAddPopoverWithTemplate, setShowAddPopoverWithTemplate] = useState(false);
 
     useEffect(() => {
+        if (selectedTemplate.template !== null) {
+            setToolbarMode('paste-template');
+        } else if (toolbarMode === 'paste-template') {
+            setToolbarMode('none');
+        }
+    }, [selectedTemplate]);
+
+    useEffect(() => {
         // Done in this way, because one cant modify the calendar in any other way
         if (hourlyWeather.length > 0) {
             insertWeather()
@@ -211,7 +219,7 @@ function CalendarPage(props: ICalendarPageProps) {
     };
 
     return (
-        <div className={['fcPage', showWeather ? 'fcPageWeather' : ''].join(' ')}>
+        <div className={['fcPage', showWeather ? 'fcPageWeather' : '', `toolBarMode-${toolbarMode}`].join(' ')}>
             <div className='calendar-container' >
                 <div
                     className='calendar-left-button calendar-nav-button'
@@ -260,6 +268,9 @@ function CalendarPage(props: ICalendarPageProps) {
                     setPopoverOpen(true);
                 }}
                 onModeChange={(mode) => {
+                    if (toolbarMode === 'paste-template') {
+                        setSelectedTemplate({ template: null, index: -1 });
+                    }
                     setToolbarMode(toolbarMode === mode ? 'none' : mode);
                 }}
                 onAddTemplateClick={() => {

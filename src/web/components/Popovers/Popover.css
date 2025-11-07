@@ -31,4 +31,14 @@
 .popover .form-check-input,
 .popover .react-datepicker-wrapper input {
     box-shadow: 0 2px 2px #0000001b;
+
+    &:focus {
+        outline-color: #5da373;
+        border-color: #5da373;
+    }
+}
+
+.popover .form-check-input:checked {
+    background-color: #5da373;
+    border-color: black;
 }

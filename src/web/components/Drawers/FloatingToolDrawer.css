@@ -4,7 +4,7 @@
     bottom: calc(2 * var(--drawer-bs-btn-padding-y) + var(--drawer-bs-btn-font-size) + 1rem);
     right: 1.5rem;
     height: var(--tool-drawer-height);
-    z-index: 1000;
+    z-index: 10;
     display: flex;
     gap: .5rem;
     justify-content: center;
@@ -37,6 +37,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &.isOpen *:nth-child(2) {
+        display: none;
+    }
 }
 
 .moreToolsDrawerIcon {

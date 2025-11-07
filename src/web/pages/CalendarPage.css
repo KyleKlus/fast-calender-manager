@@ -4,6 +4,27 @@
     height: 100vh;
 }
 
+
+.fcPage.toolBarMode-delete .fc-event {
+    cursor: url('./cursors/trash-fill.svg'), auto;
+}
+
+.fcPage.toolBarMode-split .fc-event {
+    cursor: url('./cursors/arrows-expand.svg'), auto;
+}
+
+.fcPage.toolBarMode-duplicate .fc-event {
+    cursor: url('./cursors/copy.svg'), auto;
+}
+
+.fcPage.toolBarMode-color .fc-event {
+    cursor: url('./cursors/brush.svg'), auto;
+}
+
+.fcPage.toolBarMode-paste-template {
+    cursor: url('./cursors/clipboard2-plus-fill.svg'), auto;
+}
+
 .fcPage .fc-header-toolbar {
     padding: 0;
     margin: 0 !important;
