@@ -15,7 +15,7 @@ let config: {
 let gcal: GCal | undefined = undefined;
 
 async function initGCal(): Promise<void> {
-    await fetch('env.json')
+    await fetch('/env.json')
         .then((res) => {
             return res.json()
         })
