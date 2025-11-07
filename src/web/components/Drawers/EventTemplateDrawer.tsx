@@ -6,7 +6,6 @@ import { useKeyPress } from '../../hooks/useKeyPress';
 import Drawer from './Drawer';
 import { SimplifiedEvent } from '../../handlers/eventConverters';
 import { TemplateContext } from '../../contexts/TemplateContext';
-import { GCalContext } from '../../contexts/GCalContext';
 import { WeatherContext } from '../../contexts/WeatherContext';
 import { EventInput } from '@fullcalendar/core';
 import { EventContext } from '../../contexts/EventContext';
@@ -26,12 +25,11 @@ export interface IEventTemplateDrawerProps {
 
 const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventTemplateDrawerProps) => {
     const { templates, areTemplatesLoaded, selectedTemplate, setSelectedTemplate, swapTemplates, resetSelectedTemplate } = useContext(TemplateContext);
-    const { events, setEvents, areBGEventsEditable, setBGEventsEditable } = useContext(EventContext);
+    const { events, areBGEventsEditable, setBGEventsEditable, isSyncOn, setIsSyncOn, switchWeek } = useContext(EventContext);
 
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const isSpaceKeyPressed = useKeyPress(' ');
 
-    const { isSyncOn, setIsSyncOn, switchWeek } = useContext(GCalContext);
     const { showWeather, setShowWeather } = useContext(WeatherContext);
     const isTKeyPressed = useKeyPress('t');
 
@@ -144,14 +142,6 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                     <div
                         className={['phase-button', areBGEventsEditable ? 'active' : ''].join(' ')}
                         onClick={() => {
-                            const newEvents = (events as Array<EventInput>).map(event => {
-                                let isBackgroundEvent = event.display !== 'background' && !event.allDay;
-                                return {
-                                    ...event,
-                                    display: isBackgroundEvent ? 'background' : 'auto',
-                                };
-                            });
-                            setEvents(newEvents);
                             setBGEventsEditable(!areBGEventsEditable);
                         }}
                     >

@@ -2,7 +2,8 @@ import { DateTime } from "luxon";
 import IDataSource from "./IDataSource";
 import GCal from "./gcalHandler";
 import { EventInput } from "@fullcalendar/core";
-import { defaultEventColor, getColorFromColorId } from "../components/ColorSelector";
+import { defaultColorId, defaultEventColor, getColorFromColorId } from "../components/ColorSelector";
+import { phases } from "../contexts/EventContext";
 
 let config: {
     clientId: string;
@@ -39,6 +40,10 @@ initGCal();
 export default class GoogleDataSource implements IDataSource {
     init(): Promise<void> {
         return initGCal();
+    }
+
+    isInitialized(): boolean {
+        return gcal !== undefined;
     }
 
     async login(): Promise<boolean> {
@@ -110,24 +115,113 @@ export default class GoogleDataSource implements IDataSource {
         return events;
     }
 
-    addEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description: string } }, isAllDay?: boolean): Promise<void> {
-        return Promise.resolve();
+    async addEvent(event: {
+        title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: {
+            description?: string
+        }
+    }, setIsAuthValid: (isAuthValid: boolean) => void, isAllDay?: boolean): Promise<EventInput | undefined> {
+        if (gcal === undefined) { return new Promise((resolve, reject) => { return reject(undefined) }); }
+
+        const start = event.start.toISO();
+        const startDate = event.start.toFormat('yyyy-MM-dd');
+        const startZone = event.start.zoneName;
+        const end = event.end.toISO();
+        const endDate = event.end.toFormat('yyyy-MM-dd');
+        const endZone = event.end.zoneName;
+
+        return await gcal.createEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: isAllDay
+                ? {
+                    date: startDate,
+                }
+                : {
+                    dateTime: start === null ? undefined : start,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: endDate }
+                : {
+                    dateTime: end === null ? undefined : end,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? 0 : event.colorId).toString(),
+        }, setIsAuthValid).then((res: any) => {
+            const e = res.result;
+            const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
+            const title: string = e.summary || 'No Title';
+            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0);
+            return {
+                id: e.id,
+                title: e.summary,
+                start: e.start.dateTime || e.start.date, // try timed. will fall back to all-day
+                end: e.end.dateTime || e.end.date, // same
+                allDay: e.start.date !== undefined,
+                // url: e.htmlLink,
+                location: e.location,
+                description: e.description,
+                attachments: e.attachments || [],
+                extendedProps: {
+                    description: e.description,
+                },
+                display: isBackgroundEvent ? 'background' : 'auto',
+                backgroundColor: color,
+                borderColor: color,
+            };
+        });
     }
 
-    deleteEvent(eventId: string): Promise<void> {
-        return Promise.resolve();
+    async deleteEvent(eventId: string, setIsAuthValid: (isAuthValid: boolean) => void): Promise<boolean> {
+        if (gcal === undefined) { return new Promise((resolve, reject) => { return reject(false) }); }
+        return await gcal.deleteEvent(eventId, setIsAuthValid).then((res: any) => {
+            return true;
+        }).catch(() => {
+            return false;
+        });
     }
 
-    editEvent(event: {
+    async editEvent(event: {
         title: string;
         start: DateTime;
         end: DateTime;
         colorId: number;
-        extendedProps: { description?: string }
+        extendedProps?: { description?: string }
     },
-        eventId: string,
+        eventId: string, setIsAuthValid: (isAuthValid: boolean) => void,
         isAllDay?: boolean
-    ): Promise<void> {
-        return Promise.resolve();
+    ): Promise<boolean> {
+        if (gcal === undefined) { return new Promise((resolve, reject) => { return reject(false) }); }
+
+        const start = event.start.toISO();
+        const startDate = event.start.toFormat('yyyy-MM-dd');
+        const startZone = event.start.zoneName;
+        const end = event.end.toISO();
+        const endDate = event.end.toFormat('yyyy-MM-dd');
+        const endZone = event.end.zoneName;
+
+        return await gcal.updateEvent({
+            summary: event.title,
+            description: event.extendedProps?.description,
+            start: isAllDay
+                ? {
+                    date: startDate,
+                }
+                : {
+                    dateTime: start === null ? undefined : start,
+                    timeZone: startZone === null ? DateTime.now().zoneName : startZone,
+                },
+            end: isAllDay
+                ? { date: endDate }
+                : {
+                    dateTime: end === null ? undefined : end,
+                    timeZone: endZone === null ? DateTime.now().zoneName : endZone,
+                },
+            colorId: (event.colorId === -1 || event.colorId === undefined ? defaultColorId : event.colorId).toString(),
+        }, eventId, setIsAuthValid).then((res: any) => {
+            return true;
+        }).catch(() => {
+            return false;
+        });
     }
 }

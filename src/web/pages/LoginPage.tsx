@@ -1,9 +1,9 @@
+import { DataSourceContext } from '../contexts/DataSourceProvider';
 import './LoginPage.css';
 import { useContext } from 'react';
-import { GCalContext } from '../contexts/GCalContext';
 
 function LoginPage() {
-    const { login } = useContext(GCalContext);
+    const { login } = useContext(DataSourceContext);
 
     return (
         <div className={['login-page'].join(' ')}>

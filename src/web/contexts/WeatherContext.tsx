@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import React from 'react';
 import { DateTime } from 'luxon';
-import { DateInViewContext } from './DateInViewContext';
 
 interface IWeatherContext {
     sunrise: DateTime | null;

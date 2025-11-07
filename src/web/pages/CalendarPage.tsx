@@ -9,7 +9,6 @@ import { getDefaultConfig } from '../handlers/defaultFCConfig';
 import EventTemplateDrawer, { ToolbarMode } from '../components/Drawers/EventTemplateDrawer';
 import AddEventPopover from '../components/Popovers/AddEventPopover';
 import EditEventPopover from '../components/Popovers/EditEventPopover';
-import { GCalContext } from '../contexts/GCalContext';
 import { defaultColorId, getColorIdFromColor } from '../components/ColorSelector';
 import { KeyboardShortcutContext } from '../contexts/KeyboardShortcutContext';
 import { EventContext } from '../contexts/EventContext';
@@ -39,8 +38,7 @@ function CalendarPage(props: ICalendarPageProps) {
     const { setShortcutsEnabled } = useContext(KeyboardShortcutContext);
     const { selectedTemplate, setSelectedTemplate, getTemplateDuration } = useContext(TemplateContext);
     const { hourlyWeather, insertWeather, showWeather } = useContext(WeatherContext);
-    const { isCurrentlyLoading, deleteEvent, editEvent, addEvent, switchWeek, splitEvent } = useContext(GCalContext);
-    const { events, setSelectedEvents: setCurrentEvents } = useContext(EventContext);
+    const { events, isCurrentlyLoading, removeEvent, editEvent, addEvent, switchWeek, splitEvent, setSelectedEvents } = useContext(EventContext);
     const { dateInView } = useContext(DateInViewContext);
 
     const [selectedColor, setSelectedColor] = useState<number>(defaultColorId);
@@ -78,7 +76,7 @@ function CalendarPage(props: ICalendarPageProps) {
         switch (toolbarMode) {
             case 'none':
                 if (popoverMode === 'none') {
-                    setCurrentEvents([convertEventImplToEventInput(info.event)]);
+                    setSelectedEvents([convertEventImplToEventInput(info.event)]);
                     setShortcutsEnabled(false);
                     setPopoverMode('edit');
                     setPopoverOpen(true);
@@ -98,7 +96,7 @@ function CalendarPage(props: ICalendarPageProps) {
                 }, info.event.allDay)
                 break;
             case 'delete':
-                deleteEvent(info.event.id)
+                removeEvent(info.event.id)
                 break;
             case 'color':
                 editEvent({
