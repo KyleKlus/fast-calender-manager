@@ -216,25 +216,27 @@ function CalendarPage(props: ICalendarPageProps) {
     return (
         <div className={['fcPage', showWeather ? 'fcPageWeather' : '', `toolBarMode-${toolbarMode}`].join(' ')}>
             <div className='calendar-container' >
-                <div
-                    className='calendar-left-button calendar-nav-button'
-                    onMouseLeave={() => {
-                        if (pendingPrevWeekSwitch.current !== undefined) {
-                            clearTimeout(pendingPrevWeekSwitch.current);
-                            pendingPrevWeekSwitch.current = undefined;
-                        }
-                    }}
-                    onMouseEnter={() => {
-                        if (isDragging && !isCurrentlyLoading) {
-                            pendingPrevWeekSwitch.current = setTimeout(() => {
-                                switchWeek('prev');
+                {isDragging &&
+                    <div
+                        className='calendar-left-button calendar-nav-button'
+                        onMouseLeave={() => {
+                            if (pendingPrevWeekSwitch.current !== undefined) {
+                                clearTimeout(pendingPrevWeekSwitch.current);
                                 pendingPrevWeekSwitch.current = undefined;
-                            }, 1000);
-                        }
-                    }}
-                >
-                    <i className='bi-chevron-double-left' />
-                </div>
+                            }
+                        }}
+                        onMouseEnter={() => {
+                            if (isDragging && !isCurrentlyLoading) {
+                                pendingPrevWeekSwitch.current = setTimeout(() => {
+                                    switchWeek('prev');
+                                    pendingPrevWeekSwitch.current = undefined;
+                                }, 1000);
+                            }
+                        }}
+                    >
+                        <i className='bi-chevron-double-left' />
+                    </div>
+                }
                 <FullCalendar {...getDefaultConfig()}
                     events={events}
                     eventClick={eventClick}
@@ -245,25 +247,27 @@ function CalendarPage(props: ICalendarPageProps) {
                     select={select}
                     initialDate={dateInView.toFormat('yyyy-MM-dd')}
                 />
-                <div
-                    className='calendar-right-button calendar-nav-button'
-                    onMouseLeave={() => {
-                        if (pendingNextWeekSwitch.current !== undefined) {
-                            clearTimeout(pendingNextWeekSwitch.current);
-                            pendingNextWeekSwitch.current = undefined;
-                        }
-                    }}
-                    onMouseEnter={() => {
-                        if (isDragging && !isCurrentlyLoading) {
-                            pendingNextWeekSwitch.current = setTimeout(() => {
-                                switchWeek('next');
+                {isDragging &&
+                    <div
+                        className='calendar-right-button calendar-nav-button'
+                        onMouseLeave={() => {
+                            if (pendingNextWeekSwitch.current !== undefined) {
+                                clearTimeout(pendingNextWeekSwitch.current);
                                 pendingNextWeekSwitch.current = undefined;
-                            }, 1000);
-                        }
-                    }}
-                >
-                    <i className='bi-chevron-double-right' />
-                </div>
+                            }
+                        }}
+                        onMouseEnter={() => {
+                            if (isDragging && !isCurrentlyLoading) {
+                                pendingNextWeekSwitch.current = setTimeout(() => {
+                                    switchWeek('next');
+                                    pendingNextWeekSwitch.current = undefined;
+                                }, 1000);
+                            }
+                        }}
+                    >
+                        <i className='bi-chevron-double-right' />
+                    </div>
+                }
             </div >
             {/* Also a toolbar now */}
             <EventTemplateDrawer
