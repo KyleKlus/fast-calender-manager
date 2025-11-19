@@ -85,13 +85,11 @@
 }
 
 .fcPage .calendar-nav-button {
-    --height: 80vh;
-    background-color: var(--bs-body-bg);
-    border: 1px solid var(--bs-border-color);
+    --height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 1.2rem;
+    width: 4rem;
     height: var(--height);
     position: absolute;
     top: calc(50vh - var(--height) / 2);
@@ -106,15 +104,33 @@
 }
 
 .fcPage .calendar-right-button {
-    right: 0.8rem;
+    right: 0rem;
+    background-image: linear-gradient(to right, transparent, var(--bs-body-bg));
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
+
+    & i {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    &:hover i {
+        transform: translateX(2px);
+    }
 }
 
 .fcPage .calendar-left-button {
     left: 0rem;
+    background-image: linear-gradient(to left, transparent, var(--bs-body-bg));
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
+
+    & i {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    &:hover i {
+        transform: translateX(-2px);
+    }
 }
 
 .fcPage .fc-theme-bootstrap5 .fc-list,
@@ -126,13 +142,13 @@
 
 .fcPage .fc-event {
     border-radius: 10px;
-    box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 1px 0px #0000005c;
+    box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 3px 0px #0000005c;
     transition: box-shadow 0.1s ease-in-out;
     /* outline: var(--bs-border-color) solid 1.5px; */
 }
 
 .fcPage .fc-event:hover {
-    box-shadow: inset 0px 1px 1px #ffffff5d, inset 0px -1px 1px #0000005d, 2px 3px 2px 0px #0000005c;
+    box-shadow: inset 0px 1px 1px #ffffff5d, inset 0px -1px 1px #0000005d, 2px 3px 5px 0px #0000005c;
 
     /* outline: var(--bs-border-color) solid 1.5px; */
 }
