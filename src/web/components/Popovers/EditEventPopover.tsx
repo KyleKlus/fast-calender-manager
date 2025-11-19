@@ -178,8 +178,8 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                 <div className='edit-popover-buttons'>
                     {props.popoverMode === 'edit-template' &&
                         <ButtonGroup>
-                            <Button onClick={() => { switchSelectedTemplate('prev') }}><i className='bi-chevron-left' /></Button>
-                            <Button onClick={() => { switchSelectedTemplate('next') }}><i className='bi-chevron-right' /></Button>
+                            <Button className={'switch-template-left-button'} onClick={() => { switchSelectedTemplate('prev') }}><i className='bi-chevron-left' /></Button>
+                            <Button className={'switch-template-right-button'} onClick={() => { switchSelectedTemplate('next') }}><i className='bi-chevron-right' /></Button>
                         </ButtonGroup>
                     }
                     <Button
@@ -256,7 +256,7 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                         onClick={() => {
                             handleEditClick();
                         }}
-                    >Confirm</Button>
+                    >Save</Button>
                 </div>
             </Card >
         </Popup>

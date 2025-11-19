@@ -106,8 +106,11 @@
         pointer-events: none;
     }
 
+    &:not(.disabled, .active):hover {
+        background-color: var(--bs-body-bg-hover);
+    }
+
     &:not(.disabled):hover {
-        background-color: #ececec;
         cursor: pointer;
     }
 }
@@ -115,7 +118,26 @@
 .event-template-drawer-handle .sync-button.active,
 .event-template-drawer-handle .phase-button.active,
 .event-template-drawer-handle .weather-button.active {
-    background-color: #ececec;
+    background-color: var(--bs-body-bg-active);
+}
+
+.event-template-drawer-handle .sync-button,
+.event-template-drawer-handle .toolbar-navigation-button {
+    & i {
+        transition: transform 0.1s ease;
+    }
+
+    &:hover i {
+        transform: rotate(20deg);
+    }
+
+    &.left-button:hover i {
+        transform: translateX(-1px);
+    }
+
+    &.right-button:hover i {
+        transform: translateX(1px);
+    }
 }
 
 .event-template-drawer-handle .toolbar-navigation-button.left-button,

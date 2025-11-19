@@ -4,16 +4,24 @@
     border-radius: 50%;
     border: 1px solid var(--bs-border-color);
     cursor: pointer;
+    box-shadow: inset 0px 1px 0 #ffffff5d,
+        inset 0px -1px 0px #0000005d,
+        1px 2px 2px 0px #00000076;
+
+    transition: transform 0.1s ease-in-out;
 
     &:hover {
-        border-width: 2px;
-        border-style: double;
+        transform: scale(1.1);
+        box-shadow: inset 0px 1px 1px #ffffff5d,
+            inset 0px -1px 1px #0000005d,
+            1px 2px 3px 0px #000000a1;
     }
 
     &.selected {
-        border-width: 2px;
-        border-style: double;
-        box-shadow: 1px 2px 3px 0 #0000006b;
+        transform: scale(1.2);
+        box-shadow: inset 0px 1px 1px #ffffff5d,
+            inset 0px -1px 1px #0000005d,
+            1px 2px 3px 0px #000000a1;
     }
 }
 

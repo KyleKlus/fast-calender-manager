@@ -172,7 +172,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
                     <Button
                         onClick={() => {
                             handleAddEventClick();
-                        }}>Confirm</Button>
+                        }}>Save</Button>
                 </div>
             </Card >
         </Popup>
