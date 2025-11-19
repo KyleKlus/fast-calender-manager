@@ -125,10 +125,16 @@
 }
 
 .fcPage .fc-event {
-    --bs-btn-box-shadow: ;
     border-radius: 10px;
-    box-shadow: 2px 2px 2px #00000080;
-    outline: var(--bs-border-color) solid 1.5px;
+    box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 1px 0px #0000005c;
+    transition: box-shadow 0.1s ease-in-out;
+    /* outline: var(--bs-border-color) solid 1.5px; */
+}
+
+.fcPage .fc-event:hover {
+    box-shadow: inset 0px 1px 1px #ffffff5d, inset 0px -1px 1px #0000005d, 2px 3px 2px 0px #0000005c;
+
+    /* outline: var(--bs-border-color) solid 1.5px; */
 }
 
 .fcPage .fc-timegrid-event .fc-event-main {

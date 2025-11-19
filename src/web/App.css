@@ -3,34 +3,79 @@ body {
   font-family: Fira Code, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --bs-body-bg: hsl(89, 30%, 92%);
+  --bs-body-bg-hover: hsl(89, 30%, 85%);
+  --bs-body-bg-active: hsl(89, 30%, 75%);
 }
 
 :root,
 [data-bs-theme=light] {
-  --bs-border-color: #000;
+  --bs-border-color: #575757;
+  --bs-dropdown-border-color: var(--bs-border-color);
+  --accent-color: hsl(145, 40%, 50%);
 }
 
 .btn-primary {
   border-width: 1px;
   --bs-btn-color: #fff;
-  --bs-btn-bg: #5da373;
+  --bs-btn-bg: hsl(145, 40%, 50%);
   --bs-btn-gap: 0.4rem;
-  --bs-btn-border-color: black;
+  --bs-btn-border-color: transparent;
   --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #74d29b;
-  --bs-btn-hover-border-color: black;
+  --bs-btn-hover-bg: hsl(145, 51%, 40%);
+  --bs-btn-hover-border-color: transparent;
   --bs-btn-focus-shadow-rgb: 95, 203, 126;
   --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #348557;
-  --bs-btn-active-border-color: black;
+  --bs-btn-active-bg: hsl(145, 51%, 36%);
+  --bs-btn-active-border-color: transparent;
   --bs-btn-disabled-color: #fff;
   --bs-btn-disabled-bg: #69a776;
   --bs-btn-disabled-border-color: black;
-  --bs-btn-box-shadow: inset 0 2px 0 #ffffff26, 0 2px 2px #0000004f;
+  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 1px 0px #0000005c;
   --bs-btn-border-radius: var(--bs-border-radius-lg);
   box-shadow: var(--bs-btn-box-shadow);
   display: flex;
   justify-content: center;
   align-items: center;
   gap: var(--bs-btn-gap);
+}
+
+.btn-group {
+  --bs-group-btn-border-color: hsl(145, 51%, 36%);
+  gap: 1px;
+  box-shadow: 1px 2px 1px 0px #0000005c;
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.btn-group .btn-primary:not(:first-child, :last-child) {
+  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d,
+    inset 0px -1px 0px #0000005d;
+  border-left-color: var(--bs-group-btn-border-color);
+  border-right: none;
+}
+
+.btn-group .btn-primary:last-child {
+  border-left-color: var(--bs-group-btn-border-color);
+  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d,
+    inset 0px -1px 0px #0000005d;
+}
+
+.btn-group .btn-primary:first-child {
+  border-right: none;
+  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d,
+    inset 0px -1px 0px #0000005d;
+}
+
+.btn-group .btn-primary.active,
+.btn-primary.active {
+  --bs-btn-box-shadow: inset 1px 1px 2px #0000005d, inset -1px -1px 2px #0000005d;
+}
+
+.dropup .dropdown-toggle::after {
+  transition: transform 0.2s ease-in-out;
+}
+
+.dropup .dropdown-toggle:hover::after {
+  transform: translateY(-1px);
 }

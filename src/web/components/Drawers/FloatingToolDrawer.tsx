@@ -32,6 +32,7 @@ function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
                     id={`dropdown-variants-${'Primary'}`}
                     variant={'Primary'.toLowerCase()}
                     className='color-event-button'
+                    drop={'up'}
                     title={
                         <div className={['color-swatch',].join(' ')} style={{ backgroundColor: getColorFromColorId(props.selectedColor) }}></div>
                     }
@@ -53,7 +54,7 @@ function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
                             props.onModeChange && props.onModeChange('color')
                         }}
                     >
-                        <i className={`bi-palette${props.selectedMode === 'color' ? '-fill' : ''}`}></i>
+                        <i className={`bi-palette`}></i>
                     </Button>
                     <Button
                         variant="primary" active={props.selectedMode === 'delete'}
@@ -62,7 +63,7 @@ function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
                             props.onModeChange && props.onModeChange('delete')
                         }}
                     >
-                        <i className={`bi-trash${props.selectedMode === 'delete' ? '-fill' : ''}`}></i>
+                        <i className={`bi-trash`}></i>
                     </Button>
                     <Button
                         variant="primary"

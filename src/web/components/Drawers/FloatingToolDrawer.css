@@ -21,7 +21,6 @@
     gap: 0.5rem;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
     opacity: 0;
     transform-origin: right;
     transition: width 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
@@ -38,6 +37,14 @@
     justify-content: center;
     align-items: center;
 
+    & i:first-child {
+        transition: transform .1s ease-in-out;
+    }
+
+    &:hover i:first-child {
+        transform: translateX(-2px);
+    }
+
     &.isOpen *:nth-child(2) {
         display: none;
     }
@@ -47,7 +54,7 @@
     transition: transform .4s ease;
 
     &.isOpen {
-        transform: rotateY(180deg);
+        rotate: 180deg;
     }
 }
 

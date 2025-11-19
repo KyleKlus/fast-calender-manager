@@ -133,7 +133,8 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
             childrenWithinHandleRight={
                 <>
                     <div
-                        className={['sync-button', isSyncOn ? 'active' : ''].join(' ')}
+                        className={['sync-button', isSyncOn ? 'active' : '', showWeather || areBGEventsEditable ? 'disabled' : ''].join(' ')}
+                        aria-disabled={showWeather || areBGEventsEditable}
                         onClick={() => { setIsSyncOn(!isSyncOn) }}
                     >
                         <i className='bi-arrow-repeat'></i>
@@ -142,14 +143,23 @@ const EventTemplateDrawer: React.FC<IEventTemplateDrawerProps> = (props: IEventT
                         className={['phase-button', areBGEventsEditable ? 'active' : '', showWeather ? 'disabled' : ''].join(' ')}
                         aria-disabled={showWeather}
                         onClick={() => {
+                            if (!areBGEventsEditable) {
+                                setShowWeather(false);
+                                setIsSyncOn(false);
+                            }
                             setBGEventsEditable(!areBGEventsEditable);
                         }}
                     >
                         <i className='bi-layers-half'></i>
                     </div>
                     <div
-                        className={['weather-button', showWeather ? 'active' : ''].join(' ')}
+                        className={['weather-button', showWeather ? 'active' : '', areBGEventsEditable ? 'disabled' : ''].join(' ')}
+                        aria-disabled={areBGEventsEditable}
                         onClick={() => {
+                            if (!showWeather) {
+                                setBGEventsEditable(false);
+                                setIsSyncOn(false);
+                            }
                             setShowWeather(!showWeather)
                             switchWeek('today', !showWeather);
                         }}

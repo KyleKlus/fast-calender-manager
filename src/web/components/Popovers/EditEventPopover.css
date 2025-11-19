@@ -42,3 +42,16 @@
     align-items: center;
     gap: 1rem;
 }
+
+.switch-template-left-button i,
+.switch-template-right-button i {
+    transition: transform 0.2s ease-in-out;
+}
+
+.switch-template-left-button:hover i {
+    transform: translateX(-2px);
+}
+
+.switch-template-right-button:hover i {
+    transform: translateX(2px);
+}
