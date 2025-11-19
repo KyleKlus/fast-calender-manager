@@ -10,7 +10,7 @@ export default defineConfig({
 	},
 	html: {
 		title: "Calendar Manager",
-		favicon: "./public/calendar-check.svg",
+		favicon: "./public/calendar-icon.svg",
 	},
 	server: {
 		port: process.env.NODE_ENV === "development" ? 3000 : 8080,

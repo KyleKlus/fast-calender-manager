@@ -20,9 +20,6 @@
     padding: 0.5rem;
 }
 
-.popover input[type="text"],
-.popover textarea {}
-
 .popover hr {
     margin: 1.2rem 0 0rem 0;
     border-color: var(--bs-border-color);
