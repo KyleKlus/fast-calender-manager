@@ -13,11 +13,12 @@
 }
 
 .moreToolsDrawer {
+    --more-tools-drawer-width: 242px;
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row;
     width: 0;
-    transform: scaleX(0) translateX(202px);
+    transform: scaleX(0) translateX(var(--more-tools-drawer-width));
     gap: 0.5rem;
     justify-content: center;
     align-items: center;
@@ -26,7 +27,7 @@
     transition: width 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
 
     &.isOpen {
-        width: 202px;
+        width: var(--more-tools-drawer-width);
         opacity: 1;
         transform: scaleX(1) translateX(0px);
     }

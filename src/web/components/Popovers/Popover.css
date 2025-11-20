@@ -1,4 +1,6 @@
 .popover {
+    font-family: Fira Code, monospace;
+    font-size: medium;
     display: flex;
     flex-direction: column;
     padding: 1rem;
@@ -8,11 +10,12 @@
     border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius-lg);
     gap: 0.5rem;
-    box-shadow: 0 4px 4px #0000008f;
+    box-shadow: inset 0px 2px 0 #c9c9c9bd,
+        inset 0px -2px 0px #0000006e, 3px 4px 8px #000000af;
 }
 
 .react-datepicker-wrapper input {
-    width: 18ch;
+    width: 21ch;
     text-align: center;
     outline: none;
     border: 1px solid var(--bs-border-color);
@@ -45,6 +48,18 @@
         outline-color: var(--accent-color);
         border-color: var(--accent-color);
     }
+}
+
+.popover textarea {
+    min-height: 100px;
+}
+
+.popover .form-check {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: .5rem;
+    line-height: 1.5rem;
 }
 
 .popover .form-check-input {

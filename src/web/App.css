@@ -4,7 +4,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --bs-body-bg: hsl(89, 30%, 92%);
+  --bs-body-bg: hsl(88, 32%, 92%);
   --bs-body-bg-hover: hsl(89, 30%, 85%);
   --bs-body-bg-active: hsl(89, 30%, 75%);
 }

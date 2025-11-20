@@ -3,6 +3,7 @@ import ColorSelector, { getColorFromColorId } from '../ColorSelector';
 import './FloatingToolDrawer.css';
 import { ToolbarMode } from './EventTemplateDrawer';
 import { useState } from 'react';
+import SettingsPopover from '../Popovers/SettingsPopover';
 
 export interface IFloatingToolDrawerProps {
     selectedColor: number;
@@ -15,6 +16,8 @@ export interface IFloatingToolDrawerProps {
 
 function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
     const [isMoreToolsDrawerOpen, setIsMoreToolsDrawerOpen] = useState(false);
+    const [areSettingsOpen, setAreSettingsOpen] = useState(false);
+
     return (
         <div className={['floatingToolDrawer', props.isTemplateDrawerOpen ? 'isOpen' : ''].join(' ')}>
             <Button
@@ -28,6 +31,11 @@ function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
                 <i className={[`bi-tools`].join(' ')} />
             </Button>
             <div className={['moreToolsDrawer', isMoreToolsDrawerOpen ? 'isOpen' : ''].join(' ')}>
+                <Button variant="primary" className='open-settings-button' onClick={() => {
+                    setAreSettingsOpen(!areSettingsOpen);
+                }}>
+                    <i className={`bi-gear`}></i>
+                </Button>
                 <DropdownButton
                     id={`dropdown-variants-${'Primary'}`}
                     variant={'Primary'.toLowerCase()}
@@ -86,10 +94,19 @@ function FloatingToolDrawer(props: IFloatingToolDrawerProps) {
                         <i className={`bi-hr`}></i>
                     </Button>
                 </ButtonGroup>
+
             </div>
             <Button variant="primary" className='add-event-button' onClick={() => { props.onAddClick && props.onAddClick() }}>
                 <i className={`bi-calendar2-plus`}></i>
             </Button>
+            {areSettingsOpen &&
+                <SettingsPopover
+                    open={areSettingsOpen}
+                    closePopover={() => {
+                        setAreSettingsOpen(false);
+                    }}
+                />
+            }
         </div>
     );
 };
