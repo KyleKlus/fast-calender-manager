@@ -80,6 +80,10 @@
     white-space: nowrap;
 }
 
+.fcPage .fc-event .fc-event-time {
+    font-size: .65rem;
+}
+
 .fcPage .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
     margin-bottom: 0.5rem;
 }
