@@ -1,0 +1,41 @@
+.settings-popover {
+    min-width: 520px;
+    gap: 1.2rem;
+    font-size: larger;
+}
+
+.settings-popover-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.settings-popover-item {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-self: center;
+}
+
+.background-color-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    outline: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    box-shadow: 1px 2px 1px 0px #0000005d;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.reset-background-color-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--bs-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}

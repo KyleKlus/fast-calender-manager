@@ -6,6 +6,8 @@ import CalendarPage from './pages/CalendarPage';
 import ContextProviders from './contexts/ContextProviders';
 import StateWrapper from './components/StateWrapper';
 import IDataSource from './handlers/IDataSource';
+import { useEffect, useState } from 'react';
+import { getBgHoverAndActiveColor } from './components/ColorSelector';
 
 export interface IAppProps {
   externalDataSource?: IDataSource;
@@ -19,6 +21,19 @@ export interface IAppProps {
  *
  */
 const App: React.FC<IAppProps> = (props) => {
+  useEffect(() => {
+    const bgColor = window.localStorage.getItem('bgColor');
+    if (bgColor) {
+      document.body.style.setProperty('--bs-body-bg', bgColor);
+      const bgHoverAndActiveColor = getBgHoverAndActiveColor(bgColor);
+      document.body.style.setProperty('--bs-body-bg-hover', bgHoverAndActiveColor.hover);
+      document.body.style.setProperty('--bs-body-bg-active', bgHoverAndActiveColor.active);
+    } else {
+      const cssBgColor = getComputedStyle(document.body).getPropertyValue('--bs-body-bg');
+      window.localStorage.setItem('bgColor', cssBgColor);
+    }
+  }, []);
+
   return (
     <StrictMode>
       <ContextProviders externalDataSource={props.externalDataSource}>

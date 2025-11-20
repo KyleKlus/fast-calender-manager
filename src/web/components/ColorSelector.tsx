@@ -37,6 +37,56 @@ export function getColorFromColorId(colorId: number): string {
     return colorMap[colorId];
 }
 
+export interface IHsl {
+    h: number;
+    s: number;
+    l: number;
+}
+
+export function hexToHsl(hex: string): IHsl {
+    // Remove the '#' character if present
+    hex = hex.replace(/^#/, '');
+
+    // Convert hex to RGB
+    const r: number = parseInt(hex.slice(0, 2), 16) / 255;
+    const g: number = parseInt(hex.slice(2, 4), 16) / 255;
+    const b: number = parseInt(hex.slice(4, 6), 16) / 255;
+
+    // Calculate max and min values
+    const max: number = Math.max(r, g, b);
+    const min: number = Math.min(r, g, b);
+    let h: number, s: number, l: number = (max + min) / 2;
+
+    // Calculate Hue
+    if (max === min) {
+        h = s = 0; // achromatic
+    } else {
+        const d: number = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+            default: h = 0; // Default case (not expected to reach here)
+        }
+        h /= 6;
+    }
+
+    // Convert H, S, and L to percentage
+    h = Math.round(h * 360);
+    s = Math.round(s * 100);
+    l = Math.round(l * 100);
+
+    return { h, s, l };
+}
+
+export function getBgHoverAndActiveColor(bgColor: string): { hover: string, active: string } {
+    const hslBgColor = hexToHsl(bgColor);
+    const bgHoverColor = `hsl(${hslBgColor.h}, ${hslBgColor.s}%, ${hslBgColor.l - 7}%)`;
+    const bgActiveColor = `hsl(${hslBgColor.h}, ${hslBgColor.s}%, ${hslBgColor.l - 17}%)`;
+    return { hover: bgHoverColor, active: bgActiveColor };
+}
+
 export interface IColorSelectorProps {
     selectedColor: number;
     swatchesPerRow?: number;
