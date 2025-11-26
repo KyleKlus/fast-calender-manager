@@ -123,20 +123,16 @@
 
 .event-template-drawer-handle .sync-button,
 .event-template-drawer-handle .toolbar-navigation-button {
-    & i {
-        transition: transform 0.1s ease;
-    }
-
     &:hover i {
-        transform: rotate(20deg);
+        animation: signify-right-rotate 0.3s ease-in-out;
     }
 
     &.left-button:hover i {
-        transform: translateX(-1px);
+        animation: signify-left 0.3s ease-in-out;
     }
 
     &.right-button:hover i {
-        transform: translateX(1px);
+        animation: signify-right 0.3s ease-in-out;
     }
 }
 

@@ -82,7 +82,7 @@
 }
 
 .drawer-container .drawer-handle-icon:hover i {
-    transform: translateY(-1px);
+    animation: signify-up 0.3s ease-in-out;
 }
 
 .drawer-handle-children {
