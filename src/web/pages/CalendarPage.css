@@ -4,25 +4,12 @@
     height: 100vh;
 }
 
-
-.fcPage.toolBarMode-delete .fc-event {
-    cursor: url('./cursors/trash-fill.svg'), auto;
-}
-
-.fcPage.toolBarMode-split .fc-event {
-    cursor: url('./cursors/arrows-expand.svg'), auto;
-}
-
-.fcPage.toolBarMode-duplicate .fc-event {
-    cursor: url('./cursors/copy.svg'), auto;
-}
-
-.fcPage.toolBarMode-color .fc-event {
-    cursor: url('./cursors/brush.svg'), auto;
-}
-
+.fcPage.toolBarMode-delete .fc-event,
+.fcPage.toolBarMode-split .fc-event,
+.fcPage.toolBarMode-duplicate .fc-event,
+.fcPage.toolBarMode-color .fc-event,
 .fcPage.toolBarMode-paste-template {
-    cursor: url('./cursors/clipboard2-plus-fill.svg'), auto;
+    cursor: pointer;
 }
 
 .fcPage .fc-header-toolbar {
@@ -113,12 +100,8 @@
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
 
-    & i {
-        transition: transform 0.2s ease-in-out;
-    }
-
     &:hover i {
-        transform: translateX(2px);
+        animation: signify-right 0.7s ease-in-out;
     }
 }
 
@@ -128,12 +111,8 @@
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
 
-    & i {
-        transition: transform 0.2s ease-in-out;
-    }
-
     &:hover i {
-        transform: translateX(-2px);
+        animation: signify-left 0.7s ease-in-out;
     }
 }
 

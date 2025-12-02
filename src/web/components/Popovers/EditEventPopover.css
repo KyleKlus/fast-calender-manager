@@ -43,15 +43,10 @@
     gap: 1rem;
 }
 
-.switch-template-left-button i,
-.switch-template-right-button i {
-    transition: transform 0.2s ease-in-out;
-}
-
 .switch-template-left-button:hover i {
-    transform: translateX(-2px);
+    animation: signify-left 0.3s ease-in-out;
 }
 
 .switch-template-right-button:hover i {
-    transform: translateX(2px);
+    animation: signify-right 0.3s ease-in-out;
 }

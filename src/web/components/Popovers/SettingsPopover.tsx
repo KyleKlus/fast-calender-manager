@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import './Popover.css';
 import './SettingsPopover.css';
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Form } from "react-bootstrap";
 import "react-datepicker/dist/react-datepicker.css";
 import { useKeyPress } from '../../hooks/useKeyPress';
 import Popup from 'reactjs-popup';
@@ -9,6 +9,7 @@ import { getBgHoverAndActiveColor } from '../ColorSelector';
 import { SimplifiedEvent } from '../../handlers/eventConverters';
 import { TemplateContext } from '../../contexts/TemplateContext';
 import { useContext } from 'react';
+import { defaultBgColor, defaultRoundingValue, SettingsContext } from '../../contexts/SettingsContext';
 
 export interface ISettingsPopoverProps {
     closePopover: () => void;
@@ -17,16 +18,28 @@ export interface ISettingsPopoverProps {
 
 const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopoverProps) => {
     const { templates, addTemplate } = useContext(TemplateContext);
+    const { backgroundColor, setBackgroundColor, setRoundSplits, roundSplits, setRoundingValue, roundingValue } = useContext(SettingsContext);
     const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
-    const [color, setColor] = useState("#ebf1e4");
 
     useEffect(() => {
-        const bgColor = window.localStorage.getItem('bgColor');
-        if (bgColor) {
-            setColor(bgColor);
+        const savedBgColor = window.localStorage.getItem('bgColor');
+        const savedRoundingValue = window.localStorage.getItem('roundingValue');
+        const savedRoundSplits = window.localStorage.getItem('roundSplits');
+        if (savedRoundingValue) {
+            setRoundingValue(parseInt(savedRoundingValue));
+        } else {
+            window.localStorage.setItem('roundingValue', defaultRoundingValue.toString());
+        }
+        if (savedRoundSplits) {
+            setRoundSplits(savedRoundSplits === 'true');
+        } else {
+            window.localStorage.setItem('roundSplits', 'false');
+        }
+        if (savedBgColor) {
+            setBackgroundColor(savedBgColor);
         } else {
             const cssBgColor = getComputedStyle(document.body).getPropertyValue('--bs-body-bg');
-            setColor(cssBgColor);
+            setBackgroundColor(cssBgColor);
             window.localStorage.setItem('bgColor', cssBgColor);
         }
     }, []);
@@ -51,8 +64,8 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                 <h3>Settings</h3>
                 <div className='settings-popover-item'>
                     <span>Background Color:</span>
-                    <input className='background-color-input' type="color" value={color} onChange={(e) => {
-                        setColor(e.target.value);
+                    <input className='background-color-input' type="color" value={backgroundColor} onChange={(e) => {
+                        setBackgroundColor(e.target.value);
                         document.body.style.setProperty('--bs-body-bg', e.target.value);
                         window.localStorage.setItem('bgColor', e.target.value);
                         document.body.style.setProperty('--bs-body-bg', e.target.value);
@@ -61,15 +74,40 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                         document.body.style.setProperty('--bs-body-bg-active', bgHoverAndActiveColor.active);
                     }} />
                     <button className='reset-background-color-button' onClick={() => {
-                        const defaultColor = '#ebf1e4ff';
-                        setColor(defaultColor);
-                        document.body.style.setProperty('--bs-body-bg', defaultColor);
-                        window.localStorage.setItem('bgColor', defaultColor);
-                        document.body.style.setProperty('--bs-body-bg', defaultColor);
-                        const bgHoverAndActiveColor = getBgHoverAndActiveColor(defaultColor);
+                        setBackgroundColor(defaultBgColor);
+                        document.body.style.setProperty('--bs-body-bg', defaultBgColor);
+                        window.localStorage.setItem('bgColor', defaultBgColor);
+                        document.body.style.setProperty('--bs-body-bg', defaultBgColor);
+                        const bgHoverAndActiveColor = getBgHoverAndActiveColor(defaultBgColor);
                         document.body.style.setProperty('--bs-body-bg-hover', bgHoverAndActiveColor.hover);
                         document.body.style.setProperty('--bs-body-bg-active', bgHoverAndActiveColor.active);
                     }}><i className='bi-arrow-counterclockwise'></i></button>
+                </div>
+                <div className='settings-popover-item'>
+                    <span>Round to:</span>
+                    <Form.Control
+                        type="number"
+                        id="roundingValueInput"
+                        placeholder="Rounding Value"
+                        value={roundingValue}
+                        onChange={(e) => {
+                            setRoundingValue(parseInt(e.target.value));
+                            window.localStorage.setItem('roundingValue', e.target.value);
+                        }}
+                    />
+                    <span>min</span>
+                </div>
+                <div className='settings-popover-item'>
+                    <span>Round split:</span>
+                    <Form.Check
+                        type="checkbox"
+                        id="roundSplitsCheckbox"
+                        defaultChecked={roundSplits}
+                        onChange={() => {
+                            setRoundSplits(!roundSplits);
+                            window.localStorage.setItem('roundSplits', (!roundSplits).toString());
+                        }}
+                    />
                 </div>
                 <div className='settings-popover-item'>
                     <span>Import/Export Templates:</span>

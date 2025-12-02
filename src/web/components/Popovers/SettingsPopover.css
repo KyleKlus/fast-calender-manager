@@ -1,5 +1,5 @@
 .settings-popover {
-    min-width: 520px;
+    min-width: 600px;
     gap: 1.2rem;
     font-size: larger;
 }
@@ -15,6 +15,7 @@
     flex-direction: row;
     gap: 0.5rem;
     justify-self: center;
+    align-items: center;
 }
 
 .background-color-input {
@@ -38,4 +39,9 @@
     align-items: center;
     justify-content: center;
     padding: 0;
+}
+
+#roundingValueInput {
+    width: 4rem;
+    padding: 2px;
 }

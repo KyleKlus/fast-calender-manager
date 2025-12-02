@@ -83,10 +83,96 @@ body {
   --bs-btn-box-shadow: inset 1px 1px 2px #0000005d, inset -1px -1px 2px #0000005d;
 }
 
-.dropup .dropdown-toggle::after {
-  transition: transform 0.2s ease-in-out;
+@keyframes signify-up {
+  0% {
+    transform: translateY(0);
+  }
+
+  45% {
+    transform: translateY(-1px);
+  }
+
+  55% {
+    transform: translateY(-1px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes signify-down {
+  0% {
+    transform: translateY(0);
+  }
+
+  45% {
+    transform: translateY(1px);
+  }
+
+  55% {
+    transform: translateY(1px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes signify-right {
+  0% {
+    transform: translateX(0);
+  }
+
+  45% {
+    transform: translateX(1px);
+  }
+
+  55% {
+    transform: translateX(1px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes signify-left {
+  0% {
+    transform: translateX(0);
+  }
+
+  45% {
+    transform: translateX(-1px);
+  }
+
+  55% {
+    transform: translateX(-1px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes signify-right-rotate {
+  0% {
+    transform: rotate(0);
+  }
+
+  45% {
+    transform: rotate(20deg);
+  }
+
+  55% {
+    transform: rotate(20deg);
+  }
+
+  100% {
+    transform: rotate(0);
+  }
 }
 
 .dropup .dropdown-toggle:hover::after {
-  transform: translateY(-1px);
+  animation: signify-up 0.3s ease-in-out;
 }

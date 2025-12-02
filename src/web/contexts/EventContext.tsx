@@ -6,6 +6,7 @@ import { dayWeatherColor, nightWeatherColor, WeatherContext } from './WeatherCon
 import { DataSourceContext } from './DataSourceProvider';
 import { DateInViewContext } from './DateInViewContext';
 import { defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
+import { SettingsContext } from './SettingsContext';
 
 export const phases: string[] = ['Arbeitszeit', 'Unizeit', 'Freizeit'];
 
@@ -68,6 +69,7 @@ const EventContext = createContext<IEventContext>({
 });
 
 function EventProvider(props: React.PropsWithChildren<{}>) {
+    const { roundSplits, roundingValue } = useContext(SettingsContext);
     const { showWeather, dailyWeather } = useContext(WeatherContext);
     const { isLoggedIn, fetchEvents, saveEvent, deleteEvent, updateEvent } = useContext(DataSourceContext);
     const { dateInView, setDateInView } = useContext(DateInViewContext);
@@ -293,9 +295,15 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
         const end = event.end;
 
         const durationInMinutes = event.end.diff(event.start).as('minutes');
+        const firstHalfEndInMinutes = percent * durationInMinutes / 100;
+        const secondHalfStartInMinutes = (100 - percent) * durationInMinutes / 100;
 
-        const firstHalfEnd = start.plus({ minutes: percent * durationInMinutes / 100 });
-        const secondHalfStart = start.plus({ minutes: (100 - percent) * durationInMinutes / 100 });
+        const firstHalfEndRounded = roundingValue * Math.floor((firstHalfEndInMinutes / roundingValue) - 0.5);
+
+        const secondHalfStartRounded = roundingValue * Math.floor((secondHalfStartInMinutes / roundingValue) - 0.5);
+
+        const firstHalfEnd = start.plus({ minutes: roundSplits ? firstHalfEndRounded : firstHalfEndInMinutes });
+        const secondHalfStart = start.plus({ minutes: roundSplits ? secondHalfStartRounded : secondHalfStartInMinutes });
 
         const firstEvent = await saveEvent({
             ...event,
