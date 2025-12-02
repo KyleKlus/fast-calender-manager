@@ -9,7 +9,8 @@ import ColorSelector, { defaultColorId } from '../ColorSelector';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import Popup from 'reactjs-popup';
 import { TemplateContext } from '../../contexts/TemplateContext';
-import { EventContext, phases } from '../../contexts/EventContext';
+import { EventContext } from '../../contexts/EventContext';
+import { SettingsContext } from '../../contexts/SettingsContext';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
@@ -22,6 +23,7 @@ export interface IAddEventPopoverProps {
 
 const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopoverProps) => {
     const { addEvent, areBGEventsEditable } = useContext(EventContext);
+    const { availablePhases } = useContext(SettingsContext);
     const { selectedTemplate, resetSelectedTemplate, addTemplate } = useContext(TemplateContext);
     const [isAllDay, setIsAllDay] = useState(getIsAllDay(props.startDate, props.endDate));
     const [eventName, setEventName] = useState(selectedTemplate.template !== null
@@ -110,7 +112,7 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
 
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            {...phases.map(p => <Dropdown.Item eventKey={p} key={p}>{p}</Dropdown.Item>)}
+                            {...availablePhases.map(p => <Dropdown.Item eventKey={p} key={p}>{p}</Dropdown.Item>)}
                         </Dropdown.Menu>
                     </Dropdown>
                 }

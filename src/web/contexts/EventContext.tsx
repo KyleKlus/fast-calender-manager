@@ -8,8 +8,6 @@ import { DateInViewContext } from './DateInViewContext';
 import { defaultEventColor, getColorFromColorId } from '../components/ColorSelector';
 import { SettingsContext } from './SettingsContext';
 
-export const phases: string[] = ['Arbeitszeit', 'Unizeit', 'Freizeit'];
-
 interface IEventContext {
     events: EventInput[];
     areEventsLoaded: boolean;
@@ -69,7 +67,7 @@ const EventContext = createContext<IEventContext>({
 });
 
 function EventProvider(props: React.PropsWithChildren<{}>) {
-    const { roundSplits, roundingValue } = useContext(SettingsContext);
+    const { roundSplits, roundingValue, availablePhases } = useContext(SettingsContext);
     const { showWeather, dailyWeather } = useContext(WeatherContext);
     const { isLoggedIn, fetchEvents, saveEvent, deleteEvent, updateEvent } = useContext(DataSourceContext);
     const { dateInView, setDateInView } = useContext(DateInViewContext);
@@ -214,7 +212,7 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
                 if (e.id === eventId) {
                     const color: string = getColorFromColorId(event.colorId as number) || defaultEventColor;
                     const title: string = event.title || 'No Title';
-                    const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0);
+                    const isBackgroundEvent = (availablePhases.filter((phase: string) => title.startsWith(phase)).length > 0);
                     return {
                         ...e,
                         title: event.title,

@@ -1,9 +1,10 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
 import IDataSource from '../handlers/IDataSource';
 import GoogleDataSource from '../handlers/GoogleDataSource';
 import { DateTime } from 'luxon';
 import { EventInput } from '@fullcalendar/core';
+import { SettingsContext } from './SettingsContext';
 
 export interface IDataSourceProviderProps {
     externalDataSource?: IDataSource;
@@ -57,6 +58,7 @@ const DataSourceContext = createContext<IDataSourceContext>({
 
 function DataSourceProvider(props: React.PropsWithChildren<IDataSourceProviderProps>) {
     const dataSource = props.externalDataSource ? props.externalDataSource : new GoogleDataSource();
+    const { availablePhases } = useContext(SettingsContext);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
     const [isTryingToAutoLogin, setIsTryingToAutoLogin] = useState(true);
@@ -82,7 +84,7 @@ function DataSourceProvider(props: React.PropsWithChildren<IDataSourceProviderPr
         if (!isLoggedIn) { return [] }
         const events = await dataSource.loadEvents(date ?? DateTime.now(), (isAuthValid: boolean) => {
             setIsAuthValid(isAuthValid);
-        });
+        }, availablePhases);
         return events
     }
 
@@ -93,7 +95,7 @@ function DataSourceProvider(props: React.PropsWithChildren<IDataSourceProviderPr
     async function saveEvent(event: { title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: { description?: string } }, isAllDay?: boolean): Promise<EventInput | undefined> {
         return await dataSource.addEvent(event, (isAuthValid: boolean) => {
             setIsAuthValid(isAuthValid);
-        }, isAllDay);
+        }, availablePhases, isAllDay);
     }
 
     async function deleteEvent(eventId: string): Promise<boolean> {

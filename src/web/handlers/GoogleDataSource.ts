@@ -3,7 +3,6 @@ import IDataSource from "./IDataSource";
 import GCal from "./gcalHandler";
 import { EventInput } from "@fullcalendar/core";
 import { defaultColorId, defaultEventColor, getColorFromColorId } from "../components/ColorSelector";
-import { phases } from "../contexts/EventContext";
 
 let config: {
     clientId: string;
@@ -54,7 +53,7 @@ export default class GoogleDataSource implements IDataSource {
         });
     }
 
-    async loadEvents(date: DateTime, setIsAuthValid: (isAuthValid: boolean) => void): Promise<EventInput[]> {
+    async loadEvents(date: DateTime, setIsAuthValid: (isAuthValid: boolean) => void, availablePhases: string[]): Promise<EventInput[]> {
         if (gcal === undefined) { return new Promise((resolve, reject) => { return reject([]) }); }
 
         let events: EventInput[] = (await gcal.listEvents({
@@ -67,7 +66,7 @@ export default class GoogleDataSource implements IDataSource {
         }, setIsAuthValid)).result.items.map((e: any) => {
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
-            const isBackgroundEvent = title.startsWith('Arbeitszeit') || title.startsWith('Unizeit') || title.startsWith('Freizeit') || title.startsWith('Urlaub');
+            const isBackgroundEvent = (availablePhases.filter((phase: string) => title.startsWith(phase)).length > 0);
 
             return {
                 id: e.id,
@@ -119,7 +118,7 @@ export default class GoogleDataSource implements IDataSource {
         title: string; start: DateTime; end: DateTime; colorId: number; extendedProps?: {
             description?: string
         }
-    }, setIsAuthValid: (isAuthValid: boolean) => void, isAllDay?: boolean): Promise<EventInput | undefined> {
+    }, setIsAuthValid: (isAuthValid: boolean) => void, availablePhases: string[], isAllDay?: boolean): Promise<EventInput | undefined> {
         if (gcal === undefined) { return new Promise((resolve, reject) => { return reject(undefined) }); }
 
         const start = event.start.toISO();
@@ -151,7 +150,7 @@ export default class GoogleDataSource implements IDataSource {
             const e = res.result;
             const color: string = getColorFromColorId(e.colorId as number) || defaultEventColor;
             const title: string = e.summary || 'No Title';
-            const isBackgroundEvent = (phases.filter((phase: string) => title.startsWith(phase)).length > 0);
+            const isBackgroundEvent = (availablePhases.filter((phase: string) => title.startsWith(phase)).length > 0);
             return {
                 id: e.id,
                 title: e.summary,

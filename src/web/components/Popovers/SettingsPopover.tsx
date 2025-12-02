@@ -110,7 +110,7 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                     />
                 </div>
                 <div className='settings-popover-item'>
-                    <span>Import/Export Templates:</span>
+                    <span>Import/Export Data:</span>
                     <input id='template-import' hidden type='file' accept='.json' className='import-templates-input' onChange={(e) => {
                         if (!e.target.files) return;
                         const file = e.target.files[0];
@@ -119,7 +119,6 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                             reader.onload = (e) => {
                                 if (e.target === null || e.target.result === null) return;
                                 const templates: SimplifiedEvent[] = JSON.parse(e.target.result as string).templates;
-                                console.log(templates);
                                 templates.forEach((template) => {
                                     if (templates.filter((t) => t.title === template.title && t.start === template.start && t.end === template.end && t.allDay === template.allDay).length > 0) {
                                         return;
