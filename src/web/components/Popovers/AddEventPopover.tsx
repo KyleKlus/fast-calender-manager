@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import './Popover.css';
 import './AddEventPopover.css';
-import { Card, Form, Button } from "react-bootstrap";
+import { Card, Form, Button, Dropdown } from "react-bootstrap";
 import { DateTime } from 'luxon';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,7 +9,7 @@ import ColorSelector, { defaultColorId } from '../ColorSelector';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import Popup from 'reactjs-popup';
 import { TemplateContext } from '../../contexts/TemplateContext';
-import { EventContext } from '../../contexts/EventContext';
+import { EventContext, phases } from '../../contexts/EventContext';
 
 export interface IAddEventPopoverProps {
     popoverMode: 'add' | 'add-template';
@@ -21,12 +21,12 @@ export interface IAddEventPopoverProps {
 }
 
 const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopoverProps) => {
-    const { addEvent } = useContext(EventContext);
+    const { addEvent, areBGEventsEditable } = useContext(EventContext);
     const { selectedTemplate, resetSelectedTemplate, addTemplate } = useContext(TemplateContext);
     const [isAllDay, setIsAllDay] = useState(getIsAllDay(props.startDate, props.endDate));
     const [eventName, setEventName] = useState(selectedTemplate.template !== null
         ? selectedTemplate.template.title
-        : ''
+        : areBGEventsEditable ? 'BG Event Name' : ''
     );
     const [startDate, setStartDate] = useState(props.startDate || DateTime.now().toJSDate());
     const [endDate, setEndDate] = useState(props.endDate || DateTime.now().plus({ hour: 1 }).toJSDate()
@@ -101,13 +101,28 @@ const AddEventPopover: React.FC<IAddEventPopoverProps> = (props: IAddEventPopove
             }}
         >
             <Card className={['popover', props.popoverMode === 'add' ? 'add-popover' : 'add-template-popover', isAllDay ? 'allday' : ''].join(' ')}>
-                <Form.Control
-                    type="text"
-                    id="eventNameInput"
-                    placeholder="Event Name"
-                    value={eventName}
-                    onChange={(e) => { setEventName(e.target.value) }}
-                />
+                {areBGEventsEditable &&
+                    <Dropdown onSelect={((p) => {
+                        setEventName(p as string);
+                    })}>
+                        <Dropdown.Toggle variant="primary" id="dropdown-bg-events">
+                            {eventName}
+
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {...phases.map(p => <Dropdown.Item eventKey={p} key={p}>{p}</Dropdown.Item>)}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                }
+                {!areBGEventsEditable &&
+                    <Form.Control
+                        type="text"
+                        id="eventNameInput"
+                        placeholder="Event Name"
+                        value={eventName}
+                        onChange={(e) => { setEventName(e.target.value) }}
+                    />
+                }
                 <div className='add-popover-date-input'>
                     <DatePicker
                         selected={startDate}

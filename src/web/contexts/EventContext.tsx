@@ -220,7 +220,7 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
                         title: event.title,
                         description: event.extendedProps?.description,
                         extendedProps: event.extendedProps?.description,
-                        display: isBackgroundEvent ? 'background' : 'auto',
+                        display: isBackgroundEvent && !areBGEventsEditable ? 'background' : 'auto',
                         backgroundColor: color,
                         borderColor: color,
                         start: isAllDay ? startDate : start, // try timed. will fall back to all-day
