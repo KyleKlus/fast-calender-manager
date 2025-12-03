@@ -10,6 +10,8 @@ import { SimplifiedEvent } from '../../handlers/eventConverters';
 import { TemplateContext } from '../../contexts/TemplateContext';
 import { useContext } from 'react';
 import { defaultBgColor, defaultRoundingValue, SettingsContext } from '../../contexts/SettingsContext';
+import { exportData, importData } from '../../handlers/settingsHandler';
+import { IDataExport } from '../../handlers/IDataExport';
 
 export interface ISettingsPopoverProps {
     closePopover: () => void;
@@ -18,38 +20,8 @@ export interface ISettingsPopoverProps {
 
 const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopoverProps) => {
     const { templates, addTemplate } = useContext(TemplateContext);
-    const { backgroundColor, setBackgroundColor, setRoundSplits, roundSplits, setRoundingValue, roundingValue } = useContext(SettingsContext);
+    const { backgroundColor, setBackgroundColor, setRoundSplits, roundSplits, setRoundingValue, roundingValue, availablePhases, setAvailablePhases } = useContext(SettingsContext);
     const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
-
-    useEffect(() => {
-        const savedBgColor = window.localStorage.getItem('bgColor');
-        const savedRoundingValue = window.localStorage.getItem('roundingValue');
-        const savedRoundSplits = window.localStorage.getItem('roundSplits');
-        if (savedRoundingValue) {
-            setRoundingValue(parseInt(savedRoundingValue));
-        } else {
-            window.localStorage.setItem('roundingValue', defaultRoundingValue.toString());
-        }
-        if (savedRoundSplits) {
-            setRoundSplits(savedRoundSplits === 'true');
-        } else {
-            window.localStorage.setItem('roundSplits', 'false');
-        }
-        if (savedBgColor) {
-            setBackgroundColor(savedBgColor);
-        } else {
-            const cssBgColor = getComputedStyle(document.body).getPropertyValue('--bs-body-bg');
-            setBackgroundColor(cssBgColor);
-            window.localStorage.setItem('bgColor', cssBgColor);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (isEnterKeyPressed) {
-            props.closePopover();
-        }
-    }, [isEnterKeyPressed]);
-
 
     return (
         <Popup
@@ -66,21 +38,9 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                     <span>Background Color:</span>
                     <input className='background-color-input' type="color" value={backgroundColor} onChange={(e) => {
                         setBackgroundColor(e.target.value);
-                        document.body.style.setProperty('--bs-body-bg', e.target.value);
-                        window.localStorage.setItem('bgColor', e.target.value);
-                        document.body.style.setProperty('--bs-body-bg', e.target.value);
-                        const bgHoverAndActiveColor = getBgHoverAndActiveColor(e.target.value);
-                        document.body.style.setProperty('--bs-body-bg-hover', bgHoverAndActiveColor.hover);
-                        document.body.style.setProperty('--bs-body-bg-active', bgHoverAndActiveColor.active);
                     }} />
                     <button className='reset-background-color-button' onClick={() => {
                         setBackgroundColor(defaultBgColor);
-                        document.body.style.setProperty('--bs-body-bg', defaultBgColor);
-                        window.localStorage.setItem('bgColor', defaultBgColor);
-                        document.body.style.setProperty('--bs-body-bg', defaultBgColor);
-                        const bgHoverAndActiveColor = getBgHoverAndActiveColor(defaultBgColor);
-                        document.body.style.setProperty('--bs-body-bg-hover', bgHoverAndActiveColor.hover);
-                        document.body.style.setProperty('--bs-body-bg-active', bgHoverAndActiveColor.active);
                     }}><i className='bi-arrow-counterclockwise'></i></button>
                 </div>
                 <div className='settings-popover-item'>
@@ -92,7 +52,6 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                         value={roundingValue}
                         onChange={(e) => {
                             setRoundingValue(parseInt(e.target.value));
-                            window.localStorage.setItem('roundingValue', e.target.value);
                         }}
                     />
                     <span>min</span>
@@ -102,46 +61,40 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                     <Form.Check
                         type="checkbox"
                         id="roundSplitsCheckbox"
-                        defaultChecked={roundSplits}
+                        checked={roundSplits}
                         onChange={() => {
                             setRoundSplits(!roundSplits);
-                            window.localStorage.setItem('roundSplits', (!roundSplits).toString());
                         }}
                     />
                 </div>
                 <div className='settings-popover-item'>
                     <span>Import/Export Data:</span>
-                    <input id='template-import' hidden type='file' accept='.json' className='import-templates-input' onChange={(e) => {
+                    <input id='template-import' hidden type='file' accept='.json' className='import-templates-input' onChange={async (e) => {
                         if (!e.target.files) return;
                         const file = e.target.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                if (e.target === null || e.target.result === null) return;
-                                const templates: SimplifiedEvent[] = JSON.parse(e.target.result as string).templates;
-                                templates.forEach((template) => {
-                                    if (templates.filter((t) => t.title === template.title && t.start === template.start && t.end === template.end && t.allDay === template.allDay).length > 0) {
-                                        return;
-                                    }
-                                    addTemplate(template);
-                                });
-                            };
-                            reader.readAsText(file);
-                        }
+                        const dataExport = await importData(file, templates);
+
+                        setBackgroundColor(dataExport.backgroundColor);
+                        setRoundingValue(dataExport.roundingValue);
+                        setRoundSplits(dataExport.roundSplits);
+                        setAvailablePhases(dataExport.availablePhases);
+
+                        dataExport.templates.forEach((template) => {
+                            addTemplate(template);
+                        });
                     }} />
                     <Button variant="primary" className='import--templates-button' onClick={() => {
                         document.getElementById('template-import')?.click();
                     }}><i className='bi-file-earmark-arrow-down'></i>Import</Button>
-                    <Button variant="primary" className='export-templates-button' onClick={() => {
-
-                        const templatesObj = { templates: templates as SimplifiedEvent[] };
-                        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templatesObj));
-                        const downloadAnchorNode = document.createElement('a');
-                        downloadAnchorNode.setAttribute("href", dataStr);
-                        downloadAnchorNode.setAttribute("download", "templates.json");
-                        document.body.appendChild(downloadAnchorNode); // required for firefox
-                        downloadAnchorNode.click();
-                        downloadAnchorNode.remove();
+                    <Button variant="primary" className='export-templates-button' onClick={async () => {
+                        const dataExport: IDataExport = {
+                            backgroundColor,
+                            roundingValue,
+                            roundSplits,
+                            availablePhases,
+                            templates,
+                        };
+                        await exportData(dataExport);
                     }}><i className='bi-file-earmark-arrow-up'></i>Export</Button>
                 </div>
                 <hr />
