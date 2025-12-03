@@ -79,6 +79,27 @@ function EventProvider(props: React.PropsWithChildren<{}>) {
     const [isSyncOn, setIsSyncOn] = useState(false);
 
     useEffect(() => {
+        if (isCurrentlyLoading || !isLoggedIn) return;
+        setIsCurrentlyLoading(true);
+        const modifiedEvents = events.map(event => {
+            if (event.allDay) return event;
+
+            let isBackgroundEvent = (availablePhases.filter((phase: string) => event.title?.startsWith(phase)).length > 0);
+
+            if (areBGEventsEditable) {
+                isBackgroundEvent = !isBackgroundEvent;
+            }
+
+            return {
+                ...event,
+                display: isBackgroundEvent ? 'background' : 'auto',
+            };
+        });
+        setEvents(modifiedEvents);
+        setIsCurrentlyLoading(false);
+    }, [availablePhases]);
+
+    useEffect(() => {
         if (areEventsLoaded || !isLoggedIn) return;
         loadEvents(dateInView);
     }, [isLoggedIn]);

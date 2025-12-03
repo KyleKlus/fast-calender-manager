@@ -27,29 +27,32 @@ body {
   --accent-color: hsl(145, 40%, 50%);
 }
 
-.btn-primary {
-  border-width: 1px;
-  --bs-btn-color: #fff;
-  --bs-btn-bg: hsl(145, 40%, 50%);
+.btn {
+  --bs-btn-border-width: 1px;
   --bs-btn-gap: 0.4rem;
   --bs-btn-border-color: transparent;
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: hsl(145, 51%, 40%);
   --bs-btn-hover-border-color: transparent;
-  --bs-btn-focus-shadow-rgb: 95, 203, 126;
-  --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: hsl(145, 51%, 36%);
   --bs-btn-active-border-color: transparent;
-  --bs-btn-disabled-color: #fff;
-  --bs-btn-disabled-bg: #69a776;
   --bs-btn-disabled-border-color: black;
   --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 1px 0px #0000005c;
   --bs-btn-border-radius: var(--bs-border-radius-lg);
-  box-shadow: var(--bs-btn-box-shadow);
+  box-shadow: var(--bs-btn-box-shadow) !important;
+  gap: var(--bs-btn-gap);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--bs-btn-gap);
+}
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: hsl(145, 40%, 50%);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: hsl(145, 51%, 40%);
+  --bs-btn-focus-shadow-rgb: 95, 203, 126;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: hsl(145, 51%, 36%);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #69a776;
 }
 
 .btn-group {

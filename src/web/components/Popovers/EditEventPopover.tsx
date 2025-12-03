@@ -200,6 +200,7 @@ const EditEventPopover: React.FC<IEditEventPopoverProps> = (props: IEditEventPop
                         </ButtonGroup>
                     }
                     <Button
+                        variant='danger'
                         onClick={() => {
                             if (props.popoverMode === 'edit-template') {
                                 deleteTemplate(selectedTemplate.index);

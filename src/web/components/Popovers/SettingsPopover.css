@@ -1,7 +1,8 @@
 .settings-popover {
     min-width: 600px;
     gap: 1.2rem;
-    font-size: larger;
+    font-size: large;
+    padding-bottom: 3rem;
 }
 
 .settings-popover-buttons {
@@ -44,4 +45,29 @@
 #roundingValueInput {
     width: 4rem;
     padding: 2px;
+}
+
+.close-settings-btn {
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    font-size: xx-large;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & i {
+        padding: 0;
+        margin: 0;
+        transition: transform 0.2s ease-in-out;
+        line-height: 1.5rem;
+    }
+
+    &:hover i {
+        transform: scale(1.2);
+        transform-origin: center;
+    }
 }

@@ -1,0 +1,26 @@
+.phase-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.phase-list-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px;
+    border-radius: var(--bs-border-radius);
+
+    &:not(:first-of-type):hover {
+        background-color: var(--bs-body-bg-hover);
+    }
+}
+
+.phase-list-item span {
+    width: 100%;
+}
+
+.phase-list-item input {
+    width: 100%;
+}

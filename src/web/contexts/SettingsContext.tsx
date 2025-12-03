@@ -12,6 +12,8 @@ export interface ISettingsContext {
     roundingValue: number;
     roundSplits: boolean;
     availablePhases: string[];
+    addPhase: (phase: string) => void;
+    removePhase: (phase: string) => void;
     setAvailablePhases: (availablePhases: string[]) => void;
     setRoundingValue: (roundingValue: number) => void;
     setRoundSplits: (roundSplits: boolean) => void;
@@ -23,6 +25,8 @@ const SettingsContext = createContext<ISettingsContext>({
     roundingValue: defaultRoundingValue,
     roundSplits: defaultRoundSplits,
     availablePhases: defaultPhases,
+    addPhase: (phase: string) => { },
+    removePhase: (phase: string) => { },
     setAvailablePhases: (availablePhases: string[]) => { },
     setRoundingValue: (roundingValue: number) => { },
     setRoundSplits: (roundSplits: boolean) => { },
@@ -89,8 +93,18 @@ function SettingsProvider(props: React.PropsWithChildren<{}>) {
         setAvailablePhasesLocal(availablePhases);
     }
 
+    function addPhase(phase: string) {
+        setAvailablePhases([...availablePhases, phase]);
+    }
+
+    function removePhase(phase: string) {
+        setAvailablePhases(availablePhases.filter((p) => p !== phase));
+    }
+
     return (
         <SettingsContext.Provider value={{
+            addPhase,
+            removePhase,
             availablePhases,
             setAvailablePhases,
             roundingValue,

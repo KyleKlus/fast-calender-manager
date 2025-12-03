@@ -1,17 +1,14 @@
-import { useEffect } from 'react';
 import './Popover.css';
 import './SettingsPopover.css';
 import { Card, Button, Form } from "react-bootstrap";
 import "react-datepicker/dist/react-datepicker.css";
-import { useKeyPress } from '../../hooks/useKeyPress';
 import Popup from 'reactjs-popup';
-import { getBgHoverAndActiveColor } from '../ColorSelector';
-import { SimplifiedEvent } from '../../handlers/eventConverters';
 import { TemplateContext } from '../../contexts/TemplateContext';
 import { useContext } from 'react';
-import { defaultBgColor, defaultRoundingValue, SettingsContext } from '../../contexts/SettingsContext';
+import { defaultBgColor, SettingsContext } from '../../contexts/SettingsContext';
 import { exportData, importData } from '../../handlers/settingsHandler';
 import { IDataExport } from '../../handlers/IDataExport';
+import PhaseList from './PhaseList';
 
 export interface ISettingsPopoverProps {
     closePopover: () => void;
@@ -20,8 +17,7 @@ export interface ISettingsPopoverProps {
 
 const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopoverProps) => {
     const { templates, addTemplate } = useContext(TemplateContext);
-    const { backgroundColor, setBackgroundColor, setRoundSplits, roundSplits, setRoundingValue, roundingValue, availablePhases, setAvailablePhases } = useContext(SettingsContext);
-    const isEnterKeyPressed = useKeyPress('Enter', 'inverted');
+    const { backgroundColor, setBackgroundColor, setRoundSplits, roundSplits, setRoundingValue, roundingValue, availablePhases, setAvailablePhases, addPhase, removePhase } = useContext(SettingsContext);
 
     return (
         <Popup
@@ -33,7 +29,13 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
             }}
         >
             <Card className={['popover', 'settings-popover'].join(' ')}>
-                <h3>Settings</h3>
+                <div className='settings-popover-item'>
+                    <h4>Settings</h4>
+                    <div className='divider' style={{ flexGrow: 1 }} />
+                    <button className={'close-settings-btn'} onClick={() => { props.closePopover() }}>
+                        <i className='bi-x'></i>
+                    </button>
+                </div>
                 <div className='settings-popover-item'>
                     <span>Background Color:</span>
                     <input className='background-color-input' type="color" value={backgroundColor} onChange={(e) => {
@@ -68,6 +70,10 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                     />
                 </div>
                 <div className='settings-popover-item'>
+                    <PhaseList phases={availablePhases} addPhase={addPhase} removePhase={removePhase} />
+                </div>
+                <h4>Data</h4>
+                <div className='settings-popover-item'>
                     <span>Import/Export Data:</span>
                     <input id='template-import' hidden type='file' accept='.json' className='import-templates-input' onChange={async (e) => {
                         if (!e.target.files) return;
@@ -96,13 +102,6 @@ const SettingsPopover: React.FC<ISettingsPopoverProps> = (props: ISettingsPopove
                         };
                         await exportData(dataExport);
                     }}><i className='bi-file-earmark-arrow-up'></i>Export</Button>
-                </div>
-                <hr />
-                <div className='settings-popover-buttons'>
-                    <div className='divider' style={{ flexGrow: 1 }} />
-                    <Button onClick={() => {
-                        props.closePopover();
-                    }}>Close</Button>
                 </div>
             </Card >
         </Popup>
