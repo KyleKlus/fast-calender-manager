@@ -40,8 +40,41 @@
 }
 
 .calendar-page .fc-timegrid-now-indicator-line.CustomNowIndicator {
-    border-width: 2px 0 0;
+    border-width: 3px 0 0;
     border-radius: 8px;
+    border-color: #ee5b5b;
+
+    &::after{
+        content: '';
+        --size: 0.6rem;
+        position: absolute;
+        top: calc(var(--size) * -0.5 - 0.1rem);
+        left: -0.5px;
+        width: var(--size);
+        height: var(--size);
+        border-radius: 8px;
+        border: 1px solid transparent;
+        box-shadow: inset 0px 1px 0 #c9c9c9bd,
+            inset 0px -1px 0px #00000031;
+        background-color: #ee5b5b;
+    }
+}
+
+.calendar-page .fc-timegrid-now-indicator-arrow.CustomNowIndicator {
+    background-color: #ee5b5b;
+    border-radius: var(--bs-border-radius-lg);
+    border: 1px solid transparent;
+    box-shadow: inset 0px 1px 0 #c9c9c9bd,
+        inset 0px -1px 0px #00000031, 2px 2px 4px #0000005c;
+    ;
+    padding: none;
+    width: 4rem;
+    height: 1.1rem;
+    left: 2px;
+    color: white;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 1.1rem;
 }
 
 .calendar-nav-button {

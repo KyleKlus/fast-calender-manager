@@ -2,7 +2,7 @@ import './CalendarPage.css';
 import FullCalendar from '@fullcalendar/react';
 import { DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/core';
 import { EventDragStartArg, EventDragStopArg, EventReceiveArg } from '@fullcalendar/interaction';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { use, useContext, useEffect, useRef, useState } from 'react';
 import { DateTime } from 'luxon';
 
 import { getDefaultConfig } from '../handlers/defaultFCConfig';
@@ -56,10 +56,29 @@ function CalendarPage(props: ICalendarPageProps) {
     const pendingNextWeekSwitch = useRef(undefined as NodeJS.Timeout | undefined);
     const pendingPrevWeekSwitch = useRef(undefined as NodeJS.Timeout | undefined);
 
+    const nowIndicatorIntervall = useRef(undefined as NodeJS.Timeout | undefined);
+
     useEffect(() => {
         // Done in this way, because one cant modify the calendar in any other way
         if (hourlyWeather.length > 0) {
             insertWeather()
+        }
+    }, []);
+
+    useEffect(() => {
+        if (nowIndicatorIntervall.current !== undefined) {
+            clearInterval(nowIndicatorIntervall.current);
+        }
+        nowIndicatorIntervall.current = setInterval(() => {
+            const nowIndicatorArrow = document.getElementsByClassName('fc-timegrid-now-indicator-arrow')[0] as HTMLElement;
+            if (nowIndicatorArrow === undefined) return;
+            nowIndicatorArrow.innerHTML = DateTime.now().toFormat('HH:mm');
+        }, 5000);
+
+        return () => {
+            if (nowIndicatorIntervall.current !== undefined) {
+                clearInterval(nowIndicatorIntervall.current);
+            }
         }
     }, []);
 

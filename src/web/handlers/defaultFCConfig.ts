@@ -4,10 +4,10 @@ import interactionPlugin from '@fullcalendar/interaction';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 import { defaultEventColor } from "../components/ColorSelector";
 
-import { autoUpdate, computePosition, flip, offset, shift, arrow } from "@floating-ui/dom/dist/floating-ui.dom";
 import { setupTooltip } from "./tooltipHandler";
 
 export function getDefaultConfig(): CalendarOptions {
+
     return {
         plugins: [timeGridPlugin, interactionPlugin, bootstrap5Plugin],
         initialView: "timeGridWeek",
