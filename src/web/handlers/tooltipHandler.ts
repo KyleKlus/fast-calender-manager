@@ -33,6 +33,10 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
     document.body.appendChild(tooltip);
 
     function update() {
+        if (document.body.hasAttribute('dragging')) {
+            tooltip.style.display = '';
+            return;
+        }
         computePosition(eventEl, tooltip, {
             placement: 'top',
             middleware: [offset(6), flip(), shift({ padding: 5 }), arrow({ element: arrowEl }),],
@@ -75,12 +79,14 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
             if (!eventEl.hasAttribute('data-show')) return;
             tooltip.style.display = 'block';
             update();
+            cleanup();
         }, 500);
     }
 
     function hideTooltip() {
         tooltip.style.display = '';
         eventEl.removeAttribute('data-show');
+        cleanup();
     }
 
     [

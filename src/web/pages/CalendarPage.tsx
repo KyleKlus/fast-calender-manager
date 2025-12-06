@@ -207,12 +207,14 @@ function CalendarPage(props: ICalendarPageProps) {
     function eventDragStart(info: EventDragStartArg) {
         if (showWeather) { return }
 
+        document.body.setAttribute('dragging', '');
         setIsDragging(true);
     }
 
     function eventDragStop(info: EventDragStopArg) {
         if (showWeather) { return }
 
+        document.body.removeAttribute('dragging');
         setIsDragging(false);
     }
 
