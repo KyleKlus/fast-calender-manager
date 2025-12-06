@@ -35,7 +35,7 @@ export function setupTooltip(eventEl: HTMLElement, title: string, isAllDay: bool
 
     function update() {
         computePosition(eventEl, tooltip, {
-            placement: 'right',
+            placement: 'top',
             middleware: [offset(6), flip(), shift({ padding: 5 }), arrow({ element: arrowEl }),],
         }).then(({ x, y, placement, middlewareData }) => {
             Object.assign(tooltip.style, {
