@@ -1,4 +1,4 @@
-import { createContext, use, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import React from 'react';
 import { getBgHoverAndActiveColor } from '../components/ColorSelector';
 

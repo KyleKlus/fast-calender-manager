@@ -7,7 +7,7 @@ import { TemplateContext } from '../../contexts/TemplateContext';
 import { useContext } from 'react';
 import { defaultBgColor, SettingsContext } from '../../contexts/SettingsContext';
 import { exportData, importData } from '../../handlers/settingsHandler';
-import { IDataExport } from '../../handlers/IDataExport';
+import { IDataExport } from '../../interfaces/IDataExport';
 import PhaseList from './PhaseList';
 
 export interface ISettingsPopoverProps {

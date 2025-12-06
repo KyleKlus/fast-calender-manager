@@ -1,4 +1,4 @@
-@import './CalendarEvents.css';
+@import '../components/CalendarEvents.css';
 
 .calendar-page {
     display: flex;
@@ -44,7 +44,7 @@
     border-radius: 8px;
     border-color: #ee5b5b;
 
-    &::after{
+    &::after {
         content: '';
         --size: 0.6rem;
         position: absolute;

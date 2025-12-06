@@ -37,7 +37,7 @@ export function getDefaultConfig(): CalendarOptions {
             info.el.id = id;
 
             const eventEl = info.el;
-            setupTooltip(eventEl, info.event.title, info.event.extendedProps.description);
+            setupTooltip(eventEl, info);
         },
         eventMinHeight: 15,
         eventShortHeight: 45,

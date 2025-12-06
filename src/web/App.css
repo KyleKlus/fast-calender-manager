@@ -2,28 +2,10 @@
 
 body {
   margin: 0;
-
-  --bs-body-bg: hsl(88, 32%, 92%);
-  --bs-body-bg-hover: hsl(89, 30%, 85%);
-  --bs-body-bg-active: hsl(89, 30%, 75%);
 }
 
-:root,
-[data-bs-theme=light] {
-  --bs-border-color: hsl(0, 0%, 45%);
-  --bs-dropdown-border-color: var(--bs-border-color);
-  --accent-color: hsl(145, 40%, 50%);
-}
 
 .btn {
-  --bs-btn-border-width: 1px;
-  --bs-btn-gap: 0.4rem;
-  --bs-btn-border-color: transparent;
-  --bs-btn-hover-border-color: transparent;
-  --bs-btn-active-border-color: transparent;
-  --bs-btn-disabled-border-color: black;
-  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 1px 0px #0000005c;
-  --bs-btn-border-radius: var(--bs-border-radius-lg);
   box-shadow: var(--bs-btn-box-shadow) !important;
   gap: var(--bs-btn-gap);
   display: flex;
@@ -31,47 +13,23 @@ body {
   align-items: center;
 }
 
-.btn-primary {
-  --bs-btn-color: #fff;
-  --bs-btn-bg: hsl(145, 40%, 50%);
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: hsl(145, 51%, 40%);
-  --bs-btn-focus-shadow-rgb: 95, 203, 126;
-  --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: hsl(145, 51%, 36%);
-  --bs-btn-disabled-color: #fff;
-  --bs-btn-disabled-bg: #69a776;
-}
-
 .btn-group {
-  --bs-group-btn-border-color: hsl(145, 51%, 36%);
   gap: 1px;
   box-shadow: 1px 2px 1px 0px #0000005c;
   border-radius: var(--bs-border-radius-lg);
 }
 
 .btn-group .btn-primary:not(:first-child, :last-child) {
-  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d,
-    inset 0px -1px 0px #0000005d;
   border-left-color: var(--bs-group-btn-border-color);
   border-right: none;
 }
 
 .btn-group .btn-primary:last-child {
   border-left-color: var(--bs-group-btn-border-color);
-  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d,
-    inset 0px -1px 0px #0000005d;
 }
 
 .btn-group .btn-primary:first-child {
   border-right: none;
-  --bs-btn-box-shadow: inset 0px 1px 0 #ffffff5d,
-    inset 0px -1px 0px #0000005d;
-}
-
-.btn-group .btn-primary.active,
-.btn-primary.active {
-  --bs-btn-box-shadow: inset 1px 1px 2px #0000005d, inset -1px -1px 2px #0000005d;
 }
 
 @keyframes signify-up {
@@ -162,8 +120,4 @@ body {
   100% {
     transform: rotate(0);
   }
-}
-
-.dropup .dropdown-toggle:hover::after {
-  animation: signify-up 0.3s ease-in-out;
 }

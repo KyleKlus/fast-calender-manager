@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import IDataSource from "./IDataSource";
+import IDataSource from "../interfaces/IDataSource";
 import GCal from "./gcalHandler";
 import { EventInput } from "@fullcalendar/core";
 import { defaultColorId, defaultEventColor, getColorFromColorId } from "../components/ColorSelector";

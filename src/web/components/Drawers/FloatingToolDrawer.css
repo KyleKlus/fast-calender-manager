@@ -58,3 +58,7 @@
 .floatingToolDrawer.isOpen {
     transform: translateY(-3.7rem);
 }
+
+.dropdown-toggle:hover::after {
+    animation: signify-up 0.3s ease-in-out;
+}

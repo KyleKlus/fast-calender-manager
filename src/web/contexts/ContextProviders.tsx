@@ -5,7 +5,7 @@ import { KeyboardShortcutProvider } from './KeyboardShortcutContext';
 import { TemplateProvider } from './TemplateContext';
 import { WeatherProvider } from './WeatherContext';
 import { DataSourceProvider } from './DataSourceProvider';
-import IDataSource from '../handlers/IDataSource';
+import IDataSource from '../interfaces/IDataSource';
 import { SettingsProvider } from './SettingsContext';
 
 export interface IContextProvidersProps {

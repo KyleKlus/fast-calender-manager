@@ -5,8 +5,8 @@ import { StrictMode } from 'react';
 import CalendarPage from './pages/CalendarPage';
 import ContextProviders from './contexts/ContextProviders';
 import StateWrapper from './components/StateWrapper';
-import IDataSource from './handlers/IDataSource';
-import { useEffect, useState } from 'react';
+import IDataSource from './interfaces/IDataSource';
+import { useEffect } from 'react';
 import { getBgHoverAndActiveColor } from './components/ColorSelector';
 
 export interface IAppProps {

@@ -69,10 +69,17 @@ function CalendarPage(props: ICalendarPageProps) {
         if (nowIndicatorIntervall.current !== undefined) {
             clearInterval(nowIndicatorIntervall.current);
         }
-        nowIndicatorIntervall.current = setInterval(() => {
+
+        function setTime() {
             const nowIndicatorArrow = document.getElementsByClassName('fc-timegrid-now-indicator-arrow')[0] as HTMLElement;
             if (nowIndicatorArrow === undefined) return;
             nowIndicatorArrow.innerHTML = DateTime.now().toFormat('HH:mm');
+        }
+
+        setTime();
+
+        nowIndicatorIntervall.current = setInterval(() => {
+            setTime();
         }, 5000);
 
         return () => {

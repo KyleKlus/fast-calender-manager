@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
-import IDataSource from '../handlers/IDataSource';
+import IDataSource from '../interfaces/IDataSource';
 import GoogleDataSource from '../handlers/GoogleDataSource';
 import { DateTime } from 'luxon';
 import { EventInput } from '@fullcalendar/core';

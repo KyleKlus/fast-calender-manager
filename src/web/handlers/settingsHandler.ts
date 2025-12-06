@@ -1,5 +1,5 @@
 import { SimplifiedEvent } from "./eventConverters";
-import { IDataExport } from "./IDataExport";
+import { IDataExport } from "../interfaces/IDataExport";
 
 export function exportData(dataExport: IDataExport) {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataExport));

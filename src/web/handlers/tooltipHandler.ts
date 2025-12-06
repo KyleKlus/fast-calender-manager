@@ -1,6 +1,20 @@
 import { computePosition, offset, flip, shift, arrow, autoUpdate } from "@floating-ui/dom/dist/floating-ui.dom";
 
-export function setupTooltip(eventEl: HTMLElement, title: string, description?: string) {
+export function setupTooltip(eventEl: HTMLElement, info: any) {
+    const { event, el } = info;
+    const { title, extendedProps } = event;
+
+
+
+    if (info.isMirror ||
+        info.isFloating ||
+        info.isBackgroundEvent ||
+        info.isResizing ||
+        info.isDragging
+    ) {
+        return;
+    }
+
     const hash: any = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const id = `event-${hash}`
     eventEl.id = id;
@@ -14,15 +28,13 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
     tooltipTitle.innerText = title;
     tooltip.appendChild(tooltipTitle);
 
-    console
-
-    if (description !== undefined && description !== '') {
+    if (extendedProps.description !== undefined && extendedProps.description !== '') {
         const tooltipHr = document.createElement("hr");
         tooltip.appendChild(tooltipHr);
 
         const tooltipDescription = document.createElement("div");
         tooltipDescription.classList.add('tooltip-description');
-        tooltipDescription.innerHTML = description;
+        tooltipDescription.innerHTML = extendedProps.description;
         tooltip.appendChild(tooltipDescription);
     }
 
@@ -33,7 +45,14 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
     document.body.appendChild(tooltip);
 
     function update() {
-        if (document.body.hasAttribute('dragging')) {
+        if (document.body.hasAttribute('dragging') ||
+            info.isMirror ||
+            info.isFloating ||
+            info.isBackgroundEvent ||
+            info.isResizing ||
+            info.isDragging
+
+        ) {
             tooltip.style.display = '';
             return;
         }
@@ -41,6 +60,11 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
             placement: 'top',
             middleware: [offset(6), flip(), shift({ padding: 5 }), arrow({ element: arrowEl }),],
         }).then(({ x, y, placement, middlewareData }) => {
+            if (x === undefined || y === undefined || (x <= 10 && y <= 10)) {
+                tooltip.style.display = '';
+                return
+            }
+
             Object.assign(tooltip.style, {
                 left: `${x}px`,
                 top: `${y}px`,
