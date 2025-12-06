@@ -1,6 +1,6 @@
 import { computePosition, offset, flip, shift, arrow, autoUpdate } from "@floating-ui/dom/dist/floating-ui.dom";
 
-export function setupTooltip(eventEl: HTMLElement, title: string, isAllDay: boolean, description?: string) {
+export function setupTooltip(eventEl: HTMLElement, title: string, description?: string) {
     const hash: any = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const id = `event-${hash}`
     eventEl.id = id;
@@ -13,6 +13,8 @@ export function setupTooltip(eventEl: HTMLElement, title: string, isAllDay: bool
     tooltipTitle.classList.add('tooltip-title');
     tooltipTitle.innerText = title;
     tooltip.appendChild(tooltipTitle);
+
+    console
 
     if (description !== undefined && description !== '') {
         const tooltipHr = document.createElement("hr");
@@ -27,9 +29,6 @@ export function setupTooltip(eventEl: HTMLElement, title: string, isAllDay: bool
     const arrowEl = document.createElement("div");
     arrowEl.id = 'arrow-' + id;
     arrowEl.classList.add("tooltip-arrow");
-    if (isAllDay) {
-        arrowEl.classList.add("is-all-day");
-    }
     tooltip.appendChild(arrowEl);
     document.body.appendChild(tooltip);
 
