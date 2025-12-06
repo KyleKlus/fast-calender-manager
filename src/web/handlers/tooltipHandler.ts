@@ -1,6 +1,6 @@
 import { computePosition, offset, flip, shift, arrow, autoUpdate } from "@floating-ui/dom/dist/floating-ui.dom";
 
-export function setupTooltip(eventEl: HTMLElement, title: string, description?: string) {
+export function setupTooltip(eventEl: HTMLElement, title: string, isAllDay: boolean, description?: string) {
     const hash: any = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const id = `event-${hash}`
     eventEl.id = id;
@@ -27,12 +27,15 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
     const arrowEl = document.createElement("div");
     arrowEl.id = 'arrow-' + id;
     arrowEl.classList.add("tooltip-arrow");
+    if (isAllDay) {
+        arrowEl.classList.add("is-all-day");
+    }
     tooltip.appendChild(arrowEl);
     document.body.appendChild(tooltip);
 
     function update() {
         computePosition(eventEl, tooltip, {
-            placement: 'top',
+            placement: 'right',
             middleware: [offset(6), flip(), shift({ padding: 5 }), arrow({ element: arrowEl }),],
         }).then(({ x, y, placement, middlewareData }) => {
             Object.assign(tooltip.style, {
@@ -52,6 +55,9 @@ export function setupTooltip(eventEl: HTMLElement, title: string, description?: 
             }[placement.split('-')[0]];
 
             if (staticSide === undefined) return;
+
+            arrowEl.classList.remove('is-top', 'is-left', 'is-right');
+            arrowEl.classList.add(`is-${staticSide}`);
 
             Object.assign(arrowEl.style, {
                 left: arrowX != null ? `${arrowX}px` : '',

@@ -125,7 +125,7 @@
         font-weight: 600;
     }
 
-    & hr{
+    & hr {
         margin: 0.2rem 0;
         border-color: var(--bs-border-color);
     }
@@ -143,4 +143,16 @@
     height: 8px;
     z-index: 998;
     transform: rotate(45deg);
+
+    &.is-top {
+        transform: rotate(225deg);
+    }
+
+    &.is-left {
+        transform: rotate(-225deg);
+    }
+
+    &.is-right {
+        transform: rotate(-45deg);
+    }
 }
