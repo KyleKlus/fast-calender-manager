@@ -26,23 +26,13 @@
 .calendar-page .fc {
     min-height: 1vh;
     flex-grow: 1;
-    --fc-button-bg-color: #c54141;
-    --fc-button-text-color: #fff;
-    --fc-button-border-color: #c54141;
-    --fc-button-hover-bg-color: #a03c3c;
-    --fc-button-hover-border-color: #a03c3c;
-    --fc-button-active-bg-color: #8c3333;
-    --fc-button-active-border-color: #8c3333;
-    --fc-today-bg-color: rgba(255, 40, 40, 0);
-    --fc-event-bg-color: #b74f4f;
-    --fc-event-border-color: #b74f4f;
     user-select: none;
 }
 
 .calendar-page .fc-timegrid-now-indicator-line.CustomNowIndicator {
     border-width: 3px 0 0;
     border-radius: 8px;
-    border-color: #ee5b5b;
+    border-color: var(--fc-now-indicator-color);
 
     &::after {
         content: '';
@@ -56,17 +46,16 @@
         border: 1px solid transparent;
         box-shadow: inset 0px 1px 0 #c9c9c9bd,
             inset 0px -1px 0px #00000031;
-        background-color: #ee5b5b;
+        background-color: var(--fc-now-indicator-color);
     }
 }
 
 .calendar-page .fc-timegrid-now-indicator-arrow.CustomNowIndicator {
-    background-color: #ee5b5b;
+    background-color: var(--fc-now-indicator-color);
     border-radius: var(--bs-border-radius-lg);
     border: 1px solid transparent;
     box-shadow: inset 0px 1px 0 #c9c9c9bd,
         inset 0px -1px 0px #00000031, 2px 2px 4px #0000005c;
-    ;
     padding: none;
     width: 4rem;
     height: 1.1rem;
@@ -116,6 +105,10 @@
             animation: signify-left 0.7s ease-in-out;
         }
     }
+}
+
+.calendar-page .fc .fc-timegrid-divider {
+    padding: 0;
 }
 
 .calendar-page .fc-theme-bootstrap5 .fc-list,

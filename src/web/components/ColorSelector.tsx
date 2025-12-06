@@ -1,20 +1,39 @@
 import './ColorSelector.css';
 
 // Color mapping for event colors (Based on Google Calendar colors)
+// export const colorMap = [
+//     '#cf4b4bff',
+//     '#2468a0ff',
+//     '#33b670ff',
+//     '#8e24aaff',
+//     '#ca469cff',
+//     '#f9b01eff',
+//     '#f4511eff',
+//     '#038be5ff',
+//     '#605F5E',
+//     '#394bb4ff',
+//     '#0b8043',
+//     '#FB3640',
+//     '#000000',
+// ];
+
+
+console.log(getComputedStyle(document.body).getPropertyValue('--bs-red'));
+
 export const colorMap = [
-    '#cf4b4bff',
-    '#2468a0ff',
-    '#33b670ff',
-    '#8e24aaff',
-    '#ca469cff',
-    '#f9b01eff',
-    '#f4511eff',
-    '#038be5ff',
-    '#605F5E',
-    '#394bb4ff',
-    '#0b8043',
-    '#FB3640',
-    '#000000',
+    getComputedStyle(document.body).getPropertyValue('--bs-red'),
+    getComputedStyle(document.body).getPropertyValue('--bs-indigo'),
+    getComputedStyle(document.body).getPropertyValue('--bs-teal'),
+    getComputedStyle(document.body).getPropertyValue('--bs-purple'),
+    getComputedStyle(document.body).getPropertyValue('--bs-pink'),
+    getComputedStyle(document.body).getPropertyValue('--bs-yellow'),
+    getComputedStyle(document.body).getPropertyValue('--bs-orange'),
+    getComputedStyle(document.body).getPropertyValue('--bs-cyan'),
+    getComputedStyle(document.body).getPropertyValue('--bs-gray-600'),
+    getComputedStyle(document.body).getPropertyValue('--bs-blue'),
+    getComputedStyle(document.body).getPropertyValue('--bs-green'),
+    getComputedStyle(document.body).getPropertyValue('--bs-danger'),
+    getComputedStyle(document.body).getPropertyValue('--bs-black'),
 ];
 
 export const defaultColorId = 0 // Default color ID for eventx

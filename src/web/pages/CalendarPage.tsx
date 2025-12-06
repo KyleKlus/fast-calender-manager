@@ -315,7 +315,8 @@ function CalendarPage(props: ICalendarPageProps) {
                     if (toolbarMode === 'paste-template') {
                         setSelectedTemplate({ template: null, index: -1 });
                     }
-                    setToolbarMode(toolbarMode === mode ? 'none' : mode);
+                    setToolbarMode(toolbarMode === mode ? 'none' : mode as ToolbarMode);
+                    document.body.setAttribute('toolbarMode', toolbarMode === mode ? 'none' : mode as ToolbarMode);
                 }}
                 onAddTemplateClick={() => {
                     setPopoverMode('add-template');

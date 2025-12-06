@@ -46,12 +46,16 @@ export function setupTooltip(eventEl: HTMLElement, info: any) {
 
     function update() {
         if (document.body.hasAttribute('dragging') ||
+            document.body.getAttribute('toolbarMode') === 'delete' ||
+            document.body.getAttribute('toolbarMode') === 'split' ||
+            document.body.getAttribute('toolbarMode') === 'duplicate' ||
+            document.body.getAttribute('toolbarMode') === 'color' ||
             info.isMirror ||
             info.isFloating ||
             info.isBackgroundEvent ||
             info.isResizing ||
-            info.isDragging
-
+            info.isDragging ||
+            info.event.display === 'background'
         ) {
             tooltip.style.display = '';
             return;
