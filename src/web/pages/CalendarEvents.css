@@ -1,0 +1,146 @@
+.calendar-page .fc-event {
+    border-radius: 10px;
+    box-shadow: inset 0px 1px 0 #ffffff5d, inset 0px -1px 0px #0000005d, 1px 2px 3px 0px #0000005c;
+    transition: box-shadow 0.1s ease-in-out;
+
+    --event-title-size: 0.85rem;
+    --event-time-size: 0.65rem;
+
+    &:hover {
+        box-shadow: inset 0px 1px 1px #ffffff5d, inset 0px -1px 1px #0000005d, 2px 3px 5px 0px #0000005c;
+    }
+
+    & .fc-event-main {
+        padding: 1px 4px 0px;
+        overflow: hidden;
+
+        & .fc-event-main-frame {
+            flex-direction: column-reverse;
+            justify-content: flex-end;
+
+            & .fc-event-title-container {
+                flex-grow: 0;
+                overflow: hidden;
+
+                & .fc-event-title {
+                    word-break: break-all;
+                    /* Break words at any character */
+                    overflow-wrap: break-word;
+                    /* Handle long words */
+                    white-space: normal;
+                    /* Allow normal text wrapping */
+                    overflow: hidden;
+                    /* Hide overflow text */
+                    text-overflow: ellipsis;
+                    /* Show ellipsis for overflow */
+                    font-size: var(--event-title-size);
+                    line-height: calc(var(--event-title-size) + 0.5rem);
+                }
+            }
+
+            .fc-event-time {
+                font-size: var(--event-time-size);
+                line-height: calc(var(--event-title-size) + 0.5rem);
+            }
+        }
+    }
+
+    &.fc-timegrid-event-short {
+        --event-title-size: 0.65rem;
+        --event-time-size: 0.65rem;
+
+        & .fc-event-main {
+            padding: 0px 4px 0px;
+
+            & .fc-event-main-frame {
+                justify-content: center;
+
+                & .fc-event-time {
+                    display: none;
+                }
+
+                & .fc-event-title {
+                    line-height: calc(var(--event-time-size) + 0.2rem);
+                    font-size: var(--event-time-size);
+                    word-break: nowrap;
+                    white-space: nowrap;
+                }
+            }
+        }
+    }
+}
+
+.calendar-page .fc .fc-bg-event {
+    opacity: 0.8 !important;
+    border: none !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    outline-width: 1px !important;
+}
+
+.calendar-page:not(.calendar-pageWeather) .fc-event.fc-event-past {
+    filter: saturate(0.3) brightness(1.6);
+    background-color: transparent;
+    color: var(--bs-secondary-color);
+    --fc-event-text-color: #3b3a3a;
+}
+
+.calendar-page .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
+    margin-bottom: 0.5rem;
+
+}
+
+.calendar-page .fc .fc-daygrid-day-events .fc-daygrid-event .fc-event-title {
+    word-break: unset !important;
+    overflow-wrap: unset !important;
+    white-space: unset !important;
+    /* Show ellipsis for overflow */
+    font-size: 0.85rem !important;
+    line-height: 0.9rem !important;
+}
+
+.custom-tooltip {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    padding: 0.5rem;
+    box-shadow: inset 0px 2px 0 #c9c9c9bd,
+        inset 0px -2px 0px #00000031, 3px 4px 8px #0000005c;
+    color: black;
+    z-index: 1000;
+    max-width: 300px;
+    max-height: 600px;
+    display: none;
+
+    /* Float on top of the UI */
+    position: absolute;
+
+    /* Avoid layout interference */
+    top: 0;
+    left: 0;
+    font-size: 0.85rem;
+    overflow-y: visible;
+
+    & .tooltip-title {
+        font-weight: 600;
+    }
+
+    & hr{
+        margin: 0.2rem 0;
+        border-color: var(--bs-border-color);
+    }
+}
+
+.custom-tooltip .tooltip-arrow {
+    background-color: var(--bs-body-bg);
+    position: absolute;
+    box-shadow: inset -2px -2px 0 #c9c9c9bd,
+        inset 0px -2px 0px #00000031;
+    border-right: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
+
+    width: 8px;
+    height: 8px;
+    z-index: 998;
+    transform: rotate(45deg);
+}

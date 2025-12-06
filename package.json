@@ -18,6 +18,7 @@
 		"deploy": "rsbuild deploy --mode github"
 	},
 	"dependencies": {
+		"@floating-ui/dom": "^1.7.4",
 		"@fullcalendar/bootstrap5": "^6.1.18",
 		"@fullcalendar/core": "^6.1.18",
 		"@fullcalendar/icalendar": "^6.1.18",

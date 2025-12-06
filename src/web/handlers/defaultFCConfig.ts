@@ -4,6 +4,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 import { defaultEventColor } from "../components/ColorSelector";
 
+import { autoUpdate, computePosition, flip, offset, shift, arrow } from "@floating-ui/dom/dist/floating-ui.dom";
+import { setupTooltip } from "./tooltipHandler";
+
 export function getDefaultConfig(): CalendarOptions {
     return {
         plugins: [timeGridPlugin, interactionPlugin, bootstrap5Plugin],
@@ -28,5 +31,15 @@ export function getDefaultConfig(): CalendarOptions {
         slotDuration: '00:30:00',
         themeSystem: 'bootstrap5',
         nowIndicatorClassNames: 'CustomNowIndicator',
+        eventDidMount: function (info: any) {
+            const hash: any = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            const id = `event-${hash}`
+            info.el.id = id;
+
+            const eventEl = info.el;
+            setupTooltip(eventEl, info.event.title, info.event.extendedProps.description);
+        },
+        eventMinHeight: 15,
+        eventShortHeight: 45,
     };
 }

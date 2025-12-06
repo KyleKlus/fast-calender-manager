@@ -214,11 +214,11 @@ function CalendarPage(props: ICalendarPageProps) {
     };
 
     return (
-        <div className={['fcPage', showWeather ? 'fcPageWeather' : '', `toolBarMode-${toolbarMode}`].join(' ')}>
+        <div className={['calendar-page', showWeather ? 'show-weather' : '', `toolbar-mode-${toolbarMode}`].join(' ')}>
             <div className='calendar-container' >
                 {isDragging &&
                     <div
-                        className='calendar-left-button calendar-nav-button'
+                        className='calendar-nav-button left'
                         onMouseLeave={() => {
                             if (pendingPrevWeekSwitch.current !== undefined) {
                                 clearTimeout(pendingPrevWeekSwitch.current);
@@ -249,7 +249,7 @@ function CalendarPage(props: ICalendarPageProps) {
                 />
                 {isDragging &&
                     <div
-                        className='calendar-right-button calendar-nav-button'
+                        className='calendar-nav-button right'
                         onMouseLeave={() => {
                             if (pendingNextWeekSwitch.current !== undefined) {
                                 clearTimeout(pendingNextWeekSwitch.current);
